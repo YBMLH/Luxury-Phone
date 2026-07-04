@@ -1,0 +1,80 @@
+rules_version = '2';
+
+// Firestore security rules for Luxury Phone.
+// Copy the whole content of this file into:
+// Firebase Console → Firestore Database → Rules → Publish
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // An admin is any signed-in user whose UID exists as a document ID
+    // in the "admins" collection.
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function validString(value, max) {
+      return value is string && value.size() <= max;
+    }
+
+    // Products: everyone can browse, only admins can manage.
+    match /products/{productId} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Site content: everyone can read, only admins can edit.
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Orders: anyone can place one (with strict validation), but only
+    // admins can read, change or delete them. Customer data stays private.
+    match /orders/{orderId} {
+      allow create: if
+        validString(request.resource.data.customerName, 100)
+        && request.resource.data.customerName.size() >= 3
+        && validString(request.resource.data.phone, 15)
+        && request.resource.data.phone.size() >= 9
+        && validString(request.resource.data.wilaya, 50)
+        && validString(request.resource.data.commune, 100)
+        && validString(request.resource.data.address, 300)
+        && validString(request.resource.data.productName, 150)
+        && validString(request.resource.data.notes, 500)
+        && validString(request.resource.data.orderNumber, 20)
+        && request.resource.data.status == 'Pending';
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Tracking: a customer can GET their own tracking document because its
+    // ID is "orderNumber_phone" — you must know BOTH values to read it.
+    // Listing the collection is never allowed.
+    match /tracking/{trackingId} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if
+        validString(request.resource.data.orderNumber, 20)
+        && request.resource.data.status == 'Pending';
+      allow update, delete: if isAdmin();
+    }
+
+    // Customers: created/updated automatically when an order is placed.
+    // Only admins can view the list.
+    match /customers/{phone} {
+      allow create, update: if
+        validString(request.resource.data.fullName, 100)
+        && validString(request.resource.data.phone, 15)
+        && validString(request.resource.data.wilaya, 50);
+      allow read, delete: if isAdmin();
+    }
+
+    // Admins: each admin can read their own record (used by the app to
+    // verify dashboard access). Writing is only done manually from the
+    // Firebase Console — never from the app.
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+  }
+}
