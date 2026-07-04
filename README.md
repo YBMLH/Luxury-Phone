@@ -103,15 +103,37 @@ NEXT_PUBLIC_FIREBASE_APP_ID=              ← appId
 You do **not** need to create the other collections (`products`, `orders`,
 `customers`, `settings`, `tracking`) — the website creates them automatically.
 
-## 5. Configure Firebase Storage (product images)
+## 5. Product images — two options
+
+### Option A: Firebase Storage (needs a payment card)
+
+Since 2024, Google requires the Blaze (pay-as-you-go) plan to enable Storage on
+new projects. Blaze still has generous free quotas — a small store pays ~$0 —
+but it requires adding a card. If you can:
 
 1. **Build → Storage → Get started** → keep the default bucket → **Done**.
 2. Open the **Rules** tab, delete everything there, paste the full content of
    [`storage.rules`](./storage.rules) from this repo, and click **Publish**.
+3. Set a budget alert of $1 during the upgrade to be safe.
 
-> If Firebase asks you to upgrade to the Blaze plan to enable Storage: the Blaze
-> plan still has the same free quota — you only pay if you exceed it, which a small
-> store will not. You can set a budget alert of $1 to be safe.
+### Option B: Free image links — no card needed (ImgBB)
+
+Skip Firebase Storage entirely. The admin product form accepts **image links**:
+
+1. Create a free account at [imgbb.com](https://imgbb.com).
+2. Upload your product photo there → copy the **Direct link** (`https://i.ibb.co/…`).
+3. Paste it in the product form's image field and click **Add**.
+
+Even better — enable **direct uploads from the dashboard**: get a free API key at
+[api.imgbb.com](https://api.imgbb.com) and add it to `.env.local` (and to Netlify's
+environment variables) as:
+
+```
+NEXT_PUBLIC_IMGBB_API_KEY=your-imgbb-key
+```
+
+With the key set, the "click to upload" box in the product form sends images
+straight to your ImgBB account — same experience, zero cost, no card.
 
 ## 6. Test locally, then deploy to Netlify
 

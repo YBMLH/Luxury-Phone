@@ -101,6 +101,7 @@ export default function ProductForm({ product = null }) {
   const [ramOptions, setRamOptions] = useState(product?.ramOptions || []);
   const [specs, setSpecs] = useState(product?.specifications || []);
   const [images, setImages] = useState(product?.images || []);
+  const [imageUrl, setImageUrl] = useState('');
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -124,6 +125,15 @@ export default function ProductForm({ product = null }) {
     }
     setUploading(false);
     e.target.value = '';
+  }
+
+  function addImageUrl() {
+    const url = imageUrl.trim();
+    if (!/^https:\/\/.+\..+/i.test(url)) {
+      return toast.error('Please paste a valid image link (it starts with https://).');
+    }
+    if (!images.includes(url)) setImages([...images, url]);
+    setImageUrl('');
   }
 
   function makeMain(index) {
@@ -245,12 +255,38 @@ export default function ProductForm({ product = null }) {
       <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-card">
         <h2 className="mb-1 font-display text-lg font-semibold">Product Images *</h2>
         <p className="mb-4 text-xs text-neutral-500">
-          JPG, PNG or WebP, max 5 MB each. The first image is the main image.
+          Paste image links (e.g. from imgbb.com — use the “Direct link”), or
+          upload files directly. The first image is the main image.
         </p>
+
+        {/* Option 1: paste an image link (works with any free image host) */}
+        <div className="mb-4 flex gap-2">
+          <input
+            className="input"
+            type="url"
+            placeholder="https://i.ibb.co/…  (paste image link, then click Add)"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addImageUrl();
+              }
+            }}
+          />
+          <button type="button" onClick={addImageUrl} className="btn-dark !px-5 !py-2">
+            Add
+          </button>
+        </div>
+
+        {/* Option 2: direct file upload (ImgBB key or Firebase Storage) */}
         <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-neutral-300 py-8 text-center transition hover:border-gold hover:bg-gold/5">
           <span className="text-3xl">🖼️</span>
           <span className="mt-2 text-sm font-medium text-neutral-600">
-            {uploading ? 'Uploading…' : 'Click to upload images'}
+            {uploading ? 'Uploading…' : 'Or click to upload images'}
+          </span>
+          <span className="mt-1 text-xs text-neutral-400">
+            JPG, PNG or WebP — max 5 MB each
           </span>
           <input type="file" accept="image/jpeg,image/png,image/webp" multiple
             className="hidden" onChange={handleUpload} disabled={uploading} />
