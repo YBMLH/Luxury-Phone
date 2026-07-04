@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --gold: #c9a227;
+  --gold-light: #e2c86c;
+}
+
+body {
+  @apply bg-white text-neutral-900 antialiased;
+}
+
+/* ------------------------- Black marble surfaces ------------------------- */
+/* Pure CSS marble: a near-black base with faint diagonal "veins".          */
+/* No image downloads = faster loading and zero hosting cost.               */
+.marble {
+  background-color: #0c0c0e;
+  background-image:
+    radial-gradient(ellipse at 20% 10%, rgba(255, 255, 255, 0.05) 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 90%, rgba(201, 162, 39, 0.06) 0%, transparent 50%),
+    linear-gradient(115deg, transparent 42%, rgba(255, 255, 255, 0.035) 44%, transparent 46%),
+    linear-gradient(115deg, transparent 62%, rgba(255, 255, 255, 0.05) 63.5%, transparent 65%),
+    linear-gradient(65deg, transparent 28%, rgba(255, 255, 255, 0.025) 30%, transparent 33%),
+    linear-gradient(160deg, #0c0c0e 0%, #131316 50%, #0a0a0c 100%);
+}
+
+.marble-card {
+  background-color: #101013;
+  background-image:
+    radial-gradient(ellipse at 80% 0%, rgba(201, 162, 39, 0.08) 0%, transparent 55%),
+    linear-gradient(120deg, transparent 55%, rgba(255, 255, 255, 0.04) 57%, transparent 59%),
+    linear-gradient(150deg, #121215 0%, #1a1a1e 55%, #0e0e11 100%);
+  border: 1px solid rgba(201, 162, 39, 0.22);
+}
+
+/* Gold gradient text for headings */
+.text-gold-gradient {
+  background: linear-gradient(100deg, #a88420 0%, #e2c86c 45%, #f3e29a 55%, #c9a227 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Thin gold divider line */
+.gold-line {
+  height: 2px;
+  width: 72px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+/* Loading skeleton shimmer */
+.skeleton {
+  @apply bg-neutral-200 rounded-lg;
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 500px 100%;
+  background-repeat: no-repeat;
+  @apply animate-shimmer;
+}
+
+/* Form controls */
+.input {
+  @apply w-full rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-sm
+    outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/25;
+}
+
+.label {
+  @apply mb-1.5 block text-sm font-medium text-neutral-700;
+}
+
+/* Buttons */
+.btn-gold {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg bg-gold px-6 py-3
+    text-sm font-semibold text-black transition hover:bg-gold-400 hover:shadow-gold
+    disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.btn-dark {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg bg-marble px-6 py-3
+    text-sm font-semibold text-white transition hover:bg-marble-lighter
+    disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.btn-outline {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg border border-gold/60
+    px-6 py-3 text-sm font-semibold text-gold-700 transition hover:bg-gold/10;
+}
+
+/* Custom scrollbar (subtle, luxury feel) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+::-webkit-scrollbar-thumb {
+  background: #c9a227aa;
+  border-radius: 6px;
+}

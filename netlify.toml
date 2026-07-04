@@ -1,0 +1,10 @@
+# Netlify configuration for Luxury Phone.
+# Netlify auto-detects Next.js and uses its free Next.js runtime —
+# no extra setup needed beyond this file.
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
