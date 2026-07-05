@@ -34,11 +34,26 @@ export default function AdminLoginPage() {
       toast.success('Welcome back!');
       router.replace('/admin');
     } catch (err) {
+      // Show the real reason so problems are easy to diagnose.
       const code = err?.code || '';
-      if (code.includes('too-many-requests')) {
+      if (code.includes('unauthorized-domain')) {
+        toast.error(
+          `This website address is not authorized in Firebase. Add "${window.location.hostname}" in Firebase Console → Authentication → Settings → Authorized domains.`,
+          { duration: 10000 }
+        );
+      } else if (code.includes('too-many-requests')) {
         toast.error('Too many failed attempts. Try again later.');
-      } else {
+      } else if (code.includes('network-request-failed')) {
+        toast.error('Network error — check your internet connection.');
+      } else if (
+        code.includes('invalid-credential') ||
+        code.includes('wrong-password') ||
+        code.includes('user-not-found') ||
+        code.includes('invalid-email')
+      ) {
         toast.error('Invalid email or password.');
+      } else {
+        toast.error(`Login failed: ${code || 'unknown error'}`, { duration: 8000 });
       }
     } finally {
       setSubmitting(false);
