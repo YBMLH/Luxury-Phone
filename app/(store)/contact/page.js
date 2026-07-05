@@ -36,13 +36,12 @@ export default function ContactPage() {
 
   return (
     <>
-      <section className="marble py-16 text-center">
+      <section className="border-b border-neutral-200 bg-white py-16 text-center">
         <AnimateIn className="mx-auto max-w-2xl px-4">
-          <h1 className="font-display text-4xl font-bold text-gold-gradient md:text-5xl">
-            Contact Us
+          <h1 className="font-display text-4xl font-bold tracking-tight md:text-6xl">
+            Contact <span className="text-gold-gradient">us.</span>
           </h1>
-          <div className="gold-line mx-auto mt-5" />
-          <p className="mt-5 text-neutral-300">
+          <p className="mt-5 text-neutral-500">
             We answer quickly — by phone, WhatsApp or in store.
           </p>
         </AnimateIn>
@@ -63,7 +62,7 @@ export default function ContactPage() {
                     href={card.href}
                     target={card.href.startsWith('http') ? '_blank' : undefined}
                     rel="noopener noreferrer"
-                    className="flex items-center gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-card transition hover:border-gold/60 hover:shadow-card-hover"
+                    className="flex items-center gap-4 rounded-[1.75rem] border border-neutral-200 bg-white p-6 shadow-sm transition hover:border-gold/60 hover:shadow-card-hover"
                   >
                     <span className="text-3xl">{card.icon}</span>
                     <div>
@@ -74,7 +73,7 @@ export default function ContactPage() {
                     </div>
                   </a>
                 ) : (
-                  <div className="flex items-center gap-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-card">
+                  <div className="flex items-center gap-4 rounded-[1.75rem] border border-neutral-200 bg-white p-6 shadow-sm">
                     <span className="text-3xl">{card.icon}</span>
                     <div>
                       <p className="text-xs uppercase tracking-widest text-neutral-400">

@@ -58,12 +58,13 @@ function ProductsContent() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 md:px-6">
       <div className="mb-8">
-        <h1 className="font-display text-3xl font-bold md:text-4xl">Our Products</h1>
-        <div className="gold-line mt-3" />
+        <h1 className="font-display text-4xl font-bold tracking-tight md:text-5xl">
+          Our <span className="text-gold-gradient">products.</span>
+        </h1>
       </div>
 
       {/* Filters */}
-      <div className="mb-8 grid gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 p-4 md:grid-cols-5">
+      <div className="mb-8 grid gap-3 rounded-[1.75rem] border border-neutral-200 bg-white p-4 shadow-sm md:grid-cols-5">
         <input
           type="search"
           placeholder="Search products…"

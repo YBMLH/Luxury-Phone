@@ -1,56 +1,74 @@
 'use client';
 
-import SectionHeading from '@/components/SectionHeading';
+import Link from 'next/link';
 import AnimateIn from '@/components/AnimateIn';
 
 const FEATURES = [
   {
     icon: '✅',
-    title: '100% Genuine Products',
-    text: 'Every product is original and comes with its official warranty.',
+    title: '100% Genuine',
+    text: 'Original products with their official warranty.',
   },
   {
     icon: '🚚',
-    title: 'Delivery to 58 Wilayas',
-    text: 'Fast and safe delivery to every wilaya in Algeria, door to door.',
+    title: '58 Wilayas',
+    text: 'Fast, safe delivery everywhere in Algeria.',
   },
   {
     icon: '💰',
     title: 'Best Prices',
-    text: 'Honest, competitive prices with regular offers and discounts.',
+    text: 'Honest prices with regular offers.',
   },
   {
     icon: '🤝',
-    title: 'Trusted Local Store',
-    text: 'Two physical branches in Guelma — visit us any time.',
+    title: 'Local & Trusted',
+    text: 'Two physical branches in Guelma.',
   },
 ];
 
+// Large rounded marble panel with gold veins — like the reference's
+// dark promo section.
 export default function WhyChooseUs() {
   return (
-    <section className="marble py-16">
-      <div className="mx-auto max-w-7xl px-4 md:px-6">
-        <AnimateIn>
-          <SectionHeading
-            eyebrow="Our Promise"
-            title="Why Choose Luxury Phone"
-            dark
-          />
-        </AnimateIn>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {FEATURES.map((f, i) => (
-            <AnimateIn key={f.title} delay={i * 0.08}>
-              <div className="marble-card h-full rounded-2xl p-6 text-center">
-                <div className="mb-4 text-4xl">{f.icon}</div>
-                <h3 className="font-display text-lg font-semibold text-gold-300">
+    <section className="mx-auto max-w-7xl px-4 py-14 md:px-6">
+      <AnimateIn>
+        <div className="marble grid items-center gap-10 overflow-hidden rounded-[2rem] p-8 md:p-14 lg:grid-cols-2">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-gold-400">
+              Why Luxury Phone
+            </p>
+            <h2 className="mt-4 font-display text-3xl font-bold leading-tight text-white md:text-4xl">
+              Genuine products.
+              <span className="block text-gold-gradient">Real peace of mind.</span>
+            </h2>
+            <p className="mt-5 max-w-md text-sm leading-relaxed text-neutral-300 md:text-base">
+              Every device we sell is original, covered by its official
+              warranty, and delivered to your door anywhere in Algeria — or
+              pick it up at one of our two branches in Guelma.
+            </p>
+            <Link href="/contact" className="btn-gold mt-8 !px-8 !py-3.5">
+              Visit our stores →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {FEATURES.map((f) => (
+              <div
+                key={f.title}
+                className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur"
+              >
+                <div className="text-2xl">{f.icon}</div>
+                <h3 className="mt-3 font-display text-sm font-bold text-gold-300">
                   {f.title}
                 </h3>
-                <p className="mt-2 text-sm leading-relaxed text-neutral-300">{f.text}</p>
+                <p className="mt-1.5 text-xs leading-relaxed text-neutral-300">
+                  {f.text}
+                </p>
               </div>
-            </AnimateIn>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      </AnimateIn>
     </section>
   );
 }

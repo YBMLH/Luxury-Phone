@@ -11,16 +11,16 @@ export default function AboutPage() {
 
   return (
     <>
-      <section className="marble py-20 text-center">
-        <AnimateIn className="mx-auto max-w-3xl px-4 md:px-6">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.3em] text-gold-400">
-            Who We Are
+      <section className="border-b border-neutral-200 bg-white py-16 md:py-20">
+        <AnimateIn className="mx-auto max-w-3xl px-4 text-center md:px-6">
+          <p className="inline-flex items-center gap-2 rounded-full border border-neutral-300 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-neutral-600">
+            <span className="h-1.5 w-1.5 rounded-full bg-gold" />
+            Who we are
           </p>
-          <h1 className="font-display text-4xl font-bold text-gold-gradient md:text-5xl">
-            {about.title}
+          <h1 className="mt-6 font-display text-4xl font-bold tracking-tight md:text-6xl">
+            <span className="text-gold-gradient">{about.title}</span>
           </h1>
-          <div className="gold-line mx-auto mt-6" />
-          <p className="mt-8 whitespace-pre-line text-base leading-relaxed text-neutral-300">
+          <p className="mt-7 whitespace-pre-line text-base leading-relaxed text-neutral-600">
             {about.text}
           </p>
         </AnimateIn>

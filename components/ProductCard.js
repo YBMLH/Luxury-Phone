@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { formatPrice, discountPercent } from '@/lib/utils';
+import { categoryLabel } from '@/lib/constants';
 
 export default function ProductCard({ product }) {
   const discount = discountPercent(product.price, product.oldPrice);
@@ -13,7 +14,7 @@ export default function ProductCard({ product }) {
     <motion.div
       whileHover={{ y: -6 }}
       transition={{ duration: 0.25 }}
-      className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-card transition hover:border-gold/50 hover:shadow-card-hover"
+      className="group overflow-hidden rounded-[1.75rem] border border-neutral-200/80 bg-white shadow-sm transition hover:shadow-card-hover"
     >
       <Link href={`/products/${product.id}`}>
         <div className="relative aspect-square overflow-hidden bg-neutral-100">
@@ -42,7 +43,7 @@ export default function ProductCard({ product }) {
               </span>
             )}
             {product.bestseller && (
-              <span className="rounded-full bg-marble px-2.5 py-1 text-xs font-bold text-gold-300">
+              <span className="rounded-full bg-neutral-950 px-2.5 py-1 text-xs font-bold text-gold-300">
                 BEST SELLER
               </span>
             )}
@@ -57,22 +58,28 @@ export default function ProductCard({ product }) {
           )}
         </div>
 
-        <div className="p-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-gold-600">
-            {product.brand}
+        <div className="p-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-gold-600">
+            {categoryLabel(product.category)}
           </p>
-          <h3 className="mt-1 line-clamp-2 min-h-[2.5rem] text-sm font-medium text-neutral-800 group-hover:text-black">
-            {product.name}
-          </h3>
-          <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-lg font-bold text-neutral-900">
-              {formatPrice(product.price)}
-            </span>
-            {discount > 0 && (
-              <span className="text-xs text-neutral-400 line-through">
-                {formatPrice(product.oldPrice)}
-              </span>
-            )}
+          <div className="mt-1.5 flex items-start justify-between gap-3">
+            <h3 className="line-clamp-2 min-h-[2.6rem] font-display text-base font-bold leading-snug">
+              {product.name}
+            </h3>
+            <div className="shrink-0 text-right">
+              <p className="font-display text-base font-bold">
+                {formatPrice(product.price)}
+              </p>
+              {discount > 0 && (
+                <p className="text-xs text-neutral-400 line-through">
+                  {formatPrice(product.oldPrice)}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="mt-3 flex items-center justify-between">
+            <p className="text-xs text-neutral-500">{product.brand}</p>
+            <span className="chip-dark">Order →</span>
           </div>
         </div>
       </Link>

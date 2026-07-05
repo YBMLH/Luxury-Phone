@@ -8,33 +8,34 @@
 }
 
 body {
-  @apply bg-white text-neutral-900 antialiased;
+  @apply bg-[#FAFAF8] text-neutral-900 antialiased;
 }
 
-/* ------------------------- Black marble surfaces ------------------------- */
-/* Pure CSS marble: a near-black base with faint diagonal "veins".          */
-/* No image downloads = faster loading and zero hosting cost.               */
+/* --------------------- Black marble with gold veins ---------------------- */
+/* Pure CSS "kintsugi" marble: near-black stone crossed by thin bright gold */
+/* veins. No image downloads = fast loading and zero hosting cost.          */
 .marble {
-  background-color: #0c0c0e;
+  background-color: #070707;
   background-image:
-    radial-gradient(ellipse at 20% 10%, rgba(255, 255, 255, 0.05) 0%, transparent 45%),
-    radial-gradient(ellipse at 85% 90%, rgba(201, 162, 39, 0.06) 0%, transparent 50%),
-    linear-gradient(115deg, transparent 42%, rgba(255, 255, 255, 0.035) 44%, transparent 46%),
-    linear-gradient(115deg, transparent 62%, rgba(255, 255, 255, 0.05) 63.5%, transparent 65%),
-    linear-gradient(65deg, transparent 28%, rgba(255, 255, 255, 0.025) 30%, transparent 33%),
-    linear-gradient(160deg, #0c0c0e 0%, #131316 50%, #0a0a0c 100%);
+    radial-gradient(ellipse 55% 45% at 78% 15%, rgba(201, 162, 39, 0.1) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 35% at 12% 85%, rgba(201, 162, 39, 0.07) 0%, transparent 55%),
+    url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%201100%20750'%3E%3Cdefs%3E%3ClinearGradient%20id='g'%20x1='0'%20y1='0'%20x2='1'%20y2='1'%3E%3Cstop%20offset='0'%20stop-color='%238a6d1a'/%3E%3Cstop%20offset='.45'%20stop-color='%23e2c86c'/%3E%3Cstop%20offset='.55'%20stop-color='%23f3e29a'/%3E%3Cstop%20offset='1'%20stop-color='%23a98a1e'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg%20fill='none'%20stroke='url(%23g)'%20stroke-linecap='round'%3E%3Cpath%20d='M-60%20620%20C180%20520%20320%20560%20480%20380%20S760%20180%201160%2090'%20stroke-width='12'%20opacity='.1'/%3E%3Cpath%20d='M-60%20620%20C180%20520%20320%20560%20480%20380%20S760%20180%201160%2090'%20stroke-width='2.5'%20opacity='.65'/%3E%3Cpath%20d='M470%20390%20C560%20470%20650%20480%20760%20560%20S930%20660%201120%20690'%20stroke-width='1.6'%20opacity='.45'/%3E%3Cpath%20d='M760%20560%20C800%20600%20810%20650%20790%20760'%20stroke-width='1.1'%20opacity='.3'/%3E%3Cpath%20d='M-40%20220%20C90%20260%20170%20210%20300%20240%20S480%20200%20560%20130'%20stroke-width='1.2'%20opacity='.28'/%3E%3Cpath%20d='M900%20-20%20C860%20120%20930%20240%20880%20360%20S840%20520%20900%20620'%20stroke-width='1.4'%20opacity='.3'/%3E%3Cpath%20d='M180%20760%20C240%20660%20220%20600%20300%20540'%20stroke-width='1'%20opacity='.26'/%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(135deg, #080808 0%, #101010 45%, #060606 100%);
+  background-size: auto, auto, cover, auto;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .marble-card {
-  background-color: #101013;
+  background-color: #0c0c0c;
   background-image:
-    radial-gradient(ellipse at 80% 0%, rgba(201, 162, 39, 0.08) 0%, transparent 55%),
-    linear-gradient(120deg, transparent 55%, rgba(255, 255, 255, 0.04) 57%, transparent 59%),
-    linear-gradient(150deg, #121215 0%, #1a1a1e 55%, #0e0e11 100%);
+    radial-gradient(ellipse at 80% 0%, rgba(201, 162, 39, 0.1) 0%, transparent 55%),
+    linear-gradient(115deg, transparent 54%, rgba(226, 200, 108, 0.4) 55.2%, transparent 56.4%),
+    linear-gradient(150deg, #0d0d0d 0%, #151515 55%, #0a0a0a 100%);
   border: 1px solid rgba(201, 162, 39, 0.22);
 }
 
-/* Gold gradient text for headings */
+/* Gold gradient text for headline accents */
 .text-gold-gradient {
   background: linear-gradient(100deg, #a88420 0%, #e2c86c 45%, #f3e29a 55%, #c9a227 100%);
   -webkit-background-clip: text;
@@ -42,7 +43,7 @@ body {
   color: transparent;
 }
 
-/* Thin gold divider line */
+/* Thin gold divider line (used in the admin) */
 .gold-line {
   height: 2px;
   width: 72px;
@@ -51,7 +52,7 @@ body {
 
 /* Loading skeleton shimmer */
 .skeleton {
-  @apply bg-neutral-200 rounded-lg;
+  @apply bg-neutral-200 rounded-2xl;
   background-image: linear-gradient(
     90deg,
     rgba(255, 255, 255, 0) 0,
@@ -65,7 +66,7 @@ body {
 
 /* Form controls */
 .input {
-  @apply w-full rounded-lg border border-neutral-300 bg-white px-4 py-2.5 text-sm
+  @apply w-full rounded-xl border border-neutral-300 bg-white px-4 py-2.5 text-sm
     outline-none transition focus:border-gold focus:ring-2 focus:ring-gold/25;
 }
 
@@ -73,25 +74,33 @@ body {
   @apply mb-1.5 block text-sm font-medium text-neutral-700;
 }
 
-/* Buttons */
+/* Buttons — pill shaped, like the reference design */
 .btn-gold {
-  @apply inline-flex items-center justify-center gap-2 rounded-lg bg-gold px-6 py-3
-    text-sm font-semibold text-black transition hover:bg-gold-400 hover:shadow-gold
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-7 py-3
+    text-sm font-semibold text-neutral-900 transition hover:shadow-gold
     disabled:cursor-not-allowed disabled:opacity-50;
+  background: linear-gradient(100deg, #d8b646 0%, #f0d98a 50%, #c9a227 100%);
 }
 
 .btn-dark {
-  @apply inline-flex items-center justify-center gap-2 rounded-lg bg-marble px-6 py-3
-    text-sm font-semibold text-white transition hover:bg-marble-lighter
+  @apply inline-flex items-center justify-center gap-2 rounded-full bg-neutral-950 px-7 py-3
+    text-sm font-semibold text-white transition hover:bg-neutral-800
     disabled:cursor-not-allowed disabled:opacity-50;
 }
 
 .btn-outline {
-  @apply inline-flex items-center justify-center gap-2 rounded-lg border border-gold/60
-    px-6 py-3 text-sm font-semibold text-gold-700 transition hover:bg-gold/10;
+  @apply inline-flex items-center justify-center gap-2 rounded-full border border-neutral-300
+    bg-white px-7 py-3 text-sm font-semibold text-neutral-900 transition
+    hover:border-neutral-900 disabled:cursor-not-allowed disabled:opacity-50;
 }
 
-/* Custom scrollbar (subtle, luxury feel) */
+/* Small black action chip on product cards ("Order →") */
+.chip-dark {
+  @apply inline-flex items-center gap-1 rounded-lg bg-neutral-950 px-2.5 py-1
+    text-xs font-semibold text-white transition group-hover:bg-neutral-700;
+}
+
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;

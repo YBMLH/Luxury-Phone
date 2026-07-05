@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import SectionHeading from '@/components/SectionHeading';
 import AnimateIn from '@/components/AnimateIn';
 import { useSettings } from '@/context/SettingsContext';
 
@@ -10,14 +9,15 @@ export default function ContactSection() {
   const { contactInfo } = settings;
 
   return (
-    <section className="mx-auto max-w-5xl px-4 py-16 text-center md:px-6">
+    <section className="mx-auto max-w-4xl px-4 py-14 text-center md:px-6">
       <AnimateIn>
-        <SectionHeading
-          eyebrow="Get In Touch"
-          title="Questions? We're Here to Help"
-          subtitle="Call us, message us, or visit one of our branches in Guelma."
-        />
-        <div className="flex flex-wrap items-center justify-center gap-4">
+        <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">
+          Questions? <span className="text-gold-gradient">We're here to help.</span>
+        </h2>
+        <p className="mt-3 text-sm text-neutral-500 md:text-base">
+          Call us, message us, or visit one of our branches in Guelma.
+        </p>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           {contactInfo.phone && (
             <a href={`tel:${contactInfo.phone}`} className="btn-dark">
               📞 {contactInfo.phone}
@@ -34,7 +34,7 @@ export default function ContactSection() {
             </a>
           )}
           <Link href="/contact" className="btn-outline">
-            Contact Page →
+            Contact page →
           </Link>
         </div>
       </AnimateIn>

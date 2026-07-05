@@ -110,9 +110,12 @@ export default function AdminSettingsPage() {
             <Field label="Tagline (small text above the title)"
               value={settings.heroContent.tagline}
               onChange={(e) => update('heroContent', 'tagline', e.target.value)} />
-            <Field label="Main Title"
+            <Field label="Main Title (black part)"
               value={settings.heroContent.title}
               onChange={(e) => update('heroContent', 'title', e.target.value)} />
+            <Field label="Title Accent (gold part, second line)"
+              value={settings.heroContent.titleAccent || ''}
+              onChange={(e) => update('heroContent', 'titleAccent', e.target.value)} />
             <Field label="Subtitle" rows={3}
               value={settings.heroContent.subtitle}
               onChange={(e) => update('heroContent', 'subtitle', e.target.value)} />

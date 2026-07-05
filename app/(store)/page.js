@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Hero from '@/components/home/Hero';
+import MarbleBanner from '@/components/home/MarbleBanner';
 import ProductRow from '@/components/home/ProductRow';
 import Categories from '@/components/home/Categories';
-import Brands from '@/components/home/Brands';
 import WhyChooseUs from '@/components/home/WhyChooseUs';
 import Locations from '@/components/home/Locations';
 import Reviews from '@/components/home/Reviews';
@@ -26,27 +26,29 @@ export default function HomePage() {
   const featured = products.filter((p) => p.featured);
   const newArrivals = products.filter((p) => p.newArrival);
   const bestSellers = products.filter((p) => p.bestseller);
+  // "This season's essentials": featured products, or the latest ones
+  // until the owner marks some as featured.
+  const essentials = featured.length ? featured : products;
 
   return (
     <>
-      <Hero />
+      <Hero featured={featured[0] || products[0] || null} />
+      <MarbleBanner />
+      <Categories products={products} />
 
       {loading ? (
-        <div className="mx-auto max-w-7xl px-4 py-16 md:px-6">
+        <div className="mx-auto max-w-7xl px-4 py-14 md:px-6">
           <ProductGridSkeleton count={4} />
         </div>
       ) : (
         <>
           <ProductRow
-            eyebrow="Handpicked"
-            title="Featured Products"
-            subtitle="Our selection of the finest devices in store right now."
-            products={featured}
-            viewAllHref="/products?featured=1"
+            title="This season's essentials"
+            products={essentials}
+            viewAllHref="/products"
           />
           <ProductRow
-            eyebrow="Just In"
-            title="New Arrivals"
+            title="New arrivals"
             subtitle="The latest releases, fresh in our showroom."
             products={newArrivals}
             viewAllHref="/products"
@@ -54,22 +56,19 @@ export default function HomePage() {
         </>
       )}
 
-      <Categories />
+      <WhyChooseUs />
 
       {!loading && (
         <ProductRow
-          eyebrow="Customer Favorites"
-          title="Best Sellers"
+          title="Best sellers"
           subtitle="The products our customers love the most."
           products={bestSellers}
           viewAllHref="/products"
         />
       )}
 
-      <Brands products={products} />
-      <WhyChooseUs />
-      <Locations />
       <Reviews />
+      <Locations />
       <ContactSection />
     </>
   );

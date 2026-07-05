@@ -44,16 +44,17 @@ export default function TrackOrderPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-14 md:px-6">
       <div className="mb-10 text-center">
-        <h1 className="font-display text-3xl font-bold md:text-4xl">Track Your Order</h1>
-        <div className="gold-line mx-auto mt-4" />
-        <p className="mt-4 text-sm text-neutral-600">
+        <h1 className="font-display text-3xl font-bold tracking-tight md:text-5xl">
+          Track your <span className="text-gold-gradient">order.</span>
+        </h1>
+        <p className="mt-4 text-sm text-neutral-500">
           Enter the order number you received and the phone number you ordered with.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="marble-card space-y-4 rounded-2xl p-6">
+      <form onSubmit={handleSubmit} className="space-y-4 rounded-[1.75rem] border border-neutral-200 bg-white p-6 shadow-sm md:p-8">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-neutral-200">
+          <label className="label">
             Order Number
           </label>
           <input
@@ -64,7 +65,7 @@ export default function TrackOrderPage() {
           />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-neutral-200">
+          <label className="label">
             Phone Number
           </label>
           <input
