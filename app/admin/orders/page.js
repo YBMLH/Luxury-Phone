@@ -21,6 +21,9 @@ function OrderDetailModal({ order, onClose }) {
     ['Address', order.address],
     ['Product', order.productName],
     ['Price', formatPrice(order.price)],
+    ['Quantity', order.quantity || 1],
+    ['Delivery Fee', order.deliveryFee != null ? formatPrice(order.deliveryFee) : '—'],
+    ['Total', order.total ? formatPrice(order.total) : formatPrice(order.price)],
     ['Color', order.color || '—'],
     ['Storage', order.storage || '—'],
     ['RAM', order.ram || '—'],
@@ -114,6 +117,44 @@ export default function AdminOrdersPage() {
     }
   }
 
+  // WhatsApp link for an Algerian number: replace the leading 0 with 213.
+  function waLink(phone) {
+    return `https://wa.me/${String(phone).replace(/^0/, '213')}`;
+  }
+
+  function exportCsv() {
+    const header = [
+      'Order #', 'Customer', 'Phone', 'Wilaya', 'Commune', 'Address',
+      'Product', 'Variant', 'Qty', 'Total (DA)', 'Status', 'Date',
+    ];
+    const rows = filtered.map((o) => [
+      o.orderNumber,
+      o.customerName,
+      o.phone,
+      o.wilaya,
+      o.commune,
+      o.address,
+      o.productName,
+      [o.color, o.storage, o.ram].filter(Boolean).join(' / '),
+      o.quantity || 1,
+      o.total || o.price || 0,
+      o.status,
+      formatDate(o.createdAt),
+    ]);
+    const csv = [header, ...rows]
+      .map((row) =>
+        row.map((cell) => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(',')
+      )
+      .join('\n');
+    // ﻿ (BOM) makes Excel open the file with correct accents.
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
   async function handleDelete(order) {
     if (!confirm(`Delete order ${order.orderNumber}? This cannot be undone.`)) return;
     try {
@@ -127,7 +168,14 @@ export default function AdminOrdersPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-display text-2xl font-bold">Orders ({orders.length})</h1>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="font-display text-2xl font-bold">Orders ({orders.length})</h1>
+        {filtered.length > 0 && (
+          <button onClick={exportCsv} className="btn-outline !px-5 !py-2 !text-xs">
+            ⬇ Export CSV ({filtered.length})
+          </button>
+        )}
+      </div>
 
       <div className="flex flex-col gap-3 sm:flex-row">
         <input type="search" className="input sm:max-w-sm"
@@ -175,10 +223,26 @@ export default function AdminOrdersPage() {
                   </td>
                   <td className="px-4 py-3">
                     <p className="font-medium">{order.customerName}</p>
-                    <p className="text-xs text-neutral-500">{order.phone}</p>
+                    <div className="mt-0.5 flex items-center gap-2">
+                      <span className="text-xs text-neutral-500">{order.phone}</span>
+                      <a href={`tel:${order.phone}`} title="Call customer"
+                        className="rounded bg-neutral-100 px-1.5 py-0.5 text-xs hover:bg-neutral-200">
+                        📞
+                      </a>
+                      <a href={waLink(order.phone)} target="_blank" rel="noopener noreferrer"
+                        title="WhatsApp customer"
+                        className="rounded bg-green-100 px-1.5 py-0.5 text-xs hover:bg-green-200">
+                        💬
+                      </a>
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-neutral-600">{order.wilaya}</td>
-                  <td className="max-w-[180px] truncate px-4 py-3">{order.productName}</td>
+                  <td className="max-w-[180px] px-4 py-3">
+                    <p className="truncate">{order.productName}</p>
+                    {(order.quantity || 1) > 1 && (
+                      <p className="text-xs font-semibold text-gold-700">× {order.quantity}</p>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-xs text-neutral-500">
                     {[order.color, order.storage, order.ram].filter(Boolean).join(' · ') || '—'}
                   </td>

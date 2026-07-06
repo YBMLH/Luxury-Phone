@@ -4,7 +4,8 @@
 // orders/products collections — no extra services, no extra cost.
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { getOrders, getProducts } from '@/lib/db';
+import toast from 'react-hot-toast';
+import { getOrders, getProducts, getCustomers, getSettings } from '@/lib/db';
 import { TableSkeleton } from '@/components/Skeletons';
 
 function StatCard({ icon, label, value, accent = false }) {
@@ -100,6 +101,38 @@ export default function AdminDashboard() {
     };
   }, [orders]);
 
+  const lowStock = products.filter(
+    (p) => Number(p.stock) > 0 && Number(p.stock) <= 3
+  );
+
+  // One-click safety net: everything important in a single JSON file.
+  async function downloadBackup() {
+    try {
+      const [customers, settings] = await Promise.all([
+        getCustomers().catch(() => []),
+        getSettings().catch(() => null),
+      ]);
+      const backup = {
+        exportedAt: new Date().toISOString(),
+        products,
+        orders,
+        customers,
+        settings,
+      };
+      const blob = new Blob([JSON.stringify(backup, null, 2)], {
+        type: 'application/json',
+      });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `luxury-phone-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+      toast.success('Backup downloaded — keep it somewhere safe.');
+    } catch {
+      toast.error('Could not create the backup.');
+    }
+  }
+
   if (loading) {
     return (
       <div>
@@ -113,10 +146,29 @@ export default function AdminDashboard() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="font-display text-2xl font-bold">Dashboard</h1>
-        <Link href="/admin/products/new" className="btn-gold !px-5 !py-2.5">
-          + Add Product
-        </Link>
+        <div className="flex flex-wrap gap-3">
+          <button onClick={downloadBackup} className="btn-outline !px-5 !py-2.5 !text-xs">
+            ⬇ Download Backup
+          </button>
+          <Link href="/admin/products/new" className="btn-gold !px-5 !py-2.5">
+            + Add Product
+          </Link>
+        </div>
       </div>
+
+      {lowStock.length > 0 && (
+        <Link
+          href="/admin/products"
+          className="flex items-center gap-3 rounded-2xl border border-amber-300 bg-amber-50 px-5 py-4 text-sm text-amber-900 transition hover:bg-amber-100"
+        >
+          <span className="text-xl">⚠️</span>
+          <span>
+            <strong>{lowStock.length}</strong> product{lowStock.length > 1 ? 's are' : ' is'} almost
+            out of stock ({lowStock.slice(0, 3).map((p) => p.name).join(', ')}
+            {lowStock.length > 3 ? '…' : ''}) — click to review.
+          </span>
+        </Link>
+      )}
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">

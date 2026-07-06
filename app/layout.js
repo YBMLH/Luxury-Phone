@@ -11,6 +11,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata = {
+  metadataBase: new URL('https://luxury-phone.vercel.app'),
   title: {
     default: 'Luxury Phone — Premium Electronics Store in Guelma, Algeria',
     template: '%s | Luxury Phone',

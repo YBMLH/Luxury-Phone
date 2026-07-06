@@ -25,6 +25,7 @@ function ProductsContent() {
   const [category, setCategory] = useState(searchParams.get('category') || 'all');
   const [brand, setBrand] = useState(searchParams.get('brand') || 'all');
   const [price, setPrice] = useState('all');
+  const [sort, setSort] = useState('newest');
   const [featuredOnly, setFeaturedOnly] = useState(searchParams.get('featured') === '1');
 
   useEffect(() => {
@@ -44,7 +45,7 @@ function ProductsContent() {
     const [min, max] =
       price === 'all' ? [0, Infinity] : price.split('-').map(Number);
 
-    return products.filter((p) => {
+    const result = products.filter((p) => {
       if (q && !`${p.name} ${p.brand}`.toLowerCase().includes(q)) return false;
       if (category !== 'all' && p.category !== category) return false;
       if (brand !== 'all' && p.brand !== brand) return false;
@@ -53,7 +54,15 @@ function ProductsContent() {
       if (priceNum < min || priceNum > max) return false;
       return true;
     });
-  }, [products, search, category, brand, price, featuredOnly]);
+
+    if (sort === 'price-asc') {
+      result.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
+    } else if (sort === 'price-desc') {
+      result.sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0));
+    }
+    // "newest" keeps the default order (already sorted by createdAt desc).
+    return result;
+  }, [products, search, category, brand, price, sort, featuredOnly]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 md:px-6">
@@ -89,7 +98,12 @@ function ProductsContent() {
             <option key={r.id} value={r.id}>{r.label}</option>
           ))}
         </select>
-        <label className="flex items-center gap-2 text-sm text-neutral-700 md:col-span-5">
+        <select value={sort} onChange={(e) => setSort(e.target.value)} className="input md:col-span-2">
+          <option value="newest">Sort: Newest first</option>
+          <option value="price-asc">Sort: Price low → high</option>
+          <option value="price-desc">Sort: Price high → low</option>
+        </select>
+        <label className="flex items-center gap-2 text-sm text-neutral-700 md:col-span-3">
           <input
             type="checkbox"
             checked={featuredOnly}

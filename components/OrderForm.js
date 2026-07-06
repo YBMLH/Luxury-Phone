@@ -9,9 +9,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { createOrder } from '@/lib/db';
 import { WILAYAS } from '@/lib/constants';
-import { formatPrice, isValidPhone, checkRateLimit } from '@/lib/utils';
+import { useSettings } from '@/context/SettingsContext';
+import {
+  formatPrice,
+  isValidPhone,
+  checkRateLimit,
+  deliveryFeeFor,
+} from '@/lib/utils';
 
 export default function OrderForm({ product, selection, open, onClose }) {
+  const { settings } = useSettings();
   const [form, setForm] = useState({
     customerName: '',
     phone: '',
@@ -21,10 +28,17 @@ export default function OrderForm({ product, selection, open, onClose }) {
     address: '',
     notes: '',
   });
+  const [quantity, setQuantity] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [orderNumber, setOrderNumber] = useState(null);
 
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });
+
+  const subtotal = (Number(product.price) || 0) * quantity;
+  const deliveryFee = form.wilaya
+    ? deliveryFeeFor(settings.delivery, form.wilaya)
+    : null;
+  const total = subtotal + (deliveryFee || 0);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -56,6 +70,9 @@ export default function OrderForm({ product, selection, open, onClose }) {
         productName: product.name,
         productImage: product.images?.[0] || '',
         price: product.price,
+        quantity,
+        deliveryFee: deliveryFee || 0,
+        total,
         color: selection.color,
         storage: selection.storage,
         ram: selection.ram,
@@ -209,8 +226,46 @@ export default function OrderForm({ product, selection, open, onClose }) {
                       onChange={set('notes')} placeholder="Anything we should know?" />
                   </div>
 
+                  {/* Quantity */}
+                  <div>
+                    <label className="label">Quantity</label>
+                    <div className="inline-flex items-center gap-1 rounded-xl border border-neutral-300 p-1">
+                      <button type="button" aria-label="Decrease quantity"
+                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                        className="h-9 w-9 rounded-lg text-lg font-bold text-neutral-600 transition hover:bg-neutral-100">
+                        −
+                      </button>
+                      <span className="w-10 text-center font-display text-base font-bold">
+                        {quantity}
+                      </span>
+                      <button type="button" aria-label="Increase quantity"
+                        onClick={() => setQuantity(Math.min(10, quantity + 1))}
+                        className="h-9 w-9 rounded-lg text-lg font-bold text-neutral-600 transition hover:bg-neutral-100">
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Order summary */}
+                  <div className="space-y-2 rounded-xl bg-neutral-50 p-4 text-sm">
+                    <div className="flex justify-between text-neutral-600">
+                      <span>Subtotal ({quantity} × {formatPrice(product.price)})</span>
+                      <span className="font-medium">{formatPrice(subtotal)}</span>
+                    </div>
+                    <div className="flex justify-between text-neutral-600">
+                      <span>Delivery{form.wilaya ? ` — ${form.wilaya}` : ''}</span>
+                      <span className="font-medium">
+                        {deliveryFee === null ? 'Select wilaya' : formatPrice(deliveryFee)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between border-t border-neutral-200 pt-2 font-display text-base font-bold">
+                      <span>Total</span>
+                      <span className="text-gold-700">{formatPrice(total)}</span>
+                    </div>
+                  </div>
+
                   <button type="submit" disabled={submitting} className="btn-gold w-full !py-3.5">
-                    {submitting ? 'Placing order…' : `Confirm Order — ${formatPrice(product.price)}`}
+                    {submitting ? 'Placing order…' : `Confirm Order — ${formatPrice(total)}`}
                   </button>
                   <p className="text-center text-xs text-neutral-400">
                     We will call you to confirm before shipping. Payment on delivery.

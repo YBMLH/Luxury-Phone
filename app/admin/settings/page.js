@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { getSettings, saveSettings } from '@/lib/db';
 import { mergeSettings } from '@/lib/defaults';
+import { WILAYAS } from '@/lib/constants';
 import { TableSkeleton } from '@/components/Skeletons';
 import { sanitizeText } from '@/lib/utils';
 
@@ -14,6 +15,7 @@ const TABS = [
   { id: 'hero', label: '🏠 Hero Banner' },
   { id: 'contact', label: '📞 Contact Info' },
   { id: 'social', label: '🔗 Social Links' },
+  { id: 'delivery', label: '🚚 Delivery Fees' },
   { id: 'locations', label: '📍 Store Locations' },
   { id: 'reviews', label: '⭐ Reviews' },
   { id: 'about', label: 'ℹ️ About Page' },
@@ -159,6 +161,47 @@ export default function AdminSettingsPage() {
             <Field label="TikTok URL" placeholder="https://tiktok.com/@…"
               value={settings.socialLinks.tiktok}
               onChange={(e) => update('socialLinks', 'tiktok', e.target.value)} />
+          </div>
+        )}
+
+        {tab === 'delivery' && (
+          <div className="space-y-5">
+            <div className="max-w-xs">
+              <Field label="Default delivery fee (DA)" type="number" min="0"
+                hint="Used for every wilaya that has no specific price below."
+                value={settings.delivery.defaultFee}
+                onChange={(e) =>
+                  update('delivery', 'defaultFee', Number(e.target.value) || 0)
+                } />
+            </div>
+            <div>
+              <p className="label">Per-wilaya prices (leave empty to use the default)</p>
+              <div className="grid gap-x-6 gap-y-2 sm:grid-cols-2">
+                {WILAYAS.map((wilaya, i) => (
+                  <div key={wilaya} className="flex items-center gap-3">
+                    <span className="w-40 shrink-0 truncate text-sm text-neutral-600">
+                      {String(i + 1).padStart(2, '0')} — {wilaya}
+                    </span>
+                    <input
+                      className="input !py-1.5"
+                      type="number"
+                      min="0"
+                      placeholder={`${settings.delivery.defaultFee}`}
+                      value={settings.delivery.fees[wilaya] ?? ''}
+                      onChange={(e) => {
+                        const fees = { ...settings.delivery.fees };
+                        if (e.target.value === '') {
+                          delete fees[wilaya];
+                        } else {
+                          fees[wilaya] = Number(e.target.value) || 0;
+                        }
+                        update('delivery', 'fees', fees);
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 

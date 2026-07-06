@@ -1,5 +1,6 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import WhatsAppButton from '@/components/WhatsAppButton';
 
 // Layout for all customer-facing pages (the admin dashboard has its own).
 export default function StoreLayout({ children }) {
@@ -8,6 +9,7 @@ export default function StoreLayout({ children }) {
       <Navbar />
       <main className="min-h-[70vh]">{children}</main>
       <Footer />
+      <WhatsAppButton />
     </>
   );
 }

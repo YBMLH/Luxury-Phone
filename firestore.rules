@@ -31,9 +31,16 @@ service cloud.firestore {
 
     // Orders: anyone can place one (with strict validation), but only
     // admins can read, change or delete them. Customer data stays private.
+    // hasOnly() blocks any extra/unknown fields from being injected.
     match /orders/{orderId} {
       allow create: if
-        validString(request.resource.data.customerName, 100)
+        request.resource.data.keys().hasOnly([
+          'orderNumber', 'customerName', 'phone', 'secondaryPhone',
+          'wilaya', 'commune', 'address', 'productId', 'productName',
+          'productImage', 'price', 'quantity', 'deliveryFee', 'total',
+          'color', 'storage', 'ram', 'notes', 'status', 'createdAt'
+        ])
+        && validString(request.resource.data.customerName, 100)
         && request.resource.data.customerName.size() >= 3
         && validString(request.resource.data.phone, 15)
         && request.resource.data.phone.size() >= 9
@@ -43,6 +50,15 @@ service cloud.firestore {
         && validString(request.resource.data.productName, 150)
         && validString(request.resource.data.notes, 500)
         && validString(request.resource.data.orderNumber, 20)
+        && request.resource.data.price is number
+        && request.resource.data.price >= 0
+        && request.resource.data.quantity is int
+        && request.resource.data.quantity >= 1
+        && request.resource.data.quantity <= 99
+        && request.resource.data.deliveryFee is number
+        && request.resource.data.deliveryFee >= 0
+        && request.resource.data.total is number
+        && request.resource.data.total >= 0
         && request.resource.data.status == 'Pending';
       allow read, update, delete: if isAdmin();
     }
@@ -54,7 +70,10 @@ service cloud.firestore {
       allow get: if true;
       allow list: if false;
       allow create: if
-        validString(request.resource.data.orderNumber, 20)
+        request.resource.data.keys().hasOnly([
+          'orderNumber', 'productName', 'status', 'createdAt'
+        ])
+        && validString(request.resource.data.orderNumber, 20)
         && request.resource.data.status == 'Pending';
       allow update, delete: if isAdmin();
     }
@@ -63,7 +82,10 @@ service cloud.firestore {
     // Only admins can view the list.
     match /customers/{phone} {
       allow create, update: if
-        validString(request.resource.data.fullName, 100)
+        request.resource.data.keys().hasOnly([
+          'fullName', 'phone', 'wilaya', 'ordersCount', 'lastOrderAt'
+        ])
+        && validString(request.resource.data.fullName, 100)
         && validString(request.resource.data.phone, 15)
         && validString(request.resource.data.wilaya, 50);
       allow read, delete: if isAdmin();

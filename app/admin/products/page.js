@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { getProducts, deleteProduct } from '@/lib/db';
+import { getProducts, deleteProduct, addProduct } from '@/lib/db';
 import { CATEGORIES, categoryLabel } from '@/lib/constants';
 import { formatPrice } from '@/lib/utils';
 import { TableSkeleton } from '@/components/Skeletons';
@@ -31,6 +31,23 @@ export default function AdminProductsPage() {
       return true;
     });
   }, [products, search, category]);
+
+  async function handleDuplicate(product) {
+    try {
+      const { id, createdAt, updatedAt, ...data } = product;
+      await addProduct({
+        ...data,
+        name: `${product.name} (copy)`,
+        featured: false,
+        bestseller: false,
+        newArrival: false,
+      });
+      setProducts(await getProducts());
+      toast.success('Product duplicated — now edit the copy.');
+    } catch {
+      toast.error('Could not duplicate the product.');
+    }
+  }
 
   async function handleDelete(product) {
     if (!confirm(`Delete "${product.name}"? This cannot be undone.`)) return;
@@ -116,11 +133,17 @@ export default function AdminProductsPage() {
                   <td className="px-4 py-3 font-semibold">{formatPrice(product.price)}</td>
                   <td className="px-4 py-3">
                     <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                      Number(product.stock) > 0
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-red-100 text-red-700'
+                      Number(product.stock) <= 0
+                        ? 'bg-red-100 text-red-700'
+                        : Number(product.stock) <= 3
+                        ? 'bg-amber-100 text-amber-800'
+                        : 'bg-green-100 text-green-700'
                     }`}>
-                      {Number(product.stock) > 0 ? `${product.stock} in stock` : 'Out of stock'}
+                      {Number(product.stock) <= 0
+                        ? 'Out of stock'
+                        : Number(product.stock) <= 3
+                        ? `⚠ Low — ${product.stock} left`
+                        : `${product.stock} in stock`}
                     </span>
                   </td>
                   <td className="px-4 py-3">
@@ -140,6 +163,11 @@ export default function AdminProductsPage() {
                         className="rounded-lg border border-gold/50 px-3 py-1.5 text-xs text-gold-700 hover:bg-gold/10">
                         Edit
                       </Link>
+                      <button onClick={() => handleDuplicate(product)}
+                        title="Create a copy of this product"
+                        className="rounded-lg border border-neutral-300 px-3 py-1.5 text-xs hover:bg-neutral-100">
+                        Duplicate
+                      </button>
                       <button onClick={() => handleDelete(product)}
                         disabled={deleting === product.id}
                         className="rounded-lg border border-red-200 px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50">
