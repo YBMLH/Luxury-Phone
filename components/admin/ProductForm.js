@@ -119,7 +119,7 @@ export default function ProductForm({ product = null }) {
     setUploading(true);
     for (const file of files) {
       try {
-        const url = await uploadProductImage(file, settings.imgbbApiKey);
+        const url = await uploadProductImage(file, settings);
         setImages((prev) => [...prev, url]);
       } catch (err) {
         toast.error(`${file.name}: ${err.message}`);
@@ -259,9 +259,9 @@ export default function ProductForm({ product = null }) {
         <p className="mb-4 text-xs text-neutral-500">
           Upload photos (they’re shrunk automatically for fast loading) or paste
           image links. The first image is the main image.
-          {!settings.imgbbApiKey && (
+          {!settings.cloudinary?.cloudName && !settings.imgbbApiKey && (
             <span className="mt-1 block text-amber-600">
-              Tip: add a free ImgBB key in the “Images &amp; Categories” tab so the
+              Tip: set up free Cloudinary in the “Images &amp; Categories” tab so the
               upload button works — until then, paste image links.
             </span>
           )}

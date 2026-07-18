@@ -17,7 +17,7 @@ export default function ImageInput({ value, onChange, label }) {
     if (!file) return;
     setUploading(true);
     try {
-      const link = await uploadProductImage(file, settings.imgbbApiKey);
+      const link = await uploadProductImage(file, settings);
       onChange(link);
       toast.success('Image uploaded.');
     } catch (err) {

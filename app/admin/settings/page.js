@@ -211,26 +211,42 @@ export default function AdminSettingsPage() {
           <div className="space-y-8">
             <div>
               <h3 className="mb-1 font-display text-base font-semibold">
-                Photo uploads (ImgBB — free, no card)
+                Photo uploads (Cloudinary — free, no card)
               </h3>
               <p className="mb-3 text-sm text-neutral-500">
-                Paste a free ImgBB key so the upload buttons work everywhere.
-                Get one at{' '}
-                <a href="https://api.imgbb.com" target="_blank" rel="noopener noreferrer"
-                  className="text-gold-700 underline">api.imgbb.com</a>{' '}
-                (sign up → “Get API key”). Photos are automatically shrunk before
-                upload so your store loads fast.
+                Cloudinary hosts your product photos on a fast image network and
+                shrinks them automatically. One-time setup: create a free account
+                at{' '}
+                <a href="https://cloudinary.com/users/register_free" target="_blank" rel="noopener noreferrer"
+                  className="text-gold-700 underline">cloudinary.com</a>, then in
+                Settings → Upload add an <strong>unsigned</strong> upload preset.
+                Paste both values below.
               </p>
-              <div className="max-w-md">
-                <Field label="ImgBB API Key" placeholder="Paste your key here"
-                  value={settings.imgbbApiKey || ''}
-                  onChange={(e) => setSettings({ ...settings, imgbbApiKey: e.target.value })} />
-                <p className="mt-1 text-xs text-neutral-400">
-                  {settings.imgbbApiKey
-                    ? '✅ Uploads will use your ImgBB account.'
-                    : '⚠ No key yet — the upload button needs this (or paste image links directly).'}
-                </p>
+              <div className="grid max-w-lg gap-4 sm:grid-cols-2">
+                <Field label="Cloud name" placeholder="e.g. dxy123abc"
+                  value={settings.cloudinary?.cloudName || ''}
+                  onChange={(e) => update('cloudinary', 'cloudName', e.target.value.trim())} />
+                <Field label="Upload preset (unsigned)" placeholder="e.g. luxury_phone"
+                  value={settings.cloudinary?.uploadPreset || ''}
+                  onChange={(e) => update('cloudinary', 'uploadPreset', e.target.value.trim())} />
               </div>
+              <p className="mt-2 text-xs text-neutral-400">
+                {settings.cloudinary?.cloudName && settings.cloudinary?.uploadPreset
+                  ? '✅ Uploads will use Cloudinary.'
+                  : '⚠ Not set yet — fill both fields (or just paste image links directly on products).'}
+              </p>
+
+              <details className="mt-3 text-xs text-neutral-500">
+                <summary className="cursor-pointer font-medium text-neutral-600">
+                  Prefer ImgBB instead? (optional)
+                </summary>
+                <div className="mt-2 max-w-md">
+                  <Field label="ImgBB API Key (used only if Cloudinary is empty)"
+                    placeholder="Paste your ImgBB key"
+                    value={settings.imgbbApiKey || ''}
+                    onChange={(e) => setSettings({ ...settings, imgbbApiKey: e.target.value })} />
+                </div>
+              </details>
             </div>
 
             <div>
