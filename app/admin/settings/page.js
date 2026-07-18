@@ -7,15 +7,17 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { getSettings, saveSettings } from '@/lib/db';
 import { mergeSettings } from '@/lib/defaults';
-import { WILAYAS } from '@/lib/constants';
+import { WILAYAS, CATEGORIES } from '@/lib/constants';
 import { TableSkeleton } from '@/components/Skeletons';
 import { sanitizeText } from '@/lib/utils';
+import ImageInput from '@/components/admin/ImageInput';
 
 const TABS = [
   { id: 'hero', label: '🏠 Hero Banner' },
   { id: 'contact', label: '📞 Contact Info' },
   { id: 'social', label: '🔗 Social Links' },
   { id: 'delivery', label: '🚚 Delivery Fees' },
+  { id: 'images', label: '🖼️ Images & Categories' },
   { id: 'locations', label: '📍 Store Locations' },
   { id: 'reviews', label: '⭐ Reviews' },
   { id: 'about', label: 'ℹ️ About Page' },
@@ -197,6 +199,62 @@ export default function AdminSettingsPage() {
                         }
                         update('delivery', 'fees', fees);
                       }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {tab === 'images' && (
+          <div className="space-y-8">
+            <div>
+              <h3 className="mb-1 font-display text-base font-semibold">
+                Photo uploads (ImgBB — free, no card)
+              </h3>
+              <p className="mb-3 text-sm text-neutral-500">
+                Paste a free ImgBB key so the upload buttons work everywhere.
+                Get one at{' '}
+                <a href="https://api.imgbb.com" target="_blank" rel="noopener noreferrer"
+                  className="text-gold-700 underline">api.imgbb.com</a>{' '}
+                (sign up → “Get API key”). Photos are automatically shrunk before
+                upload so your store loads fast.
+              </p>
+              <div className="max-w-md">
+                <Field label="ImgBB API Key" placeholder="Paste your key here"
+                  value={settings.imgbbApiKey || ''}
+                  onChange={(e) => setSettings({ ...settings, imgbbApiKey: e.target.value })} />
+                <p className="mt-1 text-xs text-neutral-400">
+                  {settings.imgbbApiKey
+                    ? '✅ Uploads will use your ImgBB account.'
+                    : '⚠ No key yet — the upload button needs this (or paste image links directly).'}
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="mb-1 font-display text-base font-semibold">
+                Category card backgrounds
+              </h3>
+              <p className="mb-4 text-sm text-neutral-500">
+                Optional: give each homepage category card a background photo.
+                Leave empty for the elegant black-marble look.
+              </p>
+              <div className="grid gap-5 sm:grid-cols-2">
+                {CATEGORIES.map((cat) => (
+                  <div key={cat.id} className="rounded-xl border border-neutral-200 p-4">
+                    <p className="mb-2 flex items-center gap-2 text-sm font-semibold">
+                      <span>{cat.icon}</span> {cat.label}
+                    </p>
+                    <ImageInput
+                      value={settings.categoryImages?.[cat.id] || ''}
+                      onChange={(url) =>
+                        setSettings({
+                          ...settings,
+                          categoryImages: { ...settings.categoryImages, [cat.id]: url },
+                        })
+                      }
                     />
                   </div>
                 ))}

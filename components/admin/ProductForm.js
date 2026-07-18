@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { addProduct, updateProduct, uploadProductImage } from '@/lib/db';
 import { CATEGORIES } from '@/lib/constants';
 import { sanitizeText } from '@/lib/utils';
+import { useSettings } from '@/context/SettingsContext';
 
 const EMPTY = {
   name: '',
@@ -78,6 +79,7 @@ function TagListInput({ label, placeholder, values, onChange }) {
 
 export default function ProductForm({ product = null }) {
   const router = useRouter();
+  const { settings } = useSettings();
   const editing = Boolean(product);
 
   const [form, setForm] = useState(
@@ -117,7 +119,7 @@ export default function ProductForm({ product = null }) {
     setUploading(true);
     for (const file of files) {
       try {
-        const url = await uploadProductImage(file);
+        const url = await uploadProductImage(file, settings.imgbbApiKey);
         setImages((prev) => [...prev, url]);
       } catch (err) {
         toast.error(`${file.name}: ${err.message}`);
@@ -255,8 +257,14 @@ export default function ProductForm({ product = null }) {
       <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-card">
         <h2 className="mb-1 font-display text-lg font-semibold">Product Images *</h2>
         <p className="mb-4 text-xs text-neutral-500">
-          Paste image links (e.g. from imgbb.com — use the “Direct link”), or
-          upload files directly. The first image is the main image.
+          Upload photos (they’re shrunk automatically for fast loading) or paste
+          image links. The first image is the main image.
+          {!settings.imgbbApiKey && (
+            <span className="mt-1 block text-amber-600">
+              Tip: add a free ImgBB key in the “Images &amp; Categories” tab so the
+              upload button works — until then, paste image links.
+            </span>
+          )}
         </p>
 
         {/* Option 1: paste an image link (works with any free image host) */}
