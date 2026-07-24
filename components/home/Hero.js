@@ -95,10 +95,12 @@ export default function Hero({ featured }) {
                 className="h-full w-full object-cover"
               />
             ) : (
-              <div className="marble flex h-full w-full items-center justify-center">
-                <span className="font-display text-7xl font-bold text-gold-gradient">
-                  LP
-                </span>
+              <div className="marble flex h-full w-full items-center justify-center p-8">
+                <img
+                  src="/images/hero-devices.webp"
+                  alt="Smartphones, laptop, smart watches and headphones"
+                  className="h-full w-full object-contain drop-shadow-[0_35px_45px_rgba(0,0,0,0.55)]"
+                />
               </div>
             )}
 
