@@ -4,18 +4,21 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const LINKS = [
-  { href: '/', label: 'Home' },
-  { href: '/products', label: 'Products' },
-  { href: '/about', label: 'About Us' },
-  { href: '/contact', label: 'Contact' },
-  { href: '/track-order', label: 'Track Order' },
-];
+import { useLanguage } from '@/context/LanguageContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const { t } = useLanguage();
+
+  const LINKS = [
+    { href: '/', label: t('nav.home') },
+    { href: '/products', label: t('nav.products') },
+    { href: '/about', label: t('nav.about') },
+    { href: '/contact', label: t('nav.contact') },
+    { href: '/track-order', label: t('nav.trackOrder') },
+  ];
 
   return (
     <header className="sticky top-0 z-50 border-b border-neutral-200/80 bg-white/90 backdrop-blur">
@@ -46,22 +49,26 @@ export default function Navbar() {
           ))}
         </div>
 
-        <div className="hidden md:block">
+        <div className="hidden items-center gap-3 md:flex">
+          <LanguageSwitcher />
           <Link href="/products" className="btn-dark !px-5 !py-2.5">
-            Shop Now
+            {t('nav.shopNow')}
           </Link>
         </div>
 
-        {/* Mobile hamburger */}
-        <button
-          className="flex h-10 w-10 flex-col items-center justify-center gap-1.5 md:hidden"
-          onClick={() => setOpen(!open)}
-          aria-label="Toggle menu"
-        >
-          <span className={`h-0.5 w-6 bg-neutral-900 transition ${open ? 'translate-y-2 rotate-45' : ''}`} />
-          <span className={`h-0.5 w-6 bg-neutral-900 transition ${open ? 'opacity-0' : ''}`} />
-          <span className={`h-0.5 w-6 bg-neutral-900 transition ${open ? '-translate-y-2 -rotate-45' : ''}`} />
-        </button>
+        {/* Mobile: language switcher + hamburger */}
+        <div className="flex items-center gap-2 md:hidden">
+          <LanguageSwitcher />
+          <button
+            className="flex h-10 w-10 flex-col items-center justify-center gap-1.5"
+            onClick={() => setOpen(!open)}
+            aria-label="Toggle menu"
+          >
+            <span className={`h-0.5 w-6 bg-neutral-900 transition ${open ? 'translate-y-2 rotate-45' : ''}`} />
+            <span className={`h-0.5 w-6 bg-neutral-900 transition ${open ? 'opacity-0' : ''}`} />
+            <span className={`h-0.5 w-6 bg-neutral-900 transition ${open ? '-translate-y-2 -rotate-45' : ''}`} />
+          </button>
+        </div>
       </nav>
 
       {/* Mobile menu */}
@@ -94,7 +101,7 @@ export default function Navbar() {
                 onClick={() => setOpen(false)}
                 className="btn-dark mt-2 w-full"
               >
-                Shop Now
+                {t('nav.shopNow')}
               </Link>
             </div>
           </motion.div>

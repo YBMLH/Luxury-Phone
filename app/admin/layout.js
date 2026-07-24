@@ -8,26 +8,29 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
-
-const NAV = [
-  { href: '/admin', label: 'Dashboard', icon: '📊' },
-  { href: '/admin/products', label: 'Products', icon: '📦' },
-  { href: '/admin/orders', label: 'Orders', icon: '🧾' },
-  { href: '/admin/customers', label: 'Customers', icon: '👥' },
-  { href: '/admin/settings', label: 'Site Content', icon: '✏️' },
-];
+import { useLanguage } from '@/context/LanguageContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function AdminLayout({ children }) {
   const { user, admin, loading, logout } = useAuth();
+  const { t } = useLanguage();
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const NAV = [
+    { href: '/admin', label: t('admin.layout.dashboard'), icon: '📊' },
+    { href: '/admin/products', label: t('admin.layout.products'), icon: '📦' },
+    { href: '/admin/orders', label: t('admin.layout.orders'), icon: '🧾' },
+    { href: '/admin/customers', label: t('admin.layout.customers'), icon: '👥' },
+    { href: '/admin/settings', label: t('admin.layout.settings'), icon: '✏️' },
+  ];
 
   const isLoginPage = pathname === '/admin/login';
 
   async function handleLogout() {
     await logout();
-    toast.success('Logged out');
+    toast.success(t('admin.layout.loggedOut'));
     router.push('/admin/login');
   }
 
@@ -45,26 +48,27 @@ export default function AdminLayout({ children }) {
   if (!user || !admin) {
     return (
       <div className="marble flex min-h-screen flex-col items-center justify-center px-4 text-center">
+        <div className="absolute right-4 top-4">
+          <LanguageSwitcher dark />
+        </div>
         <p className="text-5xl">🔒</p>
         <h1 className="mt-4 font-display text-2xl font-bold text-white">
-          Admin Access Only
+          {t('admin.layout.adminOnly')}
         </h1>
         <p className="mt-2 max-w-sm text-sm text-neutral-400">
-          {user
-            ? 'Your account is not registered as an administrator.'
-            : 'Please sign in to access the dashboard.'}
+          {user ? t('admin.layout.notAdmin') : t('admin.layout.pleaseSignIn')}
         </p>
         <div className="mt-6 flex gap-3">
           {user ? (
-            <button onClick={handleLogout} className="btn-gold">Sign Out</button>
+            <button onClick={handleLogout} className="btn-gold">{t('admin.layout.signOut')}</button>
           ) : (
-            <Link href="/admin/login" className="btn-gold">Go to Login</Link>
+            <Link href="/admin/login" className="btn-gold">{t('admin.layout.goToLogin')}</Link>
           )}
           <Link
             href="/"
             className="inline-flex items-center rounded-lg border border-gold/50 px-6 py-3 text-sm font-semibold text-gold-300 hover:bg-gold/10"
           >
-            Back to Store
+            {t('admin.layout.backToStore')}
           </Link>
         </div>
       </div>
@@ -105,17 +109,20 @@ export default function AdminLayout({ children }) {
           ))}
         </nav>
         <div className="absolute bottom-0 w-full space-y-1 border-t border-white/10 p-4">
+          <div className="px-4 pb-2">
+            <LanguageSwitcher dark />
+          </div>
           <Link
             href="/"
             className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm text-neutral-300 hover:bg-white/5"
           >
-            🏬 View Store
+            🏬 {t('admin.layout.viewStore')}
           </Link>
           <button
             onClick={handleLogout}
             className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm text-red-300 hover:bg-red-500/10"
           >
-            🚪 Logout
+            🚪 {t('admin.layout.logout')}
           </button>
         </div>
       </aside>
@@ -135,12 +142,14 @@ export default function AdminLayout({ children }) {
             className="rounded-lg border border-neutral-300 px-3 py-1.5 text-sm lg:hidden"
             onClick={() => setMenuOpen(true)}
           >
-            ☰ Menu
+            ☰ {t('admin.layout.menu')}
           </button>
           <div className="hidden text-sm text-neutral-500 lg:block">
-            Admin Dashboard
+            {t('admin.layout.adminDashboard')}
           </div>
-          <div className="text-sm text-neutral-600">{user.email}</div>
+          <div className="flex items-center gap-3">
+            <div className="text-sm text-neutral-600">{user.email}</div>
+          </div>
         </header>
         <main className="flex-1 p-4 lg:p-8">{children}</main>
       </div>

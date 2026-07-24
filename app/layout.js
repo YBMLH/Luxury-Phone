@@ -2,6 +2,7 @@ import { Inter, Space_Grotesk } from 'next/font/google';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from '@/context/AuthContext';
 import { SettingsProvider } from '@/context/SettingsContext';
+import { LanguageProvider } from '@/context/LanguageContext';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
@@ -36,20 +37,22 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
+    <html lang="fr" className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <body className="font-sans">
-        <AuthProvider>
-          <SettingsProvider>
-            {children}
-            <Toaster
-              position="top-center"
-              toastOptions={{
-                style: { background: '#0C0C0E', color: '#fff' },
-                success: { iconTheme: { primary: '#C9A227', secondary: '#000' } },
-              }}
-            />
-          </SettingsProvider>
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <SettingsProvider>
+              {children}
+              <Toaster
+                position="top-center"
+                toastOptions={{
+                  style: { background: '#0C0C0E', color: '#fff' },
+                  success: { iconTheme: { primary: '#C9A227', secondary: '#000' } },
+                }}
+              />
+            </SettingsProvider>
+          </AuthProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

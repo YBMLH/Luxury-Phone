@@ -9,8 +9,8 @@ import OrderForm from '@/components/OrderForm';
 import EmptyState from '@/components/EmptyState';
 import { DetailSkeleton } from '@/components/Skeletons';
 import { getProduct, getProducts } from '@/lib/db';
-import { categoryLabel } from '@/lib/constants';
 import { formatPrice, discountPercent } from '@/lib/utils';
+import { useLanguage } from '@/context/LanguageContext';
 
 function ZoomableImage({ src, alt }) {
   const [zoom, setZoom] = useState(false);
@@ -70,6 +70,7 @@ function OptionPicker({ label, options, value, onChange }) {
 
 export default function ProductDetailPage() {
   const { id } = useParams();
+  const { t } = useLanguage();
   const [product, setProduct] = useState(null);
   const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -111,9 +112,9 @@ export default function ProductDetailPage() {
       <div className="mx-auto max-w-3xl px-4 py-20 md:px-6">
         <EmptyState
           icon="😕"
-          title="Product not found"
-          message="This product may have been removed."
-          action={<Link href="/products" className="btn-gold">Browse Products</Link>}
+          title={t('productDetail.notFoundTitle')}
+          message={t('productDetail.notFoundMessage')}
+          action={<Link href="/products" className="btn-gold">{t('productDetail.browseProducts')}</Link>}
         />
       </div>
     );
@@ -128,9 +129,9 @@ export default function ProductDetailPage() {
     <div className="mx-auto max-w-7xl px-4 py-10 md:px-6">
       {/* Breadcrumb */}
       <nav className="mb-6 text-sm text-neutral-500">
-        <Link href="/" className="hover:text-gold-700">Home</Link>
+        <Link href="/" className="hover:text-gold-700">{t('productDetail.home')}</Link>
         <span className="mx-2">/</span>
-        <Link href="/products" className="hover:text-gold-700">Products</Link>
+        <Link href="/products" className="hover:text-gold-700">{t('productDetail.products')}</Link>
         <span className="mx-2">/</span>
         <span className="text-neutral-800">{product.name}</span>
       </nav>
@@ -179,7 +180,7 @@ export default function ProductDetailPage() {
                 {product.brand}
               </p>
               <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs text-neutral-600">
-                {categoryLabel(product.category)}
+                {t(`categories.${product.category}.label`)}
               </span>
             </div>
             <h1 className="mt-2 font-display text-3xl font-bold md:text-4xl">
@@ -197,7 +198,7 @@ export default function ProductDetailPage() {
                   {formatPrice(product.oldPrice)}
                 </span>
                 <span className="rounded-full bg-red-600 px-3 py-1 text-xs font-bold text-white">
-                  Save {discount}%
+                  {t('productDetail.save', { percent: discount })}
                 </span>
               </>
             )}
@@ -207,24 +208,24 @@ export default function ProductDetailPage() {
             inStock ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
           }`}>
             <span className={`h-2 w-2 rounded-full ${inStock ? 'bg-green-500' : 'bg-red-500'}`} />
-            {inStock ? 'In Stock — Available Now' : 'Currently Out of Stock'}
+            {inStock ? t('productDetail.inStock') : t('productDetail.outOfStock')}
           </div>
 
-          <OptionPicker label="Color" options={product.colors} value={color} onChange={setColor} />
-          <OptionPicker label="Storage" options={product.storageOptions} value={storageOpt} onChange={setStorageOpt} />
-          <OptionPicker label="RAM" options={product.ramOptions} value={ram} onChange={setRam} />
+          <OptionPicker label={t('productDetail.color')} options={product.colors} value={color} onChange={setColor} />
+          <OptionPicker label={t('productDetail.storage')} options={product.storageOptions} value={storageOpt} onChange={setStorageOpt} />
+          <OptionPicker label={t('productDetail.ram')} options={product.ramOptions} value={ram} onChange={setRam} />
 
           <button
             onClick={() => setOrderOpen(true)}
             disabled={!inStock}
             className="btn-gold w-full !py-4 !text-base sm:w-auto sm:!px-14"
           >
-            {inStock ? '🛒 Order Now — Pay on Delivery' : 'Out of Stock'}
+            {inStock ? t('productDetail.orderNow') : t('productDetail.outOfStock')}
           </button>
 
           {product.description && (
             <div>
-              <h2 className="mb-2 font-display text-lg font-semibold">Description</h2>
+              <h2 className="mb-2 font-display text-lg font-semibold">{t('productDetail.description')}</h2>
               <p className="whitespace-pre-line text-sm leading-relaxed text-neutral-600">
                 {product.description}
               </p>
@@ -233,7 +234,7 @@ export default function ProductDetailPage() {
 
           {specs.length > 0 && (
             <div>
-              <h2 className="mb-3 font-display text-lg font-semibold">Specifications</h2>
+              <h2 className="mb-3 font-display text-lg font-semibold">{t('productDetail.specifications')}</h2>
               <div className="overflow-hidden rounded-xl border border-neutral-200">
                 {specs.map((spec, i) => (
                   <div
@@ -255,7 +256,7 @@ export default function ProductDetailPage() {
       {/* Related products */}
       {related.length > 0 && (
         <div className="mt-20">
-          <h2 className="font-display text-2xl font-bold">You May Also Like</h2>
+          <h2 className="font-display text-2xl font-bold">{t('productDetail.youMayAlsoLike')}</h2>
           <div className="gold-line mt-3" />
           <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
             {related.map((p) => (

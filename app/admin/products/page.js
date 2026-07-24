@@ -4,12 +4,14 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { getProducts, deleteProduct, addProduct } from '@/lib/db';
-import { CATEGORIES, categoryLabel } from '@/lib/constants';
+import { CATEGORIES } from '@/lib/constants';
 import { formatPrice } from '@/lib/utils';
 import { TableSkeleton } from '@/components/Skeletons';
 import EmptyState from '@/components/EmptyState';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function AdminProductsPage() {
+  const { t } = useLanguage();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -19,7 +21,7 @@ export default function AdminProductsPage() {
   useEffect(() => {
     getProducts()
       .then(setProducts)
-      .catch(() => toast.error('Could not load products.'))
+      .catch(() => toast.error(t('admin.products.loadError')))
       .finally(() => setLoading(false));
   }, []);
 
@@ -37,27 +39,27 @@ export default function AdminProductsPage() {
       const { id, createdAt, updatedAt, ...data } = product;
       await addProduct({
         ...data,
-        name: `${product.name} (copy)`,
+        name: `${product.name} ${t('admin.products.copySuffix')}`,
         featured: false,
         bestseller: false,
         newArrival: false,
       });
       setProducts(await getProducts());
-      toast.success('Product duplicated — now edit the copy.');
+      toast.success(t('admin.products.duplicateSuccess'));
     } catch {
-      toast.error('Could not duplicate the product.');
+      toast.error(t('admin.products.duplicateError'));
     }
   }
 
   async function handleDelete(product) {
-    if (!confirm(`Delete "${product.name}"? This cannot be undone.`)) return;
+    if (!confirm(t('admin.products.confirmDelete', { name: product.name }))) return;
     setDeleting(product.id);
     try {
       await deleteProduct(product.id, product.images);
       setProducts((prev) => prev.filter((p) => p.id !== product.id));
-      toast.success('Product deleted.');
+      toast.success(t('admin.products.deleteSuccess'));
     } catch {
-      toast.error('Could not delete the product.');
+      toast.error(t('admin.products.deleteError'));
     } finally {
       setDeleting(null);
     }
@@ -66,20 +68,20 @@ export default function AdminProductsPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="font-display text-2xl font-bold">Products ({products.length})</h1>
+        <h1 className="font-display text-2xl font-bold">{t('admin.products.title')} ({products.length})</h1>
         <Link href="/admin/products/new" className="btn-gold !px-5 !py-2.5">
-          + Add Product
+          {t('admin.products.addProduct')}
         </Link>
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row">
-        <input type="search" className="input sm:max-w-xs" placeholder="Search products…"
+        <input type="search" className="input sm:max-w-xs" placeholder={t('admin.products.searchPlaceholder')}
           value={search} onChange={(e) => setSearch(e.target.value)} />
         <select className="input sm:max-w-xs" value={category}
           onChange={(e) => setCategory(e.target.value)}>
-          <option value="all">All Categories</option>
+          <option value="all">{t('admin.products.allCategories')}</option>
           {CATEGORIES.map((c) => (
-            <option key={c.id} value={c.id}>{c.label}</option>
+            <option key={c.id} value={c.id}>{t(`categories.${c.id}.label`)}</option>
           ))}
         </select>
       </div>
@@ -89,12 +91,10 @@ export default function AdminProductsPage() {
       ) : filtered.length === 0 ? (
         <EmptyState
           icon="📦"
-          title={products.length === 0 ? 'No products yet' : 'No matching products'}
-          message={products.length === 0
-            ? 'Add your first product to start selling.'
-            : 'Try a different search or category.'}
+          title={products.length === 0 ? t('admin.products.noProductsTitle') : t('admin.products.noMatchTitle')}
+          message={products.length === 0 ? t('admin.products.noProductsMessage') : t('admin.products.noMatchMessage')}
           action={products.length === 0 && (
-            <Link href="/admin/products/new" className="btn-gold">+ Add Product</Link>
+            <Link href="/admin/products/new" className="btn-gold">{t('admin.products.addProduct')}</Link>
           )}
         />
       ) : (
@@ -102,12 +102,12 @@ export default function AdminProductsPage() {
           <table className="w-full min-w-[720px] text-left text-sm">
             <thead className="border-b border-neutral-200 bg-neutral-50 text-xs uppercase tracking-wider text-neutral-500">
               <tr>
-                <th className="px-4 py-3">Product</th>
-                <th className="px-4 py-3">Category</th>
-                <th className="px-4 py-3">Price</th>
-                <th className="px-4 py-3">Stock</th>
-                <th className="px-4 py-3">Tags</th>
-                <th className="px-4 py-3 text-right">Actions</th>
+                <th className="px-4 py-3">{t('admin.products.product')}</th>
+                <th className="px-4 py-3">{t('admin.products.category')}</th>
+                <th className="px-4 py-3">{t('admin.products.price')}</th>
+                <th className="px-4 py-3">{t('admin.products.stock')}</th>
+                <th className="px-4 py-3">{t('admin.products.tags')}</th>
+                <th className="px-4 py-3 text-right">{t('admin.products.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
@@ -128,7 +128,7 @@ export default function AdminProductsPage() {
                     </div>
                   </td>
                   <td className="px-4 py-3 text-neutral-600">
-                    {categoryLabel(product.category)}
+                    {t(`categories.${product.category}.label`)}
                   </td>
                   <td className="px-4 py-3 font-semibold">{formatPrice(product.price)}</td>
                   <td className="px-4 py-3">
@@ -140,10 +140,10 @@ export default function AdminProductsPage() {
                         : 'bg-green-100 text-green-700'
                     }`}>
                       {Number(product.stock) <= 0
-                        ? 'Out of stock'
+                        ? t('admin.products.outOfStock')
                         : Number(product.stock) <= 3
-                        ? `⚠ Low — ${product.stock} left`
-                        : `${product.stock} in stock`}
+                        ? t('admin.products.lowStock', { count: product.stock })
+                        : t('admin.products.inStock', { count: product.stock })}
                     </span>
                   </td>
                   <td className="px-4 py-3">
@@ -157,21 +157,21 @@ export default function AdminProductsPage() {
                     <div className="flex justify-end gap-2">
                       <Link href={`/products/${product.id}`} target="_blank"
                         className="rounded-lg border border-neutral-300 px-3 py-1.5 text-xs hover:bg-neutral-100">
-                        View
+                        {t('admin.products.view')}
                       </Link>
                       <Link href={`/admin/products/${product.id}`}
                         className="rounded-lg border border-gold/50 px-3 py-1.5 text-xs text-gold-700 hover:bg-gold/10">
-                        Edit
+                        {t('admin.products.edit')}
                       </Link>
                       <button onClick={() => handleDuplicate(product)}
                         title="Create a copy of this product"
                         className="rounded-lg border border-neutral-300 px-3 py-1.5 text-xs hover:bg-neutral-100">
-                        Duplicate
+                        {t('admin.products.duplicate')}
                       </button>
                       <button onClick={() => handleDelete(product)}
                         disabled={deleting === product.id}
                         className="rounded-lg border border-red-200 px-3 py-1.5 text-xs text-red-600 hover:bg-red-50 disabled:opacity-50">
-                        {deleting === product.id ? '…' : 'Delete'}
+                        {deleting === product.id ? '…' : t('admin.products.delete')}
                       </button>
                     </div>
                   </td>

@@ -4,31 +4,32 @@ import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { getOrders, updateOrderStatus, deleteOrder } from '@/lib/db';
-import { ORDER_STATUSES, STATUS_COLORS } from '@/lib/constants';
+import { ORDER_STATUSES, STATUS_COLORS, wilayaLabel } from '@/lib/constants';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { TableSkeleton } from '@/components/Skeletons';
 import EmptyState from '@/components/EmptyState';
+import { useLanguage } from '@/context/LanguageContext';
 
-function OrderDetailModal({ order, onClose }) {
+function OrderDetailModal({ order, onClose, t, locale }) {
   if (!order) return null;
   const rows = [
-    ['Order Number', order.orderNumber],
-    ['Customer', order.customerName],
-    ['Phone', order.phone],
-    ['Second Phone', order.secondaryPhone || '—'],
-    ['Wilaya', order.wilaya],
-    ['Commune', order.commune],
-    ['Address', order.address],
-    ['Product', order.productName],
-    ['Price', formatPrice(order.price)],
-    ['Quantity', order.quantity || 1],
-    ['Delivery Fee', order.deliveryFee != null ? formatPrice(order.deliveryFee) : '—'],
-    ['Total', order.total ? formatPrice(order.total) : formatPrice(order.price)],
-    ['Color', order.color || '—'],
-    ['Storage', order.storage || '—'],
-    ['RAM', order.ram || '—'],
-    ['Notes', order.notes || '—'],
-    ['Date', formatDate(order.createdAt)],
+    [t('admin.orders.fields.orderNumber'), order.orderNumber],
+    [t('admin.orders.fields.customer'), order.customerName],
+    [t('admin.orders.fields.phone'), order.phone],
+    [t('admin.orders.fields.secondaryPhone'), order.secondaryPhone || '—'],
+    [t('admin.orders.fields.wilaya'), wilayaLabel(order.wilaya, locale)],
+    [t('admin.orders.fields.commune'), order.commune],
+    [t('admin.orders.fields.address'), order.address],
+    [t('admin.orders.fields.product'), order.productName],
+    [t('admin.orders.fields.price'), formatPrice(order.price)],
+    [t('admin.orders.fields.quantity'), order.quantity || 1],
+    [t('admin.orders.fields.deliveryFee'), order.deliveryFee != null ? formatPrice(order.deliveryFee) : '—'],
+    [t('admin.orders.fields.total'), order.total ? formatPrice(order.total) : formatPrice(order.price)],
+    [t('admin.orders.fields.color'), order.color || '—'],
+    [t('admin.orders.fields.storage'), order.storage || '—'],
+    [t('admin.orders.fields.ram'), order.ram || '—'],
+    [t('admin.orders.fields.notes'), order.notes || '—'],
+    [t('admin.orders.fields.date'), formatDate(order.createdAt)],
   ];
 
   return (
@@ -45,9 +46,9 @@ function OrderDetailModal({ order, onClose }) {
       >
         <div className="marble flex items-center justify-between rounded-t-2xl p-5">
           <div className="flex items-center gap-3">
-            <h2 className="font-display text-lg font-bold text-white">Order Details</h2>
+            <h2 className="font-display text-lg font-bold text-white">{t('admin.orders.detailsTitle')}</h2>
             <span className={`rounded-full px-3 py-1 text-xs font-semibold ${STATUS_COLORS[order.status]}`}>
-              {order.status}
+              {t(`statuses.${order.status}`)}
             </span>
           </div>
           <button onClick={onClose} className="text-2xl text-neutral-400 hover:text-white" aria-label="Close">×</button>
@@ -72,6 +73,7 @@ function OrderDetailModal({ order, onClose }) {
 }
 
 export default function AdminOrdersPage() {
+  const { t, locale } = useLanguage();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -81,7 +83,7 @@ export default function AdminOrdersPage() {
   useEffect(() => {
     getOrders()
       .then(setOrders)
-      .catch(() => toast.error('Could not load orders.'))
+      .catch(() => toast.error(t('admin.orders.loadError')))
       .finally(() => setLoading(false));
   }, []);
 
@@ -108,12 +110,12 @@ export default function AdminOrdersPage() {
     );
     try {
       await updateOrderStatus(order, status);
-      toast.success(`Order ${order.orderNumber} → ${status}`);
+      toast.success(t('admin.orders.statusUpdated', { orderNumber: order.orderNumber, status: t(`statuses.${status}`) }));
     } catch {
       setOrders((prev) =>
         prev.map((o) => (o.id === order.id ? { ...o, status: previous } : o))
       );
-      toast.error('Could not update the status.');
+      toast.error(t('admin.orders.statusError'));
     }
   }
 
@@ -156,36 +158,36 @@ export default function AdminOrdersPage() {
   }
 
   async function handleDelete(order) {
-    if (!confirm(`Delete order ${order.orderNumber}? This cannot be undone.`)) return;
+    if (!confirm(t('admin.orders.confirmDelete', { orderNumber: order.orderNumber }))) return;
     try {
       await deleteOrder(order);
       setOrders((prev) => prev.filter((o) => o.id !== order.id));
-      toast.success('Order deleted.');
+      toast.success(t('admin.orders.deleteSuccess'));
     } catch {
-      toast.error('Could not delete the order.');
+      toast.error(t('admin.orders.deleteError'));
     }
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="font-display text-2xl font-bold">Orders ({orders.length})</h1>
+        <h1 className="font-display text-2xl font-bold">{t('admin.orders.title')} ({orders.length})</h1>
         {filtered.length > 0 && (
           <button onClick={exportCsv} className="btn-outline !px-5 !py-2 !text-xs">
-            ⬇ Export CSV ({filtered.length})
+            {t('admin.orders.exportCsv')} ({filtered.length})
           </button>
         )}
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row">
         <input type="search" className="input sm:max-w-sm"
-          placeholder="Search by order #, name, phone, product…"
+          placeholder={t('admin.orders.searchPlaceholder')}
           value={search} onChange={(e) => setSearch(e.target.value)} />
         <select className="input sm:max-w-xs" value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}>
-          <option value="all">All Statuses</option>
+          <option value="all">{t('admin.orders.allStatuses')}</option>
           {ORDER_STATUSES.map((s) => (
-            <option key={s} value={s}>{s}</option>
+            <option key={s} value={s}>{t(`statuses.${s}`)}</option>
           ))}
         </select>
       </div>
@@ -195,24 +197,22 @@ export default function AdminOrdersPage() {
       ) : filtered.length === 0 ? (
         <EmptyState
           icon="🧾"
-          title={orders.length === 0 ? 'No orders yet' : 'No matching orders'}
-          message={orders.length === 0
-            ? 'Orders placed by customers will appear here instantly.'
-            : 'Try a different search or status filter.'}
+          title={orders.length === 0 ? t('admin.orders.noOrdersTitle') : t('admin.orders.noMatchTitle')}
+          message={orders.length === 0 ? t('admin.orders.noOrdersMessage') : t('admin.orders.noMatchMessage')}
         />
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-neutral-200 bg-white shadow-card">
           <table className="w-full min-w-[900px] text-left text-sm">
             <thead className="border-b border-neutral-200 bg-neutral-50 text-xs uppercase tracking-wider text-neutral-500">
               <tr>
-                <th className="px-4 py-3">Order #</th>
-                <th className="px-4 py-3">Customer</th>
-                <th className="px-4 py-3">Wilaya</th>
-                <th className="px-4 py-3">Product</th>
-                <th className="px-4 py-3">Variant</th>
-                <th className="px-4 py-3">Date</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3 text-right">Actions</th>
+                <th className="px-4 py-3">{t('admin.orders.orderNumber')}</th>
+                <th className="px-4 py-3">{t('admin.orders.customer')}</th>
+                <th className="px-4 py-3">{t('admin.orders.wilaya')}</th>
+                <th className="px-4 py-3">{t('admin.orders.product')}</th>
+                <th className="px-4 py-3">{t('admin.orders.variant')}</th>
+                <th className="px-4 py-3">{t('admin.orders.date')}</th>
+                <th className="px-4 py-3">{t('admin.orders.status')}</th>
+                <th className="px-4 py-3 text-right">{t('admin.orders.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
@@ -236,7 +236,7 @@ export default function AdminOrdersPage() {
                       </a>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-neutral-600">{order.wilaya}</td>
+                  <td className="px-4 py-3 text-neutral-600">{wilayaLabel(order.wilaya, locale)}</td>
                   <td className="max-w-[180px] px-4 py-3">
                     <p className="truncate">{order.productName}</p>
                     {(order.quantity || 1) > 1 && (
@@ -256,7 +256,7 @@ export default function AdminOrdersPage() {
                       className={`rounded-full border-0 px-3 py-1.5 text-xs font-semibold outline-none ${STATUS_COLORS[order.status]}`}
                     >
                       {ORDER_STATUSES.map((s) => (
-                        <option key={s} value={s}>{s}</option>
+                        <option key={s} value={s}>{t(`statuses.${s}`)}</option>
                       ))}
                     </select>
                   </td>
@@ -264,11 +264,11 @@ export default function AdminOrdersPage() {
                     <div className="flex justify-end gap-2">
                       <button onClick={() => setSelected(order)}
                         className="rounded-lg border border-neutral-300 px-3 py-1.5 text-xs hover:bg-neutral-100">
-                        View
+                        {t('admin.orders.view')}
                       </button>
                       <button onClick={() => handleDelete(order)}
                         className="rounded-lg border border-red-200 px-3 py-1.5 text-xs text-red-600 hover:bg-red-50">
-                        Delete
+                        {t('admin.orders.delete')}
                       </button>
                     </div>
                   </td>
@@ -280,7 +280,7 @@ export default function AdminOrdersPage() {
       )}
 
       <AnimatePresence>
-        {selected && <OrderDetailModal order={selected} onClose={() => setSelected(null)} />}
+        {selected && <OrderDetailModal order={selected} onClose={() => setSelected(null)} t={t} locale={locale} />}
       </AnimatePresence>
     </div>
   );

@@ -11,10 +11,12 @@ import Reviews from '@/components/home/Reviews';
 import ContactSection from '@/components/home/ContactSection';
 import { ProductGridSkeleton } from '@/components/Skeletons';
 import { getProducts } from '@/lib/db';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function HomePage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguage();
 
   useEffect(() => {
     getProducts()
@@ -43,13 +45,13 @@ export default function HomePage() {
       ) : (
         <>
           <ProductRow
-            title="This season's essentials"
+            title={t('productRow.essentialsTitle')}
             products={essentials}
             viewAllHref="/products"
           />
           <ProductRow
-            title="New arrivals"
-            subtitle="The latest releases, fresh in our showroom."
+            title={t('productRow.newArrivalsTitle')}
+            subtitle={t('productRow.newArrivalsSubtitle')}
             products={newArrivals}
             viewAllHref="/products"
           />
@@ -60,8 +62,8 @@ export default function HomePage() {
 
       {!loading && (
         <ProductRow
-          title="Best sellers"
-          subtitle="The products our customers love the most."
+          title={t('productRow.bestSellersTitle')}
+          subtitle={t('productRow.bestSellersSubtitle')}
           products={bestSellers}
           viewAllHref="/products"
         />

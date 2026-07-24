@@ -3,17 +3,19 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useSettings } from '@/context/SettingsContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { formatPrice } from '@/lib/utils';
-
-const STATS = [
-  { value: '100%', label: 'Genuine products' },
-  { value: '58', label: 'Wilayas delivered' },
-  { value: '2', label: 'Branches in Guelma' },
-];
 
 export default function Hero({ featured }) {
   const { settings } = useSettings();
+  const { t } = useLanguage();
   const hero = settings.heroContent;
+
+  const STATS = [
+    { value: '100%', label: t('hero.stats.genuine') },
+    { value: '58', label: t('hero.stats.wilayas') },
+    { value: '2', label: t('hero.stats.branches') },
+  ];
 
   return (
     <section className="overflow-hidden">

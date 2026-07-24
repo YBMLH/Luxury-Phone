@@ -2,33 +2,19 @@
 
 import Link from 'next/link';
 import { useSettings } from '@/context/SettingsContext';
-
-const PERKS = [
-  {
-    icon: '🚚',
-    title: 'Delivery to 58 wilayas',
-    text: 'Fast shipping, pay on delivery.',
-  },
-  {
-    icon: '✅',
-    title: '100% genuine products',
-    text: 'Official warranty on every device.',
-  },
-  {
-    icon: '📦',
-    title: 'Order tracking',
-    text: 'Follow your order at every step.',
-  },
-  {
-    icon: '🏬',
-    title: '2 branches in Guelma',
-    text: 'Visit us — advice in person, free.',
-  },
-];
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function Footer() {
   const { settings } = useSettings();
+  const { t } = useLanguage();
   const { socialLinks } = settings;
+
+  const PERKS = [
+    { icon: '🚚', title: t('footer.perks.deliveryTitle'), text: t('footer.perks.deliveryText') },
+    { icon: '✅', title: t('footer.perks.genuineTitle'), text: t('footer.perks.genuineText') },
+    { icon: '📦', title: t('footer.perks.trackingTitle'), text: t('footer.perks.trackingText') },
+    { icon: '🏬', title: t('footer.perks.branchesTitle'), text: t('footer.perks.branchesText') },
+  ];
 
   return (
     <footer className="border-t border-neutral-200 bg-white">
@@ -56,15 +42,15 @@ export default function Footer() {
             </span>
             <span className="font-display text-sm font-bold">Luxury Phone</span>
             <span className="text-xs text-neutral-400">
-              © {new Date().getFullYear()} — Guelma, Algeria
+              © {new Date().getFullYear()} {t('footer.rights')} — Guelma, Algeria
             </span>
           </div>
 
           <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-medium text-neutral-600">
-            <Link href="/products" className="hover:text-gold-600">Products</Link>
-            <Link href="/track-order" className="hover:text-gold-600">Track Order</Link>
-            <Link href="/about" className="hover:text-gold-600">About Us</Link>
-            <Link href="/contact" className="hover:text-gold-600">Contact</Link>
+            <Link href="/products" className="hover:text-gold-600">{t('footer.products')}</Link>
+            <Link href="/track-order" className="hover:text-gold-600">{t('footer.trackOrder')}</Link>
+            <Link href="/about" className="hover:text-gold-600">{t('footer.about')}</Link>
+            <Link href="/contact" className="hover:text-gold-600">{t('footer.contact')}</Link>
             {socialLinks.facebook && (
               <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-700">
                 Facebook

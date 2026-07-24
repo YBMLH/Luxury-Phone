@@ -5,8 +5,10 @@
 import Link from 'next/link';
 import ProductCard from '@/components/ProductCard';
 import AnimateIn from '@/components/AnimateIn';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function ProductRow({ title, subtitle, products, viewAllHref }) {
+  const { t } = useLanguage();
   if (!products.length) return null;
 
   return (
@@ -24,7 +26,7 @@ export default function ProductRow({ title, subtitle, products, viewAllHref }) {
               href={viewAllHref}
               className="text-sm font-semibold text-gold-600 transition hover:text-gold-700"
             >
-              View all products →
+              {t('common.viewAllProducts')}
             </Link>
           )}
         </div>

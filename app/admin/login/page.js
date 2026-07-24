@@ -5,9 +5,12 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
 import { checkRateLimit } from '@/lib/utils';
+import { useLanguage } from '@/context/LanguageContext';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function AdminLoginPage() {
   const { user, admin, loading, login } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,17 +24,17 @@ export default function AdminLoginPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     if (!email.trim() || !password) {
-      return toast.error('Please enter your email and password.');
+      return toast.error(t('admin.login.errors.missing'));
     }
 
     // Basic rate limiting: max 1 attempt per 3 seconds from this browser.
     const rate = checkRateLimit('login', 3);
-    if (!rate.allowed) return toast.error('Too many attempts. Please wait.');
+    if (!rate.allowed) return toast.error(t('admin.login.errors.rateLimit'));
 
     setSubmitting(true);
     try {
       await login(email.trim(), password);
-      toast.success('Welcome back!');
+      toast.success(t('admin.login.welcome'));
       router.replace('/admin');
     } catch (err) {
       // Show the real reason so problems are easy to diagnose.
@@ -42,7 +45,7 @@ export default function AdminLoginPage() {
           { duration: 10000 }
         );
       } else if (code.includes('too-many-requests')) {
-        toast.error('Too many failed attempts. Try again later.');
+        toast.error(t('admin.login.errors.tooMany'));
       } else if (code.includes('network-request-failed')) {
         toast.error('Network error — check your internet connection.');
       } else if (
@@ -51,7 +54,7 @@ export default function AdminLoginPage() {
         code.includes('user-not-found') ||
         code.includes('invalid-email')
       ) {
-        toast.error('Invalid email or password.');
+        toast.error(t('admin.login.errors.invalid'));
       } else {
         toast.error(`Login failed: ${code || 'unknown error'}`, { duration: 8000 });
       }
@@ -62,13 +65,16 @@ export default function AdminLoginPage() {
 
   return (
     <div className="marble flex min-h-screen items-center justify-center px-4">
+      <div className="absolute right-4 top-4">
+        <LanguageSwitcher dark />
+      </div>
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <p className="font-display text-3xl font-bold text-gold-gradient">
             Luxury Phone
           </p>
           <p className="mt-2 text-sm uppercase tracking-[0.3em] text-neutral-400">
-            Admin Dashboard
+            {t('admin.login.title')}
           </p>
         </div>
 
@@ -78,7 +84,7 @@ export default function AdminLoginPage() {
         >
           <div>
             <label className="mb-1.5 block text-sm font-medium text-neutral-200">
-              Email
+              {t('admin.login.email')}
             </label>
             <input
               className="input"
@@ -91,7 +97,7 @@ export default function AdminLoginPage() {
           </div>
           <div>
             <label className="mb-1.5 block text-sm font-medium text-neutral-200">
-              Password
+              {t('admin.login.password')}
             </label>
             <input
               className="input"
@@ -103,10 +109,10 @@ export default function AdminLoginPage() {
             />
           </div>
           <button type="submit" disabled={submitting} className="btn-gold w-full">
-            {submitting ? 'Signing in…' : 'Sign In'}
+            {submitting ? t('admin.login.signingIn') : t('admin.login.signIn')}
           </button>
           <p className="text-center text-xs text-neutral-500">
-            Access is restricted to registered administrators.
+            {t('admin.login.restricted')}
           </p>
         </form>
       </div>

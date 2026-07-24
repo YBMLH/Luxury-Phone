@@ -2,6 +2,7 @@
 
 import AnimateIn from '@/components/AnimateIn';
 import { useSettings } from '@/context/SettingsContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 function Stars({ count }) {
   return (
@@ -14,13 +15,14 @@ function Stars({ count }) {
 
 export default function Reviews() {
   const { settings } = useSettings();
+  const { t } = useLanguage();
   if (!settings.reviews.length) return null;
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-14 md:px-6">
       <AnimateIn>
         <h2 className="mb-8 font-display text-3xl font-bold tracking-tight md:text-4xl">
-          What our customers say
+          {t('reviews.heading')}
         </h2>
       </AnimateIn>
       <div className="grid gap-5 md:grid-cols-3">

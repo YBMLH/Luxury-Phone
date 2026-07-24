@@ -7,21 +7,23 @@ import CategoryIcon from '@/components/CategoryIcon';
 import SectionHeading from '@/components/SectionHeading';
 import AnimateIn from '@/components/AnimateIn';
 import { useSettings } from '@/context/SettingsContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 // Large gold-and-black luxury category cards, shown on the homepage.
 // Each card can optionally show a product photo as its background
 // (set per category in Admin → Site Content → Images & Categories).
 export default function Categories({ products = [] }) {
   const { settings } = useSettings();
+  const { t } = useLanguage();
   const countFor = (id) => products.filter((p) => p.category === id).length;
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-16 md:px-6">
       <AnimateIn>
         <SectionHeading
-          eyebrow="Browse"
-          title="Shop by Category"
-          subtitle="Discover our full range of premium electronics."
+          eyebrow={t('categoriesSection.eyebrow')}
+          title={t('categoriesSection.title')}
+          subtitle={t('categoriesSection.subtitle')}
         />
       </AnimateIn>
 
@@ -59,18 +61,20 @@ export default function Categories({ products = [] }) {
                     </span>
                     {count > 0 && (
                       <span className="rounded-full bg-gold/15 px-3 py-1 text-xs font-semibold text-gold-300">
-                        {count} item{count > 1 ? 's' : ''}
+                        {t('categoriesSection.items', { count, plural: count > 1 ? 's' : '' })}
                       </span>
                     )}
                   </div>
 
                   <div className="relative mt-6">
                     <h3 className="font-display text-xl font-bold text-white">
-                      {cat.label}
+                      {t(`categories.${cat.id}.label`) || cat.label}
                     </h3>
-                    <p className="mt-1 text-sm text-neutral-400">{cat.subtitle}</p>
+                    <p className="mt-1 text-sm text-neutral-400">
+                      {t(`categories.${cat.id}.subtitle`) || cat.subtitle}
+                    </p>
                     <span className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-gold px-4 py-2 text-xs font-bold text-neutral-900 transition group-hover:gap-2.5">
-                      Shop Now
+                      {t('common.shopNow')}
                       <span aria-hidden="true">→</span>
                     </span>
                   </div>

@@ -4,12 +4,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { getCustomers, getOrdersByPhone } from '@/lib/db';
-import { STATUS_COLORS } from '@/lib/constants';
+import { STATUS_COLORS, wilayaLabel } from '@/lib/constants';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { TableSkeleton } from '@/components/Skeletons';
 import EmptyState from '@/components/EmptyState';
+import { useLanguage } from '@/context/LanguageContext';
 
-function HistoryModal({ customer, onClose }) {
+function HistoryModal({ customer, onClose, t, locale }) {
   const [orders, setOrders] = useState(null);
 
   useEffect(() => {
@@ -36,19 +37,19 @@ function HistoryModal({ customer, onClose }) {
               {customer.fullName}
             </h2>
             <p className="text-xs text-neutral-400">
-              {customer.phone} — {customer.wilaya}
+              {customer.phone} — {wilayaLabel(customer.wilaya, locale)}
             </p>
           </div>
           <button onClick={onClose} className="text-2xl text-neutral-400 hover:text-white" aria-label="Close">×</button>
         </div>
         <div className="p-5">
           <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">
-            Order History
+            {t('admin.customers.orderHistory')}
           </h3>
           {orders === null ? (
             <TableSkeleton rows={3} />
           ) : orders.length === 0 ? (
-            <p className="text-sm text-neutral-500">No orders found.</p>
+            <p className="text-sm text-neutral-500">{t('admin.customers.noOrders')}</p>
           ) : (
             <ul className="space-y-3">
               {orders.map((order) => (
@@ -63,7 +64,7 @@ function HistoryModal({ customer, onClose }) {
                   <div className="shrink-0 text-right">
                     <p className="font-semibold">{formatPrice(order.price)}</p>
                     <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${STATUS_COLORS[order.status]}`}>
-                      {order.status}
+                      {t(`statuses.${order.status}`)}
                     </span>
                   </div>
                 </li>
@@ -77,6 +78,7 @@ function HistoryModal({ customer, onClose }) {
 }
 
 export default function AdminCustomersPage() {
+  const { t, locale } = useLanguage();
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -85,7 +87,7 @@ export default function AdminCustomersPage() {
   useEffect(() => {
     getCustomers()
       .then(setCustomers)
-      .catch(() => toast.error('Could not load customers.'))
+      .catch(() => toast.error(t('admin.customers.loadError')))
       .finally(() => setLoading(false));
   }, []);
 
@@ -99,10 +101,10 @@ export default function AdminCustomersPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-display text-2xl font-bold">Customers ({customers.length})</h1>
+      <h1 className="font-display text-2xl font-bold">{t('admin.customers.title')} ({customers.length})</h1>
 
       <input type="search" className="input sm:max-w-sm"
-        placeholder="Search by name, phone or wilaya…"
+        placeholder={t('admin.customers.searchPlaceholder')}
         value={search} onChange={(e) => setSearch(e.target.value)} />
 
       {loading ? (
@@ -110,20 +112,20 @@ export default function AdminCustomersPage() {
       ) : filtered.length === 0 ? (
         <EmptyState
           icon="👥"
-          title={customers.length === 0 ? 'No customers yet' : 'No matching customers'}
-          message="Customers are added automatically when they place their first order."
+          title={customers.length === 0 ? t('admin.customers.noCustomersTitle') : t('admin.customers.noMatchTitle')}
+          message={t('admin.customers.noCustomersMessage')}
         />
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-neutral-200 bg-white shadow-card">
           <table className="w-full min-w-[640px] text-left text-sm">
             <thead className="border-b border-neutral-200 bg-neutral-50 text-xs uppercase tracking-wider text-neutral-500">
               <tr>
-                <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3">Phone</th>
-                <th className="px-4 py-3">Wilaya</th>
-                <th className="px-4 py-3">Orders</th>
-                <th className="px-4 py-3">Last Order</th>
-                <th className="px-4 py-3 text-right">Actions</th>
+                <th className="px-4 py-3">{t('admin.customers.name')}</th>
+                <th className="px-4 py-3">{t('admin.customers.phone')}</th>
+                <th className="px-4 py-3">{t('admin.customers.wilaya')}</th>
+                <th className="px-4 py-3">{t('admin.customers.orders')}</th>
+                <th className="px-4 py-3">{t('admin.customers.lastOrder')}</th>
+                <th className="px-4 py-3 text-right">{t('admin.customers.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
@@ -131,7 +133,7 @@ export default function AdminCustomersPage() {
                 <tr key={customer.id} className="hover:bg-neutral-50">
                   <td className="px-4 py-3 font-medium">{customer.fullName}</td>
                   <td className="px-4 py-3 text-neutral-600">{customer.phone}</td>
-                  <td className="px-4 py-3 text-neutral-600">{customer.wilaya}</td>
+                  <td className="px-4 py-3 text-neutral-600">{wilayaLabel(customer.wilaya, locale)}</td>
                   <td className="px-4 py-3">
                     <span className="rounded-full bg-gold/15 px-2.5 py-0.5 text-xs font-semibold text-gold-700">
                       {customer.ordersCount || 0}
@@ -143,7 +145,7 @@ export default function AdminCustomersPage() {
                   <td className="px-4 py-3 text-right">
                     <button onClick={() => setSelected(customer)}
                       className="rounded-lg border border-gold/50 px-3 py-1.5 text-xs text-gold-700 hover:bg-gold/10">
-                      Order History
+                      {t('admin.customers.orderHistory')}
                     </button>
                   </td>
                 </tr>
@@ -154,7 +156,7 @@ export default function AdminCustomersPage() {
       )}
 
       <AnimatePresence>
-        {selected && <HistoryModal customer={selected} onClose={() => setSelected(null)} />}
+        {selected && <HistoryModal customer={selected} onClose={() => setSelected(null)} t={t} locale={locale} />}
       </AnimatePresence>
     </div>
   );

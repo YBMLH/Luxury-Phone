@@ -8,6 +8,7 @@ import { addProduct, updateProduct, uploadProductImage } from '@/lib/db';
 import { CATEGORIES } from '@/lib/constants';
 import { sanitizeText } from '@/lib/utils';
 import { useSettings } from '@/context/SettingsContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 const EMPTY = {
   name: '',
@@ -23,7 +24,7 @@ const EMPTY = {
 };
 
 // Editable list of free-text values (colors, storage options, RAM options).
-function TagListInput({ label, placeholder, values, onChange }) {
+function TagListInput({ label, placeholder, values, onChange, addLabel }) {
   const [draft, setDraft] = useState('');
 
   function add() {
@@ -50,7 +51,7 @@ function TagListInput({ label, placeholder, values, onChange }) {
           }}
         />
         <button type="button" onClick={add} className="btn-dark !px-4 !py-2">
-          Add
+          {addLabel}
         </button>
       </div>
       {values.length > 0 && (
@@ -80,6 +81,7 @@ function TagListInput({ label, placeholder, values, onChange }) {
 export default function ProductForm({ product = null }) {
   const router = useRouter();
   const { settings } = useSettings();
+  const { t } = useLanguage();
   const editing = Boolean(product);
 
   const [form, setForm] = useState(
@@ -132,7 +134,7 @@ export default function ProductForm({ product = null }) {
   function addImageUrl() {
     const url = imageUrl.trim();
     if (!/^https:\/\/.+\..+/i.test(url)) {
-      return toast.error('Please paste a valid image link (it starts with https://).');
+      return toast.error(t('admin.productForm.errors.imageUrl'));
     }
     if (!images.includes(url)) setImages([...images, url]);
     setImageUrl('');
@@ -145,14 +147,14 @@ export default function ProductForm({ product = null }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!form.name.trim()) return toast.error('Product name is required.');
-    if (!form.brand.trim()) return toast.error('Brand is required.');
+    if (!form.name.trim()) return toast.error(t('admin.productForm.errors.name'));
+    if (!form.brand.trim()) return toast.error(t('admin.productForm.errors.brand'));
     const price = Number(form.price);
-    if (!price || price <= 0) return toast.error('Please enter a valid price.');
+    if (!price || price <= 0) return toast.error(t('admin.productForm.errors.price'));
     if (form.oldPrice && Number(form.oldPrice) <= price) {
-      return toast.error('Old price must be higher than the current price.');
+      return toast.error(t('admin.productForm.errors.oldPrice'));
     }
-    if (images.length === 0) return toast.error('Please upload at least one image.');
+    if (images.length === 0) return toast.error(t('admin.productForm.errors.images'));
 
     const data = {
       name: sanitizeText(form.name, 150),
@@ -176,15 +178,15 @@ export default function ProductForm({ product = null }) {
     try {
       if (editing) {
         await updateProduct(product.id, data);
-        toast.success('Product updated!');
+        toast.success(t('admin.productForm.updateSuccess'));
       } else {
         await addProduct(data);
-        toast.success('Product added!');
+        toast.success(t('admin.productForm.addSuccess'));
       }
       router.push('/admin/products');
     } catch (err) {
       console.error(err);
-      toast.error('Could not save the product. Please try again.');
+      toast.error(t('admin.productForm.errors.saveFailed'));
       setSaving(false);
     }
   }
@@ -193,55 +195,55 @@ export default function ProductForm({ product = null }) {
     <form onSubmit={handleSubmit} className="max-w-3xl space-y-8">
       {/* Basic info */}
       <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-card">
-        <h2 className="mb-4 font-display text-lg font-semibold">Basic Information</h2>
+        <h2 className="mb-4 font-display text-lg font-semibold">{t('admin.productForm.basicInfo')}</h2>
         <div className="space-y-4">
           <div>
-            <label className="label">Product Name *</label>
+            <label className="label">{t('admin.productForm.productName')} *</label>
             <input className="input" value={form.name} onChange={set('name')}
-              placeholder="e.g. iPhone 16 Pro Max" />
+              placeholder={t('admin.productForm.productNamePlaceholder')} />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="label">Brand *</label>
+              <label className="label">{t('admin.productForm.brand')} *</label>
               <input className="input" value={form.brand} onChange={set('brand')}
-                placeholder="e.g. Apple" />
+                placeholder={t('admin.productForm.brandPlaceholder')} />
             </div>
             <div>
-              <label className="label">Category *</label>
+              <label className="label">{t('admin.productForm.category')} *</label>
               <select className="input" value={form.category} onChange={set('category')}>
                 {CATEGORIES.map((c) => (
-                  <option key={c.id} value={c.id}>{c.label}</option>
+                  <option key={c.id} value={c.id}>{t(`categories.${c.id}.label`)}</option>
                 ))}
               </select>
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
-              <label className="label">Price (DA) *</label>
+              <label className="label">{t('admin.productForm.price')} *</label>
               <input className="input" type="number" min="0" value={form.price}
                 onChange={set('price')} placeholder="150000" />
             </div>
             <div>
-              <label className="label">Old Price (optional)</label>
+              <label className="label">{t('admin.productForm.oldPrice')}</label>
               <input className="input" type="number" min="0" value={form.oldPrice}
-                onChange={set('oldPrice')} placeholder="Shows a discount badge" />
+                onChange={set('oldPrice')} placeholder={t('admin.productForm.oldPriceHint')} />
             </div>
             <div>
-              <label className="label">Stock Quantity *</label>
+              <label className="label">{t('admin.productForm.stock')} *</label>
               <input className="input" type="number" min="0" value={form.stock}
                 onChange={set('stock')} placeholder="10" />
             </div>
           </div>
           <div>
-            <label className="label">Description</label>
+            <label className="label">{t('admin.productForm.description')}</label>
             <textarea className="input" rows={5} value={form.description}
-              onChange={set('description')} placeholder="Describe the product…" />
+              onChange={set('description')} placeholder={t('admin.productForm.descriptionPlaceholder')} />
           </div>
           <div className="flex flex-wrap gap-6 pt-2">
             {[
-              ['featured', '⭐ Featured'],
-              ['bestseller', '🏆 Best Seller'],
-              ['newArrival', '🆕 New Arrival'],
+              ['featured', t('admin.productForm.featured')],
+              ['bestseller', t('admin.productForm.bestseller')],
+              ['newArrival', t('admin.productForm.newArrival')],
             ].map(([field, label]) => (
               <label key={field} className="flex items-center gap-2 text-sm font-medium">
                 <input type="checkbox" checked={form[field]} onChange={set(field)}
@@ -255,21 +257,18 @@ export default function ProductForm({ product = null }) {
 
       {/* Images */}
       <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-card">
-        <h2 className="mb-1 font-display text-lg font-semibold">Product Images *</h2>
+        <h2 className="mb-1 font-display text-lg font-semibold">{t('admin.productForm.productImages')} *</h2>
         <p className="mb-4 text-xs text-neutral-500">
-          Upload photos (they’re shrunk automatically for fast loading) or paste
-          image links. The first image is the main image.
+          {t('admin.productForm.imagesHint')}
           {settings.imageHost === 'cloudinary' &&
             !settings.cloudinary?.cloudName && (
               <span className="mt-1 block text-amber-600">
-                Cloudinary isn’t set up yet — fill it in under “Images &amp; Categories”,
-                or switch storage to “In my database”.
+                {t('admin.productForm.cloudinaryNotSetUp')}
               </span>
             )}
           {settings.imageHost === 'imgbb' && !settings.imgbbApiKey && (
             <span className="mt-1 block text-amber-600">
-              No ImgBB key yet — add it under “Images &amp; Categories”, or switch
-              storage to “In my database”.
+              {t('admin.productForm.imgbbNotSetUp')}
             </span>
           )}
         </p>
@@ -279,7 +278,7 @@ export default function ProductForm({ product = null }) {
           <input
             className="input"
             type="url"
-            placeholder="https://i.ibb.co/…  (paste image link, then click Add)"
+            placeholder={t('admin.productForm.pasteImageLink')}
             value={imageUrl}
             onChange={(e) => setImageUrl(e.target.value)}
             onKeyDown={(e) => {
@@ -290,18 +289,18 @@ export default function ProductForm({ product = null }) {
             }}
           />
           <button type="button" onClick={addImageUrl} className="btn-dark !px-5 !py-2">
-            Add
+            {t('admin.productForm.add')}
           </button>
         </div>
 
-        {/* Option 2: direct file upload (ImgBB key or Firebase Storage) */}
+        {/* Option 2: direct file upload */}
         <label className="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-neutral-300 py-8 text-center transition hover:border-gold hover:bg-gold/5">
           <span className="text-3xl">🖼️</span>
           <span className="mt-2 text-sm font-medium text-neutral-600">
-            {uploading ? 'Uploading…' : 'Or click to upload images'}
+            {uploading ? t('admin.productForm.uploading') : t('admin.productForm.orClickToUpload')}
           </span>
           <span className="mt-1 text-xs text-neutral-400">
-            JPG, PNG or WebP — max 5 MB each
+            {t('admin.productForm.fileHint')}
           </span>
           <input type="file" accept="image/jpeg,image/png,image/webp" multiple
             className="hidden" onChange={handleUpload} disabled={uploading} />
@@ -315,20 +314,20 @@ export default function ProductForm({ product = null }) {
                 }`} />
                 {i === 0 && (
                   <span className="absolute left-1 top-1 rounded bg-gold px-1.5 py-0.5 text-[10px] font-bold text-black">
-                    MAIN
+                    {t('admin.productForm.main')}
                   </span>
                 )}
                 <div className="absolute inset-0 hidden items-center justify-center gap-1 rounded-lg bg-black/60 group-hover:flex">
                   {i !== 0 && (
                     <button type="button" onClick={() => makeMain(i)}
                       className="rounded bg-gold px-2 py-1 text-[10px] font-bold text-black">
-                      Main
+                      {t('admin.productForm.setMain')}
                     </button>
                   )}
                   <button type="button"
                     onClick={() => setImages(images.filter((_, x) => x !== i))}
                     className="rounded bg-red-600 px-2 py-1 text-[10px] font-bold text-white">
-                    Delete
+                    {t('admin.productForm.delete')}
                   </button>
                 </div>
               </div>
@@ -339,40 +338,40 @@ export default function ProductForm({ product = null }) {
 
       {/* Variants */}
       <section className="space-y-5 rounded-2xl border border-neutral-200 bg-white p-6 shadow-card">
-        <h2 className="font-display text-lg font-semibold">Variants (optional)</h2>
-        <TagListInput label="Available Colors" placeholder="e.g. Titanium Black"
-          values={colors} onChange={setColors} />
-        <TagListInput label="Storage Options" placeholder="e.g. 256 GB"
-          values={storageOptions} onChange={setStorageOptions} />
-        <TagListInput label="RAM Options" placeholder="e.g. 12 GB"
-          values={ramOptions} onChange={setRamOptions} />
+        <h2 className="font-display text-lg font-semibold">{t('admin.productForm.variants')}</h2>
+        <TagListInput label={t('admin.productForm.availableColors')} placeholder={t('admin.productForm.colorPlaceholder')}
+          values={colors} onChange={setColors} addLabel={t('admin.productForm.add')} />
+        <TagListInput label={t('admin.productForm.storageOptions')} placeholder={t('admin.productForm.storagePlaceholder')}
+          values={storageOptions} onChange={setStorageOptions} addLabel={t('admin.productForm.add')} />
+        <TagListInput label={t('admin.productForm.ramOptions')} placeholder={t('admin.productForm.ramPlaceholder')}
+          values={ramOptions} onChange={setRamOptions} addLabel={t('admin.productForm.add')} />
       </section>
 
       {/* Specifications */}
       <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-card">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-display text-lg font-semibold">Specifications</h2>
+          <h2 className="font-display text-lg font-semibold">{t('admin.productForm.specifications')}</h2>
           <button type="button" onClick={() => setSpecs([...specs, { key: '', value: '' }])}
             className="btn-outline !px-4 !py-1.5 !text-xs">
-            + Add Row
+            {t('admin.productForm.addRow')}
           </button>
         </div>
         {specs.length === 0 && (
           <p className="text-sm text-neutral-500">
-            Add rows like “Screen — 6.7&quot; OLED 120Hz”, “Battery — 5000 mAh”…
+            {t('admin.productForm.specsHint')}
           </p>
         )}
         <div className="space-y-3">
           {specs.map((spec, i) => (
             <div key={i} className="flex gap-2">
-              <input className="input !w-1/3" placeholder="Name (e.g. Screen)"
+              <input className="input !w-1/3" placeholder={t('admin.productForm.specKeyPlaceholder')}
                 value={spec.key}
                 onChange={(e) => {
                   const next = [...specs];
                   next[i] = { ...next[i], key: e.target.value };
                   setSpecs(next);
                 }} />
-              <input className="input flex-1" placeholder="Value (e.g. 6.7″ OLED)"
+              <input className="input flex-1" placeholder={t('admin.productForm.specValuePlaceholder')}
                 value={spec.value}
                 onChange={(e) => {
                   const next = [...specs];
@@ -390,11 +389,11 @@ export default function ProductForm({ product = null }) {
 
       <div className="flex gap-3">
         <button type="submit" disabled={saving || uploading} className="btn-gold flex-1 sm:flex-none sm:!px-12">
-          {saving ? 'Saving…' : editing ? 'Save Changes' : 'Add Product'}
+          {saving ? t('admin.productForm.saving') : editing ? t('admin.productForm.saveChanges') : t('admin.productForm.addProduct')}
         </button>
         <button type="button" onClick={() => router.push('/admin/products')}
           className="btn-outline">
-          Cancel
+          {t('admin.productForm.cancel')}
         </button>
       </div>
     </form>

@@ -3,9 +3,10 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { formatPrice, discountPercent } from '@/lib/utils';
-import { categoryLabel } from '@/lib/constants';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function ProductCard({ product }) {
+  const { t } = useLanguage();
   const discount = discountPercent(product.price, product.oldPrice);
   const image = product.images?.[0];
   const outOfStock = Number(product.stock) <= 0;
@@ -39,12 +40,12 @@ export default function ProductCard({ product }) {
             )}
             {product.newArrival && (
               <span className="rounded-full bg-gold px-2.5 py-1 text-xs font-bold text-black">
-                NEW
+                {t('productDetail.newBadge') || 'NEW'}
               </span>
             )}
             {product.bestseller && (
               <span className="rounded-full bg-neutral-950 px-2.5 py-1 text-xs font-bold text-gold-300">
-                BEST SELLER
+                {t('productDetail.bestSellerBadge') || 'BEST SELLER'}
               </span>
             )}
           </div>
@@ -52,7 +53,7 @@ export default function ProductCard({ product }) {
           {outOfStock && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/55">
               <span className="rounded-full border border-white/40 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-white">
-                Out of stock
+                {t('productDetail.outOfStock')}
               </span>
             </div>
           )}
@@ -60,7 +61,7 @@ export default function ProductCard({ product }) {
 
         <div className="p-5">
           <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-gold-600">
-            {categoryLabel(product.category)}
+            {t(`categories.${product.category}.label`)}
           </p>
           <div className="mt-1.5 flex items-start justify-between gap-3">
             <h3 className="line-clamp-2 min-h-[2.6rem] font-display text-base font-bold leading-snug">
@@ -79,7 +80,7 @@ export default function ProductCard({ product }) {
           </div>
           <div className="mt-3 flex items-center justify-between">
             <p className="text-xs text-neutral-500">{product.brand}</p>
-            <span className="chip-dark">Order →</span>
+            <span className="chip-dark">{t('productDetail.orderChip')}</span>
           </div>
         </div>
       </Link>

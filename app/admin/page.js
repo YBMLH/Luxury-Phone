@@ -7,6 +7,8 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { getOrders, getProducts, getCustomers, getSettings } from '@/lib/db';
 import { TableSkeleton } from '@/components/Skeletons';
+import { useLanguage } from '@/context/LanguageContext';
+import { wilayaLabel } from '@/lib/constants';
 
 function StatCard({ icon, label, value, accent = false }) {
   return (
@@ -30,7 +32,7 @@ function MonthlyChart({ data }) {
       <div className="flex h-48 items-end gap-3">
         {data.map((d) => (
           <div key={d.label} className="group flex flex-1 flex-col items-center justify-end"
-               title={`${d.label}: ${d.count} orders`}>
+               title={`${d.label}: ${d.count}`}>
             <span className="mb-1 text-xs font-semibold text-neutral-700">{d.count}</span>
             <div
               className="w-full max-w-[48px] rounded-t bg-gold-600 transition group-hover:bg-gold-500"
@@ -51,6 +53,7 @@ function MonthlyChart({ data }) {
 }
 
 export default function AdminDashboard() {
+  const { t, locale } = useLanguage();
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -127,16 +130,16 @@ export default function AdminDashboard() {
       link.download = `luxury-phone-backup-${new Date().toISOString().slice(0, 10)}.json`;
       link.click();
       URL.revokeObjectURL(link.href);
-      toast.success('Backup downloaded — keep it somewhere safe.');
+      toast.success(t('admin.dashboard.backupSuccess'));
     } catch {
-      toast.error('Could not create the backup.');
+      toast.error(t('admin.dashboard.backupError'));
     }
   }
 
   if (loading) {
     return (
       <div>
-        <h1 className="mb-6 font-display text-2xl font-bold">Dashboard</h1>
+        <h1 className="mb-6 font-display text-2xl font-bold">{t('admin.dashboard.title')}</h1>
         <TableSkeleton rows={5} />
       </div>
     );
@@ -145,13 +148,13 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="font-display text-2xl font-bold">Dashboard</h1>
+        <h1 className="font-display text-2xl font-bold">{t('admin.dashboard.title')}</h1>
         <div className="flex flex-wrap gap-3">
           <button onClick={downloadBackup} className="btn-outline !px-5 !py-2.5 !text-xs">
-            ⬇ Download Backup
+            {t('admin.dashboard.downloadBackup')}
           </button>
           <Link href="/admin/products/new" className="btn-gold !px-5 !py-2.5">
-            + Add Product
+            {t('admin.dashboard.addProduct')}
           </Link>
         </div>
       </div>
@@ -163,25 +166,26 @@ export default function AdminDashboard() {
         >
           <span className="text-xl">⚠️</span>
           <span>
-            <strong>{lowStock.length}</strong> product{lowStock.length > 1 ? 's are' : ' is'} almost
-            out of stock ({lowStock.slice(0, 3).map((p) => p.name).join(', ')}
-            {lowStock.length > 3 ? '…' : ''}) — click to review.
+            {t('admin.dashboard.lowStockWarning', {
+              count: lowStock.length,
+              names: lowStock.slice(0, 3).map((p) => p.name).join(', ') + (lowStock.length > 3 ? '…' : ''),
+            })}
           </span>
         </Link>
       )}
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard icon="📦" label="Total Products" value={products.length} accent />
-        <StatCard icon="🧾" label="Total Orders" value={orders.length} />
-        <StatCard icon="⏳" label="Pending Orders" value={stats.pending} />
-        <StatCard icon="✅" label="Delivered Orders" value={stats.delivered} />
+        <StatCard icon="📦" label={t('admin.dashboard.totalProducts')} value={products.length} accent />
+        <StatCard icon="🧾" label={t('admin.dashboard.totalOrders')} value={orders.length} />
+        <StatCard icon="⏳" label={t('admin.dashboard.pendingOrders')} value={stats.pending} />
+        <StatCard icon="✅" label={t('admin.dashboard.deliveredOrders')} value={stats.delivered} />
       </div>
 
       {/* Monthly chart */}
       <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-card">
         <h2 className="mb-6 font-display text-lg font-semibold">
-          Orders — Last 6 Months
+          {t('admin.dashboard.monthlyOrders')}
         </h2>
         <MonthlyChart data={stats.months} />
       </div>
@@ -189,14 +193,14 @@ export default function AdminDashboard() {
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Orders by wilaya */}
         <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-card">
-          <h2 className="mb-4 font-display text-lg font-semibold">Orders by Wilaya</h2>
+          <h2 className="mb-4 font-display text-lg font-semibold">{t('admin.dashboard.ordersByWilaya')}</h2>
           {stats.topWilayas.length === 0 ? (
-            <p className="text-sm text-neutral-500">No orders yet.</p>
+            <p className="text-sm text-neutral-500">{t('admin.dashboard.noOrders')}</p>
           ) : (
             <ul className="space-y-3">
               {stats.topWilayas.map(([wilaya, count]) => (
                 <li key={wilaya} className="flex items-center gap-3 text-sm">
-                  <span className="w-32 shrink-0 truncate font-medium">{wilaya}</span>
+                  <span className="w-32 shrink-0 truncate font-medium">{wilayaLabel(wilaya, locale)}</span>
                   <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-neutral-100">
                     <div
                       className="h-full rounded-full bg-gold-600"
@@ -212,16 +216,16 @@ export default function AdminDashboard() {
 
         {/* Most ordered products */}
         <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-card">
-          <h2 className="mb-4 font-display text-lg font-semibold">Most Ordered Products</h2>
+          <h2 className="mb-4 font-display text-lg font-semibold">{t('admin.dashboard.topProducts')}</h2>
           {stats.topProducts.length === 0 ? (
-            <p className="text-sm text-neutral-500">No orders yet.</p>
+            <p className="text-sm text-neutral-500">{t('admin.dashboard.noOrders')}</p>
           ) : (
             <ul className="space-y-3">
               {stats.topProducts.map(([name, count]) => (
                 <li key={name} className="flex items-center justify-between gap-3 text-sm">
                   <span className="truncate">{name}</span>
                   <span className="rounded-full bg-gold/15 px-3 py-0.5 font-semibold text-gold-700">
-                    {count} order{count > 1 ? 's' : ''}
+                    {count} {count > 1 ? t('admin.dashboard.orders') : t('admin.dashboard.order')}
                   </span>
                 </li>
               ))}

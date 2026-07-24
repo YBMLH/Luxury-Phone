@@ -2,18 +2,20 @@
 
 import AnimateIn from '@/components/AnimateIn';
 import { useSettings } from '@/context/SettingsContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function Locations() {
   const { settings } = useSettings();
+  const { t } = useLanguage();
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-14 md:px-6">
       <AnimateIn>
         <h2 className="mb-2 font-display text-3xl font-bold tracking-tight md:text-4xl">
-          Our store locations
+          {t('locations.heading')}
         </h2>
         <p className="mb-8 text-sm text-neutral-500">
-          Two branches in Guelma, ready to welcome you.
+          {t('locations.subtitle')}
         </p>
       </AnimateIn>
       <div className="grid gap-6 md:grid-cols-2">

@@ -7,17 +7,19 @@ import EmptyState from '@/components/EmptyState';
 import { ProductGridSkeleton } from '@/components/Skeletons';
 import { getProducts } from '@/lib/db';
 import { CATEGORIES } from '@/lib/constants';
-
-const PRICE_RANGES = [
-  { id: 'all', label: 'Any Price' },
-  { id: '0-20000', label: 'Under 20 000 DA' },
-  { id: '20000-60000', label: '20 000 — 60 000 DA' },
-  { id: '60000-150000', label: '60 000 — 150 000 DA' },
-  { id: '150000-99999999', label: 'Over 150 000 DA' },
-];
+import { useLanguage } from '@/context/LanguageContext';
 
 function ProductsContent() {
   const searchParams = useSearchParams();
+  const { t } = useLanguage();
+
+  const PRICE_RANGES = [
+    { id: 'all', label: t('productsPage.anyPrice') },
+    { id: '0-20000', label: t('productsPage.priceRanges.under20') },
+    { id: '20000-60000', label: t('productsPage.priceRanges.r20to60') },
+    { id: '60000-150000', label: t('productsPage.priceRanges.r60to150') },
+    { id: '150000-99999999', label: t('productsPage.priceRanges.over150') },
+  ];
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -68,7 +70,7 @@ function ProductsContent() {
     <div className="mx-auto max-w-7xl px-4 py-10 md:px-6">
       <div className="mb-8">
         <h1 className="font-display text-4xl font-bold tracking-tight md:text-5xl">
-          Our <span className="text-gold-gradient">products.</span>
+          {t('productsPage.title')}<span className="text-gold-gradient">{t('productsPage.titleAccent')}</span>
         </h1>
       </div>
 
@@ -76,19 +78,19 @@ function ProductsContent() {
       <div className="mb-8 grid gap-3 rounded-[1.75rem] border border-neutral-200 bg-white p-4 shadow-sm md:grid-cols-5">
         <input
           type="search"
-          placeholder="Search products…"
+          placeholder={t('productsPage.searchPlaceholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="input md:col-span-2"
         />
         <select value={category} onChange={(e) => setCategory(e.target.value)} className="input">
-          <option value="all">All Categories</option>
+          <option value="all">{t('productsPage.allCategories')}</option>
           {CATEGORIES.map((c) => (
-            <option key={c.id} value={c.id}>{c.label}</option>
+            <option key={c.id} value={c.id}>{t(`categories.${c.id}.label`)}</option>
           ))}
         </select>
         <select value={brand} onChange={(e) => setBrand(e.target.value)} className="input">
-          <option value="all">All Brands</option>
+          <option value="all">{t('productsPage.allBrands')}</option>
           {brands.map((b) => (
             <option key={b} value={b}>{b}</option>
           ))}
@@ -99,9 +101,9 @@ function ProductsContent() {
           ))}
         </select>
         <select value={sort} onChange={(e) => setSort(e.target.value)} className="input md:col-span-2">
-          <option value="newest">Sort: Newest first</option>
-          <option value="price-asc">Sort: Price low → high</option>
-          <option value="price-desc">Sort: Price high → low</option>
+          <option value="newest">{t('productsPage.sortNewest')}</option>
+          <option value="price-asc">{t('productsPage.sortPriceAsc')}</option>
+          <option value="price-desc">{t('productsPage.sortPriceDesc')}</option>
         </select>
         <label className="flex items-center gap-2 text-sm text-neutral-700 md:col-span-3">
           <input
@@ -110,7 +112,7 @@ function ProductsContent() {
             onChange={(e) => setFeaturedOnly(e.target.checked)}
             className="h-4 w-4 accent-gold"
           />
-          Featured products only
+          {t('productsPage.featuredOnly')}
         </label>
       </div>
 
@@ -119,13 +121,13 @@ function ProductsContent() {
       ) : filtered.length === 0 ? (
         <EmptyState
           icon="🔍"
-          title="No products found"
-          message="Try a different search or remove some filters."
+          title={t('productsPage.emptyTitle')}
+          message={t('productsPage.emptyMessage')}
         />
       ) : (
         <>
           <p className="mb-4 text-sm text-neutral-500">
-            {filtered.length} product{filtered.length > 1 ? 's' : ''} found
+            {t('productsPage.resultsCount', { count: filtered.length, plural: filtered.length > 1 ? 's' : '' })}
           </p>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
             {filtered.map((product) => (

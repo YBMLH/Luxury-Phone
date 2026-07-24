@@ -1,35 +1,37 @@
 'use client';
 
 import { useSettings } from '@/context/SettingsContext';
+import { useLanguage } from '@/context/LanguageContext';
 import Locations from '@/components/home/Locations';
 import AnimateIn from '@/components/AnimateIn';
 
 export default function ContactPage() {
   const { settings } = useSettings();
+  const { t } = useLanguage();
   const { contactInfo, socialLinks } = settings;
 
   const cards = [
     contactInfo.phone && {
       icon: '📞',
-      title: 'Call Us',
+      title: t('contactPage.callUs'),
       value: contactInfo.phone,
       href: `tel:${contactInfo.phone}`,
     },
     contactInfo.whatsapp && {
       icon: '💬',
-      title: 'WhatsApp',
+      title: t('contactPage.whatsapp'),
       value: contactInfo.whatsapp,
       href: `https://wa.me/${contactInfo.whatsapp.replace(/\D/g, '')}`,
     },
     contactInfo.email && {
       icon: '✉️',
-      title: 'Email',
+      title: t('contactPage.email'),
       value: contactInfo.email,
       href: `mailto:${contactInfo.email}`,
     },
     contactInfo.workingHours && {
       icon: '🕐',
-      title: 'Working Hours',
+      title: t('contactPage.workingHours'),
       value: contactInfo.workingHours,
     },
   ].filter(Boolean);
@@ -39,10 +41,10 @@ export default function ContactPage() {
       <section className="border-b border-neutral-200 bg-white py-16 text-center">
         <AnimateIn className="mx-auto max-w-2xl px-4">
           <h1 className="font-display text-4xl font-bold tracking-tight md:text-6xl">
-            Contact <span className="text-gold-gradient">us.</span>
+            {t('contactPage.heading')}<span className="text-gold-gradient">{t('contactPage.headingAccent')}</span>
           </h1>
           <p className="mt-5 text-neutral-500">
-            We answer quickly — by phone, WhatsApp or in store.
+            {t('contactPage.subtitle')}
           </p>
         </AnimateIn>
       </section>
@@ -50,8 +52,7 @@ export default function ContactPage() {
       <section className="mx-auto max-w-5xl px-4 py-14 md:px-6">
         {cards.length === 0 ? (
           <p className="text-center text-sm text-neutral-500">
-            Contact details will be published soon. In the meantime, visit one
-            of our branches in Guelma below.
+            {t('contactPage.noContact')}
           </p>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2">
@@ -91,7 +92,7 @@ export default function ContactPage() {
         {(socialLinks.facebook || socialLinks.instagram || socialLinks.tiktok) && (
           <div className="mt-10 text-center">
             <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-neutral-500">
-              Follow Us
+              {t('contactPage.followUs')}
             </p>
             <div className="flex justify-center gap-3">
               {socialLinks.facebook && (

@@ -8,8 +8,9 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { createOrder } from '@/lib/db';
-import { WILAYAS } from '@/lib/constants';
+import { WILAYAS, wilayaLabel } from '@/lib/constants';
 import { useSettings } from '@/context/SettingsContext';
+import { useLanguage } from '@/context/LanguageContext';
 import {
   formatPrice,
   isValidPhone,
@@ -19,6 +20,7 @@ import {
 
 export default function OrderForm({ product, selection, open, onClose }) {
   const { settings } = useSettings();
+  const { t, locale } = useLanguage();
   const [form, setForm] = useState({
     customerName: '',
     phone: '',
@@ -44,22 +46,22 @@ export default function OrderForm({ product, selection, open, onClose }) {
     e.preventDefault();
 
     if (!form.customerName.trim() || form.customerName.trim().length < 3) {
-      return toast.error('Please enter your full name.');
+      return toast.error(t('orderForm.errors.name'));
     }
     if (!isValidPhone(form.phone)) {
-      return toast.error('Please enter a valid Algerian phone number.');
+      return toast.error(t('orderForm.errors.phone'));
     }
     if (form.secondaryPhone && !isValidPhone(form.secondaryPhone)) {
-      return toast.error('The secondary phone number is not valid.');
+      return toast.error(t('orderForm.errors.secondaryPhone'));
     }
-    if (!form.wilaya) return toast.error('Please select your wilaya.');
-    if (!form.commune.trim()) return toast.error('Please enter your commune.');
-    if (!form.address.trim()) return toast.error('Please enter your full address.');
+    if (!form.wilaya) return toast.error(t('orderForm.errors.wilaya'));
+    if (!form.commune.trim()) return toast.error(t('orderForm.errors.commune'));
+    if (!form.address.trim()) return toast.error(t('orderForm.errors.address'));
 
     // Basic anti-spam: one order per browser per 60 seconds.
     const rate = checkRateLimit('order', 60);
     if (!rate.allowed) {
-      return toast.error(`Please wait ${rate.wait}s before ordering again.`);
+      return toast.error(t('orderForm.errors.rateLimit', { seconds: rate.wait }));
     }
 
     setSubmitting(true);
@@ -78,10 +80,10 @@ export default function OrderForm({ product, selection, open, onClose }) {
         ram: selection.ram,
       });
       setOrderNumber(number);
-      toast.success('Order placed successfully!');
+      toast.success(t('orderForm.success'));
     } catch (err) {
       console.error(err);
-      toast.error('Something went wrong. Please try again.');
+      toast.error(t('orderForm.errors.generic'));
     } finally {
       setSubmitting(false);
     }
@@ -111,29 +113,27 @@ export default function OrderForm({ product, selection, open, onClose }) {
                 <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-3xl">
                   ✓
                 </div>
-                <h2 className="font-display text-2xl font-bold">Order Received!</h2>
+                <h2 className="font-display text-2xl font-bold">{t('orderForm.successTitle')}</h2>
                 <p className="mt-2 text-sm text-neutral-600">
-                  Thank you, {form.customerName.split(' ')[0]}. We will call you
-                  shortly to confirm your order.
+                  {t('orderForm.successMessage', { name: form.customerName.split(' ')[0] })}
                 </p>
                 <div className="marble mt-6 rounded-xl p-5">
                   <p className="text-xs uppercase tracking-widest text-neutral-400">
-                    Your order number
+                    {t('orderForm.orderNumberLabel')}
                   </p>
                   <p className="mt-1 font-mono text-2xl font-bold text-gold-300">
                     {orderNumber}
                   </p>
                 </div>
                 <p className="mt-3 text-xs text-neutral-500">
-                  Save this number — you can use it with your phone number to
-                  track your order at any time.
+                  {t('orderForm.saveNumber')}
                 </p>
                 <div className="mt-6 flex flex-col gap-3">
                   <Link href="/track-order" className="btn-gold w-full">
-                    Track My Order
+                    {t('orderForm.trackMyOrder')}
                   </Link>
                   <button onClick={onClose} className="btn-outline w-full">
-                    Continue Shopping
+                    {t('orderForm.continueShopping')}
                   </button>
                 </div>
               </div>
@@ -143,10 +143,10 @@ export default function OrderForm({ product, selection, open, onClose }) {
                 <div className="marble flex items-start justify-between rounded-t-2xl p-5">
                   <div>
                     <h2 className="font-display text-xl font-bold text-white">
-                      Complete Your Order
+                      {t('orderForm.title')}
                     </h2>
                     <p className="mt-1 text-xs text-neutral-400">
-                      Pay on delivery — no online payment required.
+                      {t('orderForm.subtitle')}
                     </p>
                   </div>
                   <button
@@ -173,7 +173,7 @@ export default function OrderForm({ product, selection, open, onClose }) {
                     <p className="text-xs text-neutral-500">
                       {[selection.color, selection.storage, selection.ram]
                         .filter(Boolean)
-                        .join(' · ') || 'Standard'}
+                        .join(' · ') || t('orderForm.standard')}
                     </p>
                     <p className="text-sm font-bold text-gold-700">
                       {formatPrice(product.price)}
@@ -183,52 +183,54 @@ export default function OrderForm({ product, selection, open, onClose }) {
 
                 <div className="space-y-4 p-5">
                   <div>
-                    <label className="label">Full Name *</label>
+                    <label className="label">{t('orderForm.fullName')} *</label>
                     <input className="input" value={form.customerName}
-                      onChange={set('customerName')} placeholder="e.g. Mohamed Benali" required />
+                      onChange={set('customerName')} placeholder={t('orderForm.fullNamePlaceholder')} required />
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label className="label">Phone Number *</label>
+                      <label className="label">{t('orderForm.phone')} *</label>
                       <input className="input" type="tel" value={form.phone}
                         onChange={set('phone')} placeholder="05XX XX XX XX" required />
                     </div>
                     <div>
-                      <label className="label">Second Phone (optional)</label>
+                      <label className="label">{t('orderForm.secondaryPhone')}</label>
                       <input className="input" type="tel" value={form.secondaryPhone}
                         onChange={set('secondaryPhone')} placeholder="06XX XX XX XX" />
                     </div>
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label className="label">Wilaya *</label>
+                      <label className="label">{t('orderForm.wilaya')} *</label>
                       <select className="input" value={form.wilaya} onChange={set('wilaya')} required>
-                        <option value="">Select wilaya…</option>
+                        <option value="">{t('orderForm.selectWilaya')}</option>
                         {WILAYAS.map((w, i) => (
-                          <option key={w} value={w}>{String(i + 1).padStart(2, '0')} — {w}</option>
+                          <option key={w} value={w}>
+                            {String(i + 1).padStart(2, '0')} — {wilayaLabel(w, locale)}
+                          </option>
                         ))}
                       </select>
                     </div>
                     <div>
-                      <label className="label">Commune *</label>
+                      <label className="label">{t('orderForm.commune')} *</label>
                       <input className="input" value={form.commune}
-                        onChange={set('commune')} placeholder="Your commune" required />
+                        onChange={set('commune')} placeholder={t('orderForm.communePlaceholder')} required />
                     </div>
                   </div>
                   <div>
-                    <label className="label">Full Address *</label>
+                    <label className="label">{t('orderForm.address')} *</label>
                     <input className="input" value={form.address}
-                      onChange={set('address')} placeholder="Street, building, landmarks…" required />
+                      onChange={set('address')} placeholder={t('orderForm.addressPlaceholder')} required />
                   </div>
                   <div>
-                    <label className="label">Notes (optional)</label>
+                    <label className="label">{t('orderForm.notes')}</label>
                     <textarea className="input" rows={2} value={form.notes}
-                      onChange={set('notes')} placeholder="Anything we should know?" />
+                      onChange={set('notes')} placeholder={t('orderForm.notesPlaceholder')} />
                   </div>
 
                   {/* Quantity */}
                   <div>
-                    <label className="label">Quantity</label>
+                    <label className="label">{t('orderForm.quantity')}</label>
                     <div className="inline-flex items-center gap-1 rounded-xl border border-neutral-300 p-1">
                       <button type="button" aria-label="Decrease quantity"
                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -249,26 +251,26 @@ export default function OrderForm({ product, selection, open, onClose }) {
                   {/* Order summary */}
                   <div className="space-y-2 rounded-xl bg-neutral-50 p-4 text-sm">
                     <div className="flex justify-between text-neutral-600">
-                      <span>Subtotal ({quantity} × {formatPrice(product.price)})</span>
+                      <span>{t('orderForm.subtotal')} ({quantity} × {formatPrice(product.price)})</span>
                       <span className="font-medium">{formatPrice(subtotal)}</span>
                     </div>
                     <div className="flex justify-between text-neutral-600">
-                      <span>Delivery{form.wilaya ? ` — ${form.wilaya}` : ''}</span>
+                      <span>{t('orderForm.delivery')}{form.wilaya ? ` — ${wilayaLabel(form.wilaya, locale)}` : ''}</span>
                       <span className="font-medium">
-                        {deliveryFee === null ? 'Select wilaya' : formatPrice(deliveryFee)}
+                        {deliveryFee === null ? t('orderForm.selectWilayaFirst') : formatPrice(deliveryFee)}
                       </span>
                     </div>
                     <div className="flex justify-between border-t border-neutral-200 pt-2 font-display text-base font-bold">
-                      <span>Total</span>
+                      <span>{t('orderForm.total')}</span>
                       <span className="text-gold-700">{formatPrice(total)}</span>
                     </div>
                   </div>
 
                   <button type="submit" disabled={submitting} className="btn-gold w-full !py-3.5">
-                    {submitting ? 'Placing order…' : `Confirm Order — ${formatPrice(total)}`}
+                    {submitting ? t('orderForm.placing') : `${t('orderForm.confirmOrder')} — ${formatPrice(total)}`}
                   </button>
                   <p className="text-center text-xs text-neutral-400">
-                    We will call you to confirm before shipping. Payment on delivery.
+                    {t('orderForm.disclaimer')}
                   </p>
                 </div>
               </form>
