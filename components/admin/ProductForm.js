@@ -259,10 +259,17 @@ export default function ProductForm({ product = null }) {
         <p className="mb-4 text-xs text-neutral-500">
           Upload photos (they’re shrunk automatically for fast loading) or paste
           image links. The first image is the main image.
-          {!settings.cloudinary?.cloudName && !settings.imgbbApiKey && (
+          {settings.imageHost === 'cloudinary' &&
+            !settings.cloudinary?.cloudName && (
+              <span className="mt-1 block text-amber-600">
+                Cloudinary isn’t set up yet — fill it in under “Images &amp; Categories”,
+                or switch storage to “In my database”.
+              </span>
+            )}
+          {settings.imageHost === 'imgbb' && !settings.imgbbApiKey && (
             <span className="mt-1 block text-amber-600">
-              Tip: set up free Cloudinary in the “Images &amp; Categories” tab so the
-              upload button works — until then, paste image links.
+              No ImgBB key yet — add it under “Images &amp; Categories”, or switch
+              storage to “In my database”.
             </span>
           )}
         </p>

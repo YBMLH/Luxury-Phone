@@ -211,6 +211,41 @@ export default function AdminSettingsPage() {
           <div className="space-y-8">
             <div>
               <h3 className="mb-1 font-display text-base font-semibold">
+                Where should product photos be stored?
+              </h3>
+              <p className="mb-3 text-sm text-neutral-500">
+                Pick one. “In my database” needs no setup and works right away.
+              </p>
+              <div className="space-y-2">
+                {[
+                  ['database', 'In my database (recommended — no setup, no account)',
+                    'Photos are saved straight into your Firebase database. Best for a normal catalogue; each photo is shrunk automatically.'],
+                  ['cloudinary', 'Cloudinary (free image network — fastest for big catalogues)',
+                    'Needs a free Cloudinary account + upload preset below.'],
+                  ['imgbb', 'ImgBB (free image host)',
+                    'Needs a free ImgBB key below.'],
+                ].map(([value, title, desc]) => (
+                  <label key={value}
+                    className={`flex cursor-pointer gap-3 rounded-xl border p-3 transition ${
+                      (settings.imageHost || 'database') === value
+                        ? 'border-gold bg-gold/5'
+                        : 'border-neutral-200 hover:border-neutral-300'
+                    }`}>
+                    <input type="radio" name="imageHost" value={value}
+                      checked={(settings.imageHost || 'database') === value}
+                      onChange={() => setSettings({ ...settings, imageHost: value })}
+                      className="mt-1 h-4 w-4 accent-gold" />
+                    <span>
+                      <span className="block text-sm font-semibold">{title}</span>
+                      <span className="block text-xs text-neutral-500">{desc}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className={(settings.imageHost || 'database') === 'database' ? 'opacity-50' : ''}>
+              <h3 className="mb-1 font-display text-base font-semibold">
                 Photo uploads (Cloudinary — free, no card)
               </h3>
               <p className="mb-3 text-sm text-neutral-500">
