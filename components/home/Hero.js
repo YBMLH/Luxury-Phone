@@ -87,25 +87,15 @@ export default function Hero({ featured }) {
           transition={{ duration: 0.7, delay: 0.2 }}
           className="relative"
         >
-          <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] bg-neutral-100 sm:aspect-square lg:aspect-[4/5]">
-            {featured?.images?.[0] ? (
+          {featured?.images?.[0] ? (
+            <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] bg-neutral-100 sm:aspect-square lg:aspect-[4/5]">
               <img
                 src={featured.images[0]}
                 alt={featured.name}
                 className="h-full w-full object-cover"
               />
-            ) : (
-              <div className="marble flex h-full w-full items-center justify-center p-8">
-                <img
-                  src="/images/hero-devices.webp"
-                  alt="Smartphones, laptop, smart watches and headphones"
-                  className="h-full w-full object-contain drop-shadow-[0_35px_45px_rgba(0,0,0,0.55)]"
-                />
-              </div>
-            )}
 
-            {/* Floating featured card */}
-            {featured && (
+              {/* Floating featured card */}
               <Link
                 href={`/products/${featured.id}`}
                 className="absolute inset-x-4 bottom-4 flex items-center justify-between gap-4 rounded-2xl bg-white/95 p-5 shadow-xl backdrop-blur transition hover:shadow-2xl"
@@ -122,8 +112,16 @@ export default function Hero({ featured }) {
                   {formatPrice(featured.price)}
                 </p>
               </Link>
-            )}
-          </div>
+            </div>
+          ) : (
+            // No featured product yet — show the device photo directly on
+            // the page's white background, with its own shadow for depth.
+            <img
+              src="/images/hero-devices.webp"
+              alt="Smartphones, laptop, smart watches and headphones"
+              className="mx-auto w-full max-w-md object-contain drop-shadow-[0_45px_35px_rgba(0,0,0,0.25)] sm:max-w-lg"
+            />
+          )}
         </motion.div>
       </div>
     </section>
