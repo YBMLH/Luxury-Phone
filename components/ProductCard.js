@@ -5,9 +5,8 @@ import { motion } from 'framer-motion';
 import { formatPrice, discountPercent } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
 
-// Nike-style catalogue card: no bordered/shadowed box — just a rounded
-// product photo with a plain text stack underneath (tag, name, brand,
-// price). Works as a clean 2-up grid on mobile.
+// Single rounded card (image + text as one shadowed unit) — a 2-up grid
+// on mobile, 3-4 up on larger screens.
 export default function ProductCard({ product }) {
   const { t } = useLanguage();
   const discount = discountPercent(product.price, product.oldPrice);
@@ -24,8 +23,12 @@ export default function ProductCard({ product }) {
 
   return (
     <Link href={`/products/${product.id}`} className="group block">
-      <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
-        <div className="relative aspect-square overflow-hidden rounded-2xl bg-neutral-100">
+      <motion.div
+        whileHover={{ y: -4 }}
+        transition={{ duration: 0.2 }}
+        className="overflow-hidden rounded-2xl bg-white shadow-md transition-shadow duration-300 group-hover:shadow-xl"
+      >
+        <div className="relative aspect-square overflow-hidden bg-neutral-100">
           {image ? (
             <img
               src={image}
@@ -48,7 +51,7 @@ export default function ProductCard({ product }) {
           )}
         </div>
 
-        <div className="pt-3">
+        <div className="p-3">
           {tag && (
             <p className={`text-xs font-semibold uppercase tracking-wide ${tag.className}`}>
               {tag.text}
