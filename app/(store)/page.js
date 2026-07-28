@@ -34,7 +34,7 @@ export default function HomePage() {
 
   return (
     <>
-      <Hero featured={featured[0] || products[0] || null} />
+      <Hero />
       <MarbleBanner />
       <Categories products={products} />
 
@@ -48,6 +48,7 @@ export default function HomePage() {
             title={t('productRow.essentialsTitle')}
             products={essentials}
             viewAllHref="/products"
+            layout="carousel"
           />
           <ProductRow
             title={t('productRow.newArrivalsTitle')}

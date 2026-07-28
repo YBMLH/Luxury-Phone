@@ -100,6 +100,15 @@ body {
     text-xs font-semibold text-white transition group-hover:bg-neutral-700;
 }
 
+/* Hides the scrollbar on horizontal product carousels (swipe still works) */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 10px;

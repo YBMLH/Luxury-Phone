@@ -4,9 +4,8 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useSettings } from '@/context/SettingsContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { formatPrice } from '@/lib/utils';
 
-export default function Hero({ featured }) {
+export default function Hero() {
   const { settings } = useSettings();
   const { t } = useLanguage();
   const hero = settings.heroContent;
@@ -85,33 +84,6 @@ export default function Hero({ featured }) {
             </div>
           ))}
         </motion.div>
-
-        {/* Featured product overlay card, shown once the owner marks a
-            real product as featured — floats above the background image. */}
-        {featured && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-          >
-            <Link
-              href={`/products/${featured.id}`}
-              className="mx-auto mt-10 flex max-w-sm items-center justify-between gap-4 rounded-2xl bg-white/90 p-5 text-left shadow-xl backdrop-blur transition hover:shadow-2xl"
-            >
-              <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-600">
-                  Featured
-                </p>
-                <p className="truncate font-display text-lg font-bold">
-                  {featured.name}
-                </p>
-              </div>
-              <p className="shrink-0 font-display text-lg font-bold text-gold-600">
-                {formatPrice(featured.price)}
-              </p>
-            </Link>
-          </motion.div>
-        )}
       </div>
     </section>
   );
