@@ -14,7 +14,7 @@ export default function ProductCard({ product }) {
   const outOfStock = Number(product.stock) <= 0;
 
   const tag = product.newArrival
-    ? { text: t('productDetail.newBadge') || 'NEW', className: 'text-gold-600' }
+    ? { text: t('productDetail.newBadge') || 'NEW', className: 'text-gold-700' }
     : product.bestseller
     ? { text: t('productDetail.bestSellerBadge') || 'BEST SELLER', className: 'text-neutral-900' }
     : discount > 0
@@ -22,7 +22,7 @@ export default function ProductCard({ product }) {
     : null;
 
   return (
-    <Link href={`/products/${product.id}`} className="group block">
+    <Link href={`/products/${product.slug || product.id}`} className="group block">
       <motion.div
         whileHover={{ y: -4 }}
         transition={{ duration: 0.2 }}
@@ -32,7 +32,7 @@ export default function ProductCard({ product }) {
           {image ? (
             <img
               src={image}
-              alt={product.name}
+              alt={`${product.name}${product.brand ? ` ${product.brand}` : ''} - Luxury Phone Guelma`}
               loading="lazy"
               className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
             />

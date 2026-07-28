@@ -38,9 +38,10 @@ export default function Navbar() {
             <Link
               key={link.href}
               href={link.href}
+              aria-current={pathname === link.href ? 'page' : undefined}
               className={`rounded-full px-4 py-2 text-sm font-medium transition ${
                 pathname === link.href
-                  ? 'text-gold-600'
+                  ? 'text-gold-700'
                   : 'text-neutral-600 hover:text-neutral-950'
               }`}
             >
@@ -63,6 +64,8 @@ export default function Navbar() {
             className="flex h-10 w-10 flex-col items-center justify-center gap-1.5"
             onClick={() => setOpen(!open)}
             aria-label="Toggle menu"
+            aria-expanded={open}
+            aria-controls="mobile-menu"
           >
             <span className={`h-0.5 w-6 bg-neutral-900 transition ${open ? 'translate-y-2 rotate-45' : ''}`} />
             <span className={`h-0.5 w-6 bg-neutral-900 transition ${open ? 'opacity-0' : ''}`} />
@@ -80,6 +83,7 @@ export default function Navbar() {
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25 }}
             className="overflow-hidden border-t border-neutral-200 bg-white md:hidden"
+            id="mobile-menu"
           >
             <div className="space-y-1 px-4 py-4">
               {LINKS.map((link) => (
@@ -87,6 +91,7 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setOpen(false)}
+                  aria-current={pathname === link.href ? 'page' : undefined}
                   className={`block rounded-xl px-4 py-3 text-sm font-medium ${
                     pathname === link.href
                       ? 'bg-gold/10 text-gold-700'

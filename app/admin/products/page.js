@@ -155,7 +155,7 @@ export default function AdminProductsPage() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex justify-end gap-2">
-                      <Link href={`/products/${product.id}`} target="_blank"
+                      <Link href={`/products/${product.slug || product.id}`} target="_blank"
                         className="rounded-lg border border-neutral-300 px-3 py-1.5 text-xs hover:bg-neutral-100">
                         {t('admin.products.view')}
                       </Link>

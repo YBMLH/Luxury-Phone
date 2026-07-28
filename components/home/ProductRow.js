@@ -36,7 +36,7 @@ export default function ProductRow({ title, subtitle, products, viewAllHref, lay
             {viewAllHref && (
               <Link
                 href={viewAllHref}
-                className="text-sm font-semibold text-gold-600 transition hover:text-gold-700"
+                className="text-sm font-semibold text-gold-700 transition hover:text-gold-800"
               >
                 {t('common.viewAllProducts')}
               </Link>

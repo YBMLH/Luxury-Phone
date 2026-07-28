@@ -1,14 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import ProductCard from '@/components/ProductCard';
 import OrderForm from '@/components/OrderForm';
-import EmptyState from '@/components/EmptyState';
-import { DetailSkeleton } from '@/components/Skeletons';
-import { getProduct, getProducts } from '@/lib/db';
+import Breadcrumbs from '@/components/Breadcrumbs';
 import { formatPrice, discountPercent } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -68,57 +65,13 @@ function OptionPicker({ label, options, value, onChange }) {
   );
 }
 
-export default function ProductDetailPage() {
-  const { id } = useParams();
+export default function ProductDetailClient({ product, related, breadcrumbItems }) {
   const { t } = useLanguage();
-  const [product, setProduct] = useState(null);
-  const [related, setRelated] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
-  const [color, setColor] = useState('');
-  const [storageOpt, setStorageOpt] = useState('');
-  const [ram, setRam] = useState('');
+  const [color, setColor] = useState(product.colors?.[0] || '');
+  const [storageOpt, setStorageOpt] = useState(product.storageOptions?.[0] || '');
+  const [ram, setRam] = useState(product.ramOptions?.[0] || '');
   const [orderOpen, setOrderOpen] = useState(false);
-
-  useEffect(() => {
-    if (!id) return;
-    getProduct(id)
-      .then(async (p) => {
-        setProduct(p);
-        if (p) {
-          setColor(p.colors?.[0] || '');
-          setStorageOpt(p.storageOptions?.[0] || '');
-          setRam(p.ramOptions?.[0] || '');
-          const all = await getProducts();
-          setRelated(
-            all.filter((x) => x.id !== p.id && x.category === p.category).slice(0, 4)
-          );
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [id]);
-
-  if (loading) {
-    return (
-      <div className="mx-auto max-w-7xl px-4 py-12 md:px-6">
-        <DetailSkeleton />
-      </div>
-    );
-  }
-
-  if (!product) {
-    return (
-      <div className="mx-auto max-w-3xl px-4 py-20 md:px-6">
-        <EmptyState
-          icon="😕"
-          title={t('productDetail.notFoundTitle')}
-          message={t('productDetail.notFoundMessage')}
-          action={<Link href="/products" className="btn-gold">{t('productDetail.browseProducts')}</Link>}
-        />
-      </div>
-    );
-  }
 
   const discount = discountPercent(product.price, product.oldPrice);
   const inStock = Number(product.stock) > 0;
@@ -127,14 +80,7 @@ export default function ProductDetailPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 md:px-6">
-      {/* Breadcrumb */}
-      <nav className="mb-6 text-sm text-neutral-500">
-        <Link href="/" className="hover:text-gold-700">{t('productDetail.home')}</Link>
-        <span className="mx-2">/</span>
-        <Link href="/products" className="hover:text-gold-700">{t('productDetail.products')}</Link>
-        <span className="mx-2">/</span>
-        <span className="text-neutral-800">{product.name}</span>
-      </nav>
+      <Breadcrumbs items={breadcrumbItems} />
 
       <div className="grid gap-10 lg:grid-cols-2">
         {/* Gallery */}
@@ -144,7 +90,10 @@ export default function ProductDetailPage() {
           transition={{ duration: 0.5 }}
         >
           {images[activeImage] ? (
-            <ZoomableImage src={images[activeImage]} alt={product.name} />
+            <ZoomableImage
+              src={images[activeImage]}
+              alt={`${product.name}${product.brand ? ` ${product.brand}` : ''} - Luxury Phone Guelma`}
+            />
           ) : (
             <div className="flex aspect-square items-center justify-center rounded-2xl bg-neutral-100 text-6xl text-neutral-300">
               📷
@@ -156,11 +105,17 @@ export default function ProductDetailPage() {
                 <button
                   key={i}
                   onClick={() => setActiveImage(i)}
+                  aria-label={`${t('productDetail.viewPhoto')} ${i + 1}`}
                   className={`h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 transition ${
                     activeImage === i ? 'border-gold' : 'border-neutral-200 hover:border-neutral-300'
                   }`}
                 >
-                  <img src={img} alt="" loading="lazy" className="h-full w-full object-cover" />
+                  <img
+                    src={img}
+                    alt={`${product.name} - photo ${i + 1}`}
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                  />
                 </button>
               ))}
             </div>
@@ -176,7 +131,7 @@ export default function ProductDetailPage() {
         >
           <div>
             <div className="flex items-center gap-3">
-              <p className="text-sm font-semibold uppercase tracking-widest text-gold-600">
+              <p className="text-sm font-semibold uppercase tracking-widest text-gold-700">
                 {product.brand}
               </p>
               <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs text-neutral-600">

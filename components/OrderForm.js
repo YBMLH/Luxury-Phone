@@ -98,6 +98,9 @@ export default function OrderForm({ product, selection, open, onClose }) {
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[60] flex items-end justify-center bg-black/70 p-0 sm:items-center sm:p-4"
           onClick={onClose}
+          role="dialog"
+          aria-modal="true"
+          aria-label={t('orderForm.title')}
         >
           <motion.div
             initial={{ y: 60, opacity: 0 }}

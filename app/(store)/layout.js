@@ -7,7 +7,7 @@ export default function StoreLayout({ children }) {
   return (
     <>
       <Navbar />
-      <main className="min-h-[70vh]">{children}</main>
+      <main id="main-content" className="min-h-[70vh]">{children}</main>
       <Footer />
       <WhatsAppButton />
     </>

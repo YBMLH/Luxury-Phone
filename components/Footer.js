@@ -52,17 +52,17 @@ export default function Footer() {
             <Link href="/about" className="hover:text-gold-600">{t('footer.about')}</Link>
             <Link href="/contact" className="hover:text-gold-600">{t('footer.contact')}</Link>
             {socialLinks.facebook && (
-              <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-700">
+              <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-gold-700 hover:text-gold-800">
                 Facebook
               </a>
             )}
             {socialLinks.instagram && (
-              <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-700">
+              <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-gold-700 hover:text-gold-800">
                 Instagram
               </a>
             )}
             {socialLinks.tiktok && (
-              <a href={socialLinks.tiktok} target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-700">
+              <a href={socialLinks.tiktok} target="_blank" rel="noopener noreferrer" className="text-gold-700 hover:text-gold-800">
                 TikTok
               </a>
             )}

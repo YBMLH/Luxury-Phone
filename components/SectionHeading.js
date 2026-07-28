@@ -2,7 +2,11 @@ export default function SectionHeading({ eyebrow, title, subtitle, dark = false 
   return (
     <div className="mx-auto mb-10 max-w-2xl text-center">
       {eyebrow && (
-        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.25em] text-gold-600">
+        <p
+          className={`mb-2 text-xs font-semibold uppercase tracking-[0.25em] ${
+            dark ? 'text-gold-300' : 'text-gold-700'
+          }`}
+        >
           {eyebrow}
         </p>
       )}

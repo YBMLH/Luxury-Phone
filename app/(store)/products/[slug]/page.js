@@ -1,0 +1,129 @@
+import { notFound } from 'next/navigation';
+import { getProductServer, getProductsServer } from '@/lib/serverData';
+import { formatPrice } from '@/lib/utils';
+import { translations } from '@/lib/i18n/translations';
+import ProductDetailClient from './ProductDetailClient';
+
+export const revalidate = 3600;
+
+const BASE_URL = 'https://luxury-phone.vercel.app';
+const CATEGORY_LABELS = translations.fr.categories;
+
+// Keeps titles within Google's ~60-char display limit even for long
+// product names.
+function buildTitle(name) {
+  const suffix = ' | Luxury Phone Guelma';
+  const budget = 60 - suffix.length;
+  const trimmed = name.length > budget ? `${name.slice(0, budget - 1).trimEnd()}…` : name;
+  return `${trimmed}${suffix}`;
+}
+
+// Assembles a natural 140-160 char description from real product data
+// (never keyword-stuffed boilerplate) with a location-aware close.
+function buildDescription(product, categoryLabel) {
+  const brand = product.brand ? `${product.brand} ` : '';
+  const price = formatPrice(product.price);
+  const opening = `${brand}${product.name} au meilleur prix en Algérie (${price}).`;
+  const middle = product.description
+    ? ` ${product.description.replace(/\s+/g, ' ').trim()}`
+    : categoryLabel
+    ? ` ${categoryLabel} 100% authentique, garantie officielle.`
+    : ' Produit 100% authentique, garantie officielle.';
+  const closing = ' Livraison rapide à Guelma et dans les 58 wilayas, paiement à la livraison.';
+
+  let desc = `${opening}${middle}${closing}`;
+  if (desc.length > 160) {
+    const room = 160 - opening.length - closing.length - 1;
+    const trimmedMiddle = room > 20 ? `${middle.slice(0, room).trimEnd()}…` : '';
+    desc = `${opening}${trimmedMiddle}${closing}`;
+  }
+  return desc.slice(0, 160);
+}
+
+export async function generateMetadata({ params }) {
+  const product = await getProductServer(params.slug);
+  if (!product) {
+    return { title: { absolute: 'Produit introuvable | Luxury Phone' } };
+  }
+
+  const categoryLabel = CATEGORY_LABELS[product.category]?.label;
+  const title = buildTitle(product.name);
+  const description = buildDescription(product, categoryLabel);
+  const url = `${BASE_URL}/products/${product.slug || product.id}`;
+  const image = product.images?.[0];
+
+  return {
+    title: { absolute: title },
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title,
+      description,
+      url,
+      type: 'website',
+      images: image ? [{ url: image }] : undefined,
+    },
+    twitter: {
+      card: image ? 'summary_large_image' : 'summary',
+      title,
+      description,
+      images: image ? [image] : undefined,
+    },
+  };
+}
+
+export default async function ProductDetailPage({ params }) {
+  const product = await getProductServer(params.slug);
+  if (!product) notFound();
+
+  const all = await getProductsServer();
+  const related = all
+    .filter((p) => p.id !== product.id && p.category === product.category)
+    .slice(0, 4);
+
+  const url = `${BASE_URL}/products/${product.slug || product.id}`;
+  const categoryLabel = CATEGORY_LABELS[product.category]?.label;
+
+  const productJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    image: product.images || [],
+    description: product.description || `${product.name} — ${categoryLabel || ''}`.trim(),
+    brand: product.brand ? { '@type': 'Brand', name: product.brand } : undefined,
+    sku: product.id,
+    offers: {
+      '@type': 'Offer',
+      url,
+      priceCurrency: 'DZD',
+      price: Number(product.price) || 0,
+      availability:
+        Number(product.stock) > 0
+          ? 'https://schema.org/InStock'
+          : 'https://schema.org/OutOfStock',
+      areaServed: 'DZ',
+      seller: { '@type': 'Organization', name: 'Luxury Phone' },
+    },
+  };
+
+  const breadcrumbItems = [
+    { name: 'Accueil', href: '/' },
+    { name: 'Produits', href: '/products' },
+    ...(categoryLabel ? [{ name: categoryLabel, href: `/products?category=${product.category}` }] : []),
+    { name: product.name, href: `/products/${product.slug || product.id}` },
+  ];
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
+      <ProductDetailClient
+        product={product}
+        related={related}
+        breadcrumbItems={breadcrumbItems}
+      />
+    </>
+  );
+}

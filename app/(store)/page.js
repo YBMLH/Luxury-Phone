@@ -1,78 +1,47 @@
-'use client';
+import { translations } from '@/lib/i18n/translations';
+import HomeClient from './HomeClient';
 
-import { useEffect, useState } from 'react';
-import Hero from '@/components/home/Hero';
-import ProductRow from '@/components/home/ProductRow';
-import Categories from '@/components/home/Categories';
-import WhyChooseUs from '@/components/home/WhyChooseUs';
-import Locations from '@/components/home/Locations';
-import Reviews from '@/components/home/Reviews';
-import ContactSection from '@/components/home/ContactSection';
-import { ProductGridSkeleton } from '@/components/Skeletons';
-import { getProducts } from '@/lib/db';
-import { useLanguage } from '@/context/LanguageContext';
+const BASE_URL = 'https://luxury-phone.vercel.app';
+
+const title = 'Luxury Phone — Smartphones, Laptops et Tablettes | Guelma';
+const description =
+  'Luxury Phone : smartphones, laptops, tablettes et accessoires 100% authentiques à Guelma, Algérie. Livraison dans les 58 wilayas, paiement à la livraison.';
+
+export const metadata = {
+  title: { absolute: title },
+  description,
+  alternates: { canonical: BASE_URL },
+  openGraph: {
+    title,
+    description,
+    url: BASE_URL,
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title,
+    description,
+  },
+};
 
 export default function HomePage() {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const { t } = useLanguage();
-
-  useEffect(() => {
-    getProducts()
-      .then(setProducts)
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
-
-  const featured = products.filter((p) => p.featured);
-  const newArrivals = products.filter((p) => p.newArrival);
-  const bestSellers = products.filter((p) => p.bestseller);
-  // Featured Products carousel: officially featured products, or the
-  // latest ones until the owner marks some as featured.
-  const essentials = featured.length ? featured : products;
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: translations.fr.faq.items.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: { '@type': 'Answer', text: item.a },
+    })),
+  };
 
   return (
     <>
-      <Hero />
-
-      {loading ? (
-        <div className="mx-auto max-w-7xl px-4 py-14 md:px-6">
-          <ProductGridSkeleton count={4} />
-        </div>
-      ) : (
-        <ProductRow
-          title={t('productRow.essentialsTitle')}
-          products={essentials}
-          viewAllHref="/products"
-          layout="carousel"
-        />
-      )}
-
-      <Categories products={products} />
-
-      {!loading && (
-        <ProductRow
-          title={t('productRow.newArrivalsTitle')}
-          subtitle={t('productRow.newArrivalsSubtitle')}
-          products={newArrivals}
-          viewAllHref="/products"
-        />
-      )}
-
-      <WhyChooseUs />
-
-      {!loading && (
-        <ProductRow
-          title={t('productRow.bestSellersTitle')}
-          subtitle={t('productRow.bestSellersSubtitle')}
-          products={bestSellers}
-          viewAllHref="/products"
-        />
-      )}
-
-      <Reviews />
-      <Locations />
-      <ContactSection />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+      <HomeClient />
     </>
   );
 }
