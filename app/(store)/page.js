@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Hero from '@/components/home/Hero';
-import MarbleBanner from '@/components/home/MarbleBanner';
 import ProductRow from '@/components/home/ProductRow';
 import Categories from '@/components/home/Categories';
 import WhyChooseUs from '@/components/home/WhyChooseUs';
@@ -28,35 +27,36 @@ export default function HomePage() {
   const featured = products.filter((p) => p.featured);
   const newArrivals = products.filter((p) => p.newArrival);
   const bestSellers = products.filter((p) => p.bestseller);
-  // "This season's essentials": featured products, or the latest ones
-  // until the owner marks some as featured.
+  // Featured Products carousel: officially featured products, or the
+  // latest ones until the owner marks some as featured.
   const essentials = featured.length ? featured : products;
 
   return (
     <>
       <Hero />
-      <MarbleBanner />
-      <Categories products={products} />
 
       {loading ? (
         <div className="mx-auto max-w-7xl px-4 py-14 md:px-6">
           <ProductGridSkeleton count={4} />
         </div>
       ) : (
-        <>
-          <ProductRow
-            title={t('productRow.essentialsTitle')}
-            products={essentials}
-            viewAllHref="/products"
-            layout="carousel"
-          />
-          <ProductRow
-            title={t('productRow.newArrivalsTitle')}
-            subtitle={t('productRow.newArrivalsSubtitle')}
-            products={newArrivals}
-            viewAllHref="/products"
-          />
-        </>
+        <ProductRow
+          title={t('productRow.essentialsTitle')}
+          products={essentials}
+          viewAllHref="/products"
+          layout="carousel"
+        />
+      )}
+
+      <Categories products={products} />
+
+      {!loading && (
+        <ProductRow
+          title={t('productRow.newArrivalsTitle')}
+          subtitle={t('productRow.newArrivalsSubtitle')}
+          products={newArrivals}
+          viewAllHref="/products"
+        />
       )}
 
       <WhyChooseUs />
