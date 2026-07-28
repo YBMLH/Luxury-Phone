@@ -5,6 +5,8 @@ import { AuthProvider } from '@/context/AuthContext';
 import { SettingsProvider } from '@/context/SettingsContext';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { getSettingsServer } from '@/lib/serverData';
+import { SITE_URL as BASE_URL } from '@/lib/constants';
+import { safeJsonLd } from '@/lib/utils';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
@@ -12,8 +14,6 @@ const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   variable: '--font-display',
 });
-
-const BASE_URL = 'https://luxury-phone.vercel.app';
 
 export const metadata = {
   metadataBase: new URL(BASE_URL),
@@ -86,7 +86,7 @@ export default async function RootLayout({ children }) {
           <script
             key={entry['@id']}
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(entry) }}
+            dangerouslySetInnerHTML={{ __html: safeJsonLd(entry) }}
           />
         ))}
       </head>

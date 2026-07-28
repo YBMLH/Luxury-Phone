@@ -1,7 +1,7 @@
 import { translations } from '@/lib/i18n/translations';
+import { SITE_URL as BASE_URL } from '@/lib/constants';
+import { safeJsonLd } from '@/lib/utils';
 import HomeClient from './HomeClient';
-
-const BASE_URL = 'https://luxury-phone.vercel.app';
 
 const title = 'Luxury Phone — Smartphones, Laptops et Tablettes | Guelma';
 const description =
@@ -39,7 +39,7 @@ export default function HomePage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(faqJsonLd) }}
       />
       <HomeClient />
     </>

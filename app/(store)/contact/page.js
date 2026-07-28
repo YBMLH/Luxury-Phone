@@ -1,6 +1,5 @@
+import { SITE_URL as BASE_URL } from '@/lib/constants';
 import ContactClient from './ContactClient';
-
-const BASE_URL = 'https://luxury-phone.vercel.app';
 const title = 'Contactez Luxury Phone — Magasins à Guelma, Algérie';
 const description =
   'Contactez Luxury Phone à Guelma : téléphone, WhatsApp, email et adresses de nos deux magasins. Nous répondons vite pour toute question sur nos produits.';

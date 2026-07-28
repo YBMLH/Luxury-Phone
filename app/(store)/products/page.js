@@ -1,6 +1,5 @@
+import { SITE_URL as BASE_URL } from '@/lib/constants';
 import ProductsClient from './ProductsClient';
-
-const BASE_URL = 'https://luxury-phone.vercel.app';
 const title = 'Nos Produits — Smartphones, Laptops et Accessoires';
 const description =
   'Découvrez tous les produits Luxury Phone : smartphones, laptops, tablettes et accessoires 100% authentiques. Livraison rapide à Guelma et dans toute l’Algérie.';

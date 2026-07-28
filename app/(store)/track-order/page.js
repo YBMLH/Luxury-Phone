@@ -1,6 +1,5 @@
+import { SITE_URL as BASE_URL } from '@/lib/constants';
 import TrackOrderClient from './TrackOrderClient';
-
-const BASE_URL = 'https://luxury-phone.vercel.app';
 const title = 'Suivre ma Commande en Ligne — Luxury Phone Guelma';
 const description =
   'Suivez votre commande Luxury Phone en temps réel avec votre numéro de commande et téléphone. Livraison partout en Algérie, statut mis à jour à chaque étape.';

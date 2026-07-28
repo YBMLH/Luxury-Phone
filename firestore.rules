@@ -98,5 +98,14 @@ service cloud.firestore {
       allow read: if request.auth != null && request.auth.uid == uid;
       allow write: if false;
     }
+
+    // Activity log: an immutable audit trail of admin actions. Only admins
+    // can write (the app logs its own actions) or read it; nothing may
+    // ever be edited or deleted, so the trail can't be tampered with.
+    match /activityLogs/{logId} {
+      allow create: if isAdmin();
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
   }
 }

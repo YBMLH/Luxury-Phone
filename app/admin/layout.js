@@ -23,6 +23,7 @@ export default function AdminLayout({ children }) {
     { href: '/admin/products', label: t('admin.layout.products'), icon: '📦' },
     { href: '/admin/orders', label: t('admin.layout.orders'), icon: '🧾' },
     { href: '/admin/customers', label: t('admin.layout.customers'), icon: '👥' },
+    { href: '/admin/activity', label: t('admin.layout.activity'), icon: '📜' },
     { href: '/admin/settings', label: t('admin.layout.settings'), icon: '✏️' },
   ];
 

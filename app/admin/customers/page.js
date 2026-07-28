@@ -8,7 +8,10 @@ import { STATUS_COLORS, wilayaLabel } from '@/lib/constants';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { TableSkeleton } from '@/components/Skeletons';
 import EmptyState from '@/components/EmptyState';
+import Pagination from '@/components/admin/Pagination';
 import { useLanguage } from '@/context/LanguageContext';
+
+const PAGE_SIZE = 25;
 
 function HistoryModal({ customer, onClose, t, locale }) {
   const [orders, setOrders] = useState(null);
@@ -83,6 +86,7 @@ export default function AdminCustomersPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(null);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     getCustomers()
@@ -98,6 +102,9 @@ export default function AdminCustomersPage() {
       `${c.fullName} ${c.phone} ${c.wilaya}`.toLowerCase().includes(q)
     );
   }, [customers, search]);
+
+  useEffect(() => setPage(1), [search]);
+  const pageItems = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <div className="space-y-6">
@@ -129,7 +136,7 @@ export default function AdminCustomersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
-              {filtered.map((customer) => (
+              {pageItems.map((customer) => (
                 <tr key={customer.id} className="hover:bg-neutral-50">
                   <td className="px-4 py-3 font-medium">{customer.fullName}</td>
                   <td className="px-4 py-3 text-neutral-600">{customer.phone}</td>
@@ -152,6 +159,7 @@ export default function AdminCustomersPage() {
               ))}
             </tbody>
           </table>
+          <Pagination page={page} pageSize={PAGE_SIZE} total={filtered.length} onPageChange={setPage} />
         </div>
       )}
 

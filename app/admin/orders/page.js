@@ -8,7 +8,10 @@ import { ORDER_STATUSES, STATUS_COLORS, wilayaLabel } from '@/lib/constants';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { TableSkeleton } from '@/components/Skeletons';
 import EmptyState from '@/components/EmptyState';
+import Pagination from '@/components/admin/Pagination';
 import { useLanguage } from '@/context/LanguageContext';
+
+const PAGE_SIZE = 25;
 
 function OrderDetailModal({ order, onClose, t, locale }) {
   if (!order) return null;
@@ -79,6 +82,7 @@ export default function AdminOrdersPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selected, setSelected] = useState(null);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     getOrders()
@@ -103,6 +107,9 @@ export default function AdminOrdersPage() {
     });
   }, [orders, search, statusFilter]);
 
+  useEffect(() => setPage(1), [search, statusFilter]);
+  const pageItems = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   async function handleStatusChange(order, status) {
     const previous = order.status;
     setOrders((prev) =>
@@ -122,6 +129,15 @@ export default function AdminOrdersPage() {
   // WhatsApp link for an Algerian number: replace the leading 0 with 213.
   function waLink(phone) {
     return `https://wa.me/${String(phone).replace(/^0/, '213')}`;
+  }
+
+  // Neutralizes CSV/formula injection: a customer-entered name/address/note
+  // starting with =, +, -, @ (or tab/CR) would run as a formula when the
+  // exported file is opened in Excel/Sheets, so prefix it with a plain
+  // apostrophe to force it back to text.
+  function csvSafe(value) {
+    const str = String(value ?? '');
+    return /^[=+\-@\t\r]/.test(str) ? `'${str}` : str;
   }
 
   function exportCsv() {
@@ -145,7 +161,7 @@ export default function AdminOrdersPage() {
     ]);
     const csv = [header, ...rows]
       .map((row) =>
-        row.map((cell) => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(',')
+        row.map((cell) => `"${csvSafe(cell).replace(/"/g, '""')}"`).join(',')
       )
       .join('\n');
     // ﻿ (BOM) makes Excel open the file with correct accents.
@@ -216,7 +232,7 @@ export default function AdminOrdersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
-              {filtered.map((order) => (
+              {pageItems.map((order) => (
                 <tr key={order.id} className="hover:bg-neutral-50">
                   <td className="px-4 py-3 font-mono text-xs font-semibold">
                     {order.orderNumber}
@@ -276,6 +292,7 @@ export default function AdminOrdersPage() {
               ))}
             </tbody>
           </table>
+          <Pagination page={page} pageSize={PAGE_SIZE} total={filtered.length} onPageChange={setPage} />
         </div>
       )}
 

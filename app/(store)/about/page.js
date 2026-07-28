@@ -1,6 +1,5 @@
+import { SITE_URL as BASE_URL } from '@/lib/constants';
 import AboutClient from './AboutClient';
-
-const BASE_URL = 'https://luxury-phone.vercel.app';
 const title = 'À propos de Luxury Phone — Boutique High-Tech Guelma';
 const description =
   'Luxury Phone est une boutique high-tech à Guelma, Algérie, avec deux magasins. Smartphones, laptops et accessoires 100% authentiques, garantie officielle.';

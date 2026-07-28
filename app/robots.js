@@ -1,5 +1,5 @@
 // Robots rules for search engines, served at /robots.txt.
-const BASE_URL = 'https://luxury-phone.vercel.app';
+import { SITE_URL as BASE_URL } from '@/lib/constants';
 
 export default function robots() {
   return {

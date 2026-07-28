@@ -1,7 +1,6 @@
 // Sitemap for search engines, served at /sitemap.xml.
 import { getProductsServer } from '@/lib/serverData';
-
-const BASE_URL = 'https://luxury-phone.vercel.app';
+import { SITE_URL as BASE_URL } from '@/lib/constants';
 
 export const revalidate = 3600;
 

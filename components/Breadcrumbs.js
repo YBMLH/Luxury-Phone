@@ -3,8 +3,8 @@
 // `items` is an array of { name, href } with the current page last
 // (its href is used for the schema `item` but it isn't rendered as a link).
 import Link from 'next/link';
-
-const BASE_URL = 'https://luxury-phone.vercel.app';
+import { SITE_URL as BASE_URL } from '@/lib/constants';
+import { safeJsonLd } from '@/lib/utils';
 
 export default function Breadcrumbs({ items }) {
   const jsonLd = {
@@ -40,7 +40,7 @@ export default function Breadcrumbs({ items }) {
       </nav>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
     </>
   );

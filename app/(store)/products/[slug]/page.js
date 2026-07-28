@@ -1,12 +1,12 @@
 import { notFound } from 'next/navigation';
 import { getProductServer, getProductsServer } from '@/lib/serverData';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, safeJsonLd } from '@/lib/utils';
 import { translations } from '@/lib/i18n/translations';
+import { SITE_URL as BASE_URL } from '@/lib/constants';
 import ProductDetailClient from './ProductDetailClient';
 
 export const revalidate = 3600;
 
-const BASE_URL = 'https://luxury-phone.vercel.app';
 const CATEGORY_LABELS = translations.fr.categories;
 
 // Keeps titles within Google's ~60-char display limit even for long
@@ -117,7 +117,7 @@ export default async function ProductDetailPage({ params }) {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(productJsonLd) }}
       />
       <ProductDetailClient
         product={product}
