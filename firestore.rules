@@ -29,6 +29,14 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Category background images: one small document per category, kept
+    // separate from settings/site so several of them together can never
+    // hit Firestore's 1 MiB single-document size limit.
+    match /categoryImages/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Orders: anyone can place one (with strict validation), but only
     // admins can read, change or delete them. Customer data stays private.
     // hasOnly() blocks any extra/unknown fields from being injected.

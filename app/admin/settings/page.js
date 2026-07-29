@@ -5,7 +5,7 @@
 // here and saved to the settings/site document in Firestore.
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { getSettings, saveSettings } from '@/lib/db';
+import { getSettings, saveSettings, getCategoryImages, setCategoryImage } from '@/lib/db';
 import { mergeSettings } from '@/lib/defaults';
 import { WILAYAS, CATEGORIES, wilayaLabel } from '@/lib/constants';
 import { TableSkeleton } from '@/components/Skeletons';
@@ -47,8 +47,14 @@ export default function AdminSettingsPage() {
   const f = (key) => t(`admin.settings.fields.${key}`);
 
   useEffect(() => {
-    getSettings()
-      .then((saved) => setSettings(mergeSettings(saved)))
+    Promise.all([getSettings(), getCategoryImages().catch(() => ({}))])
+      .then(([saved, categoryImages]) => {
+        const merged = mergeSettings(saved);
+        setSettings({
+          ...merged,
+          categoryImages: { ...merged.categoryImages, ...categoryImages },
+        });
+      })
       .catch(() => toast.error(t('admin.settings.loadError')));
   }, []);
 
@@ -75,10 +81,21 @@ export default function AdminSettingsPage() {
   async function handleSave() {
     setSaving(true);
     try {
-      // Light sanitization of every text field before saving.
-      const clean = JSON.parse(JSON.stringify(settings), (key, value) =>
-        typeof value === 'string' ? sanitizeText(value, 2000) : value
-      );
+      // categoryImages now lives in its own Firestore collection (each
+      // ImageInput above saves itself immediately) — excluded here so it's
+      // never duplicated back into the settings document.
+      const { categoryImages, ...toSave } = settings;
+      // Light sanitization of every text field before saving. Image
+      // sources (data: URLs or https:// links) must never be truncated —
+      // cutting a data: URL at 2000 chars corrupts the image entirely, so
+      // those are only stripped of unsafe characters, not shortened.
+      const clean = JSON.parse(JSON.stringify(toSave), (key, value) => {
+        if (typeof value !== 'string') return value;
+        if (value.startsWith('data:image') || /^https?:\/\//i.test(value)) {
+          return value.replace(/[<>]/g, '');
+        }
+        return sanitizeText(value, 2000);
+      });
       await saveSettings(clean);
       toast.success(t('admin.settings.saveSuccess'));
     } catch {
@@ -295,12 +312,20 @@ export default function AdminSettingsPage() {
                     </p>
                     <ImageInput
                       value={settings.categoryImages?.[cat.id] || ''}
-                      onChange={(url) =>
+                      onChange={async (url) => {
+                        // Saved immediately to its own document — not part
+                        // of the big "Save" button below, and never at
+                        // risk of the shared settings document's 1 MiB cap.
                         setSettings({
                           ...settings,
                           categoryImages: { ...settings.categoryImages, [cat.id]: url },
-                        })
-                      }
+                        });
+                        try {
+                          await setCategoryImage(cat.id, url);
+                        } catch {
+                          toast.error(t('admin.settings.saveError'));
+                        }
+                      }}
                     />
                   </div>
                 ))}

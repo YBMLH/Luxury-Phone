@@ -4,7 +4,7 @@
 // once per visit and shares it with every component. Falls back to the
 // defaults in lib/defaults.js until the owner saves their own content.
 import { createContext, useContext, useEffect, useState } from 'react';
-import { getSettings } from '@/lib/db';
+import { getSettings, getCategoryImages } from '@/lib/db';
 import { DEFAULT_SETTINGS, mergeSettings } from '@/lib/defaults';
 
 const SettingsContext = createContext({
@@ -17,8 +17,17 @@ export function SettingsProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getSettings()
-      .then((saved) => setSettings(mergeSettings(saved)))
+    Promise.all([getSettings(), getCategoryImages().catch(() => ({}))])
+      .then(([saved, categoryImages]) => {
+        const merged = mergeSettings(saved);
+        // The dedicated categoryImages collection is the source of truth;
+        // any legacy value still embedded in the settings document (from
+        // before it moved out) is only a fallback.
+        setSettings({
+          ...merged,
+          categoryImages: { ...merged.categoryImages, ...categoryImages },
+        });
+      })
       .catch(() => setSettings(DEFAULT_SETTINGS))
       .finally(() => setLoading(false));
   }, []);
