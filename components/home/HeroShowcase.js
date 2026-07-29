@@ -1,19 +1,28 @@
 'use client';
 
-// A 3D "coverflow" style carousel of real product photos — the active
-// card sits forward and centered, side cards tilt away in perspective.
-// Auto-advances, and can be driven by drag, arrows, or the dots.
+// A fanned trio of devices that continuously rotates: the centre device slides
+// back to one side while the next one swings forward. Each device also floats
+// on its own slow cycle so the group is never completely still.
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { formatPrice } from '@/lib/utils';
+import { motion, useReducedMotion } from 'framer-motion';
+import DeviceFrame from './DeviceFrame';
+import { formatPrice, hexToRgba } from '@/lib/utils';
+import { CATEGORY_ACCENTS } from '@/lib/constants';
 import { useLanguage } from '@/context/LanguageContext';
 
-const AUTO_ADVANCE_MS = 3200;
+const AUTO_ADVANCE_MS = 3400;
 
-// Shortest signed distance from `index` to `active` around a circle of
-// size `count` — e.g. with 5 items, the item one-before-active wraps to
-// offset -1 instead of +4, so it tilts the natural way on either side.
+// Only the three nearest devices are drawn; anything further is hidden so the
+// fan stays clean no matter how many products are featured.
+const FAN = {
+  '-1': { rotateY: 30, rotate: -8, y: 18, scale: 0.86, z: -130, opacity: 1 },
+  '0': { rotateY: 0, rotate: 0, y: 0, scale: 1, z: 0, opacity: 1 },
+  '1': { rotateY: -30, rotate: 8, y: 18, scale: 0.86, z: -130, opacity: 1 },
+};
+
+// Shortest signed distance around the ring, so the item just before the active
+// one sits on the left rather than wrapping all the way around to the right.
 function signedOffset(index, active, count) {
   let offset = index - active;
   if (offset > count / 2) offset -= count;
@@ -23,24 +32,36 @@ function signedOffset(index, active, count) {
 
 export default function HeroShowcase({ products }) {
   const { t } = useLanguage();
+  const reduceMotion = useReducedMotion();
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [compact, setCompact] = useState(true);
   const dragStartX = useRef(null);
   const count = products.length;
 
+  // Two sizes rather than a continuous measure — the fan only needs to fit a
+  // phone screen or a desktop column, nothing in between matters.
   useEffect(() => {
-    if (paused || count <= 1) return;
-    const id = setInterval(() => {
-      setActive((a) => (a + 1) % count);
-    }, AUTO_ADVANCE_MS);
+    const mq = window.matchMedia('(min-width: 768px)');
+    const apply = () => setCompact(!mq.matches);
+    apply();
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, []);
+
+  useEffect(() => {
+    if (paused || count <= 1 || reduceMotion) return;
+    const id = setInterval(() => setActive((a) => (a + 1) % count), AUTO_ADVANCE_MS);
     return () => clearInterval(id);
-  }, [paused, count]);
+  }, [paused, count, reduceMotion]);
 
   if (!count) return null;
 
-  function go(delta) {
-    setActive((a) => (a + delta + count) % count);
-  }
+  const spread = compact ? 74 : 104;
+  const deviceW = compact ? 116 : 150;
+  const deviceH = compact ? 232 : 300;
+
+  const go = (delta) => setActive((a) => (a + delta + count) % count);
 
   function handlePointerDown(e) {
     dragStartX.current = e.clientX;
@@ -55,88 +76,101 @@ export default function HeroShowcase({ products }) {
     setPaused(false);
   }
 
+  const activeProduct = products[active];
+
   return (
     <div
-      className="relative mx-auto h-[300px] w-full max-w-md select-none sm:h-[360px] md:h-[400px] md:max-w-lg"
-      style={{ perspective: '1400px' }}
+      className="relative mx-auto w-full max-w-md select-none"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onPointerDown={handlePointerDown}
       onPointerUp={handlePointerUp}
     >
-      {/* Soft gold glow behind the stack */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 h-52 w-52 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gold/25 blur-3xl" />
-
-      <div className="relative h-full w-full" style={{ transformStyle: 'preserve-3d' }}>
+      <div
+        className="relative"
+        style={{ perspective: '1100px', height: deviceH + 70 }}
+      >
         {products.map((product, i) => {
           const offset = signedOffset(i, active, count);
-          const isActive = offset === 0;
-          const abs = Math.abs(offset);
-          if (abs > 2) return null;
+          if (Math.abs(offset) > 1) return null;
 
-          const image = product.images?.[0];
+          const pose = FAN[String(offset)];
+          const isActive = offset === 0;
+          const accent = CATEGORY_ACCENTS[product.category] || '#C9A227';
 
           return (
             <motion.div
               key={product.id}
-              className="absolute left-1/2 top-1/2 h-[230px] w-[230px] sm:h-[280px] sm:w-[280px] md:h-[300px] md:w-[300px]"
-              style={{ transformStyle: 'preserve-3d' }}
+              className="absolute left-1/2 top-1/2"
+              style={{ width: deviceW, height: deviceH, transformStyle: 'preserve-3d' }}
               animate={{
-                x: '-50%',
-                y: '-50%',
-                translateX: offset * 92,
-                translateZ: -abs * 110,
-                rotateY: offset * -32,
-                scale: isActive ? 1 : 0.76,
-                opacity: 1,
-                zIndex: 100 - abs,
+                x: offset * spread - deviceW / 2,
+                y: pose.y - deviceH / 2,
+                z: pose.z,
+                rotateY: pose.rotateY,
+                rotate: pose.rotate,
+                scale: pose.scale,
+                zIndex: 10 - Math.abs(offset),
               }}
-              transition={{ type: 'spring', stiffness: 260, damping: 28 }}
+              transition={{ type: 'spring', stiffness: 190, damping: 26 }}
             >
-              <Link
-                href={`/products/${product.slug || product.id}`}
-                aria-hidden={!isActive}
-                tabIndex={isActive ? 0 : -1}
-                onClick={(e) => {
-                  if (!isActive) {
-                    e.preventDefault();
-                    setActive(i);
-                  }
-                }}
-                className="block h-full w-full"
+              {/* Inner wrapper owns the idle float so it doesn't fight the
+                  position spring on the outer one. */}
+              <motion.div
+                className="h-full w-full"
+                animate={reduceMotion ? {} : { y: [0, isActive ? -12 : -7, 0] }}
+                transition={
+                  reduceMotion
+                    ? {}
+                    : {
+                        duration: isActive ? 4.2 : 5.4,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                        delay: i * 0.4,
+                      }
+                }
               >
-                <motion.div
-                  animate={isActive ? { y: [0, -10, 0] } : { y: 0 }}
-                  transition={isActive ? { duration: 3.2, repeat: Infinity, ease: 'easeInOut' } : {}}
-                  className="flex h-full w-full flex-col overflow-hidden rounded-[1.75rem] bg-white shadow-2xl ring-1 ring-black/5"
+                <Link
+                  href={`/products/${product.slug || product.id}`}
+                  aria-hidden={!isActive}
+                  tabIndex={isActive ? 0 : -1}
+                  onClick={(e) => {
+                    if (!isActive) {
+                      e.preventDefault();
+                      setActive(i);
+                    }
+                  }}
+                  className="block h-full w-full rounded-[1.75rem]"
+                  style={{ boxShadow: `0 30px 60px -22px ${hexToRgba(accent, 0.75)}` }}
                 >
-                  <div className="relative flex-1 overflow-hidden bg-neutral-50">
-                    {image ? (
-                      <img
-                        src={image}
-                        alt={`${product.name} - LuxuryPhone24`}
-                        loading={isActive ? 'eager' : 'lazy'}
-                        fetchPriority={isActive ? 'high' : 'auto'}
-                        className="h-full w-full object-contain p-6"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-5xl text-neutral-300">
-                        📱
-                      </div>
-                    )}
-                  </div>
-                  {isActive && (
-                    <div className="border-t border-white/50 bg-white/55 px-4 py-3 text-center backdrop-blur-xl backdrop-saturate-150">
-                      <p className="truncate text-sm font-semibold text-neutral-900">{product.name}</p>
-                      <p className="text-sm font-bold text-gold-700">{formatPrice(product.price)}</p>
-                    </div>
-                  )}
-                </motion.div>
-              </Link>
+                  <DeviceFrame
+                    image={product.images?.[0]}
+                    alt={isActive ? `${product.name} — LuxuryPhone24` : ''}
+                    tint={`linear-gradient(155deg, #17131f, ${hexToRgba(accent, 0.75)})`}
+                    priority={i === 0}
+                  />
+                </Link>
+              </motion.div>
             </motion.div>
           );
         })}
       </div>
+
+      {/* Name + price for whichever device is forward */}
+      {activeProduct && (
+        <motion.div
+          key={activeProduct.id}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
+          className="mt-1 text-center"
+        >
+          <p className="truncate text-sm font-medium text-white/90">{activeProduct.name}</p>
+          <p className="font-display text-base font-bold text-gold-300">
+            {formatPrice(activeProduct.price)}
+          </p>
+        </motion.div>
+      )}
 
       {count > 1 && (
         <>
@@ -144,7 +178,7 @@ export default function HeroShowcase({ products }) {
             type="button"
             onClick={() => go(-1)}
             aria-label={t('hero.showcase.previous')}
-            className="glass absolute left-0 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-neutral-700 transition hover:text-gold-700 sm:flex"
+            className="absolute -left-3 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white backdrop-blur-md transition hover:bg-white/20 sm:flex"
           >
             ←
           </button>
@@ -152,12 +186,12 @@ export default function HeroShowcase({ products }) {
             type="button"
             onClick={() => go(1)}
             aria-label={t('hero.showcase.next')}
-            className="glass absolute right-0 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-neutral-700 transition hover:text-gold-700 sm:flex"
+            className="absolute -right-3 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white backdrop-blur-md transition hover:bg-white/20 sm:flex"
           >
             →
           </button>
 
-          <div className="absolute -bottom-2 left-1/2 z-20 flex -translate-x-1/2 gap-1.5">
+          <div className="mt-3 flex justify-center gap-1.5">
             {products.map((product, i) => (
               <button
                 key={product.id}
@@ -166,7 +200,7 @@ export default function HeroShowcase({ products }) {
                 aria-label={`${t('hero.showcase.goTo')} ${i + 1}`}
                 aria-current={i === active ? 'true' : undefined}
                 className={`h-1.5 rounded-full transition-all ${
-                  i === active ? 'w-5 bg-gold' : 'w-1.5 bg-neutral-300'
+                  i === active ? 'w-5 bg-gold' : 'w-1.5 bg-white/30'
                 }`}
               />
             ))}
