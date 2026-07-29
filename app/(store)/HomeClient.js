@@ -13,7 +13,7 @@ import { ProductGridSkeleton } from '@/components/Skeletons';
 import { getProducts } from '@/lib/db';
 import { useLanguage } from '@/context/LanguageContext';
 
-export default function HomeClient() {
+export default function HomeClient({ showcaseProducts = [] }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const { t } = useLanguage();
@@ -34,7 +34,7 @@ export default function HomeClient() {
 
   return (
     <>
-      <Hero />
+      <Hero showcaseProducts={showcaseProducts} />
 
       {loading ? (
         <div className="mx-auto max-w-7xl px-4 py-14 md:px-6">

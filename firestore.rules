@@ -1,6 +1,6 @@
 rules_version = '2';
 
-// Firestore security rules for Luxury Phone.
+// Firestore security rules for LuxuryPhone24.
 // Copy the whole content of this file into:
 // Firebase Console → Firestore Database → Rules → Publish
 service cloud.firestore {

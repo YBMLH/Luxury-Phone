@@ -32,7 +32,7 @@ export default function ProductCard({ product }) {
           {image ? (
             <img
               src={image}
-              alt={`${product.name}${product.brand ? ` ${product.brand}` : ''} - Luxury Phone Guelma`}
+              alt={`${product.name}${product.brand ? ` ${product.brand}` : ''} - LuxuryPhone24 Guelma`}
               loading="lazy"
               className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
             />

@@ -18,13 +18,13 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: 'Luxury Phone — Premium Electronics Store in Guelma, Algeria',
-    template: '%s | Luxury Phone',
+    default: 'LuxuryPhone24 — Premium Electronics Store in Guelma, Algeria',
+    template: '%s | LuxuryPhone24',
   },
   description:
-    'Luxury Phone — premium smartphones, laptops, tablets and accessories in Guelma, Algeria. Genuine products, fast delivery to all 58 wilayas, order tracking.',
+    'LuxuryPhone24 — premium smartphones, laptops, tablets and accessories in Guelma, Algeria. Genuine products, fast delivery to all 58 wilayas, order tracking.',
   keywords: [
-    'Luxury Phone',
+    'LuxuryPhone24',
     'Guelma',
     'Algeria',
     'smartphones',
@@ -32,7 +32,7 @@ export const metadata = {
     'electronics store',
   ],
   openGraph: {
-    title: 'Luxury Phone — Premium Electronics Store',
+    title: 'LuxuryPhone24 — Premium Electronics Store',
     description:
       'Genuine smartphones, laptops and accessories. Fast delivery across Algeria.',
     type: 'website',
@@ -54,8 +54,8 @@ export default async function RootLayout({ children }) {
     '@context': 'https://schema.org',
     '@type': 'ElectronicsStore',
     '@id': `${BASE_URL}/#store-${i + 1}`,
-    name: loc.name || 'Luxury Phone',
-    image: `${BASE_URL}/images/hero-devices.webp`,
+    name: loc.name || 'LuxuryPhone24',
+    image: `${BASE_URL}/images/logo-full.webp`,
     url: BASE_URL,
     telephone: loc.phone || settings.contactInfo?.phone || undefined,
     address: {
@@ -74,14 +74,9 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="fr" className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <head>
-        {/* Hero background is the largest above-the-fold image (LCP) on
-            the homepage, so preload it instead of waiting on the CSS. */}
-        <link
-          rel="preload"
-          as="image"
-          href="/images/hero-devices.webp"
-          fetchPriority="high"
-        />
+        {/* The homepage's hero LCP image is preloaded per-request from
+            app/(store)/page.js instead (it's dynamic — the first showcased
+            product's photo), not a fixed asset here. */}
         {localBusinessJsonLd.map((entry) => (
           <script
             key={entry['@id']}

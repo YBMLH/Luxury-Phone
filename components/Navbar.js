@@ -23,12 +23,10 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-neutral-200/80 bg-white/90 backdrop-blur">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
-        <Link href="/" className="flex items-center gap-2.5" onClick={() => setOpen(false)}>
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-950 font-display text-sm font-bold text-gold-300">
-            L
-          </span>
+        <Link href="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
+          <img src="/images/logo-icon.webp" alt="" className="h-8 w-auto md:h-9" />
           <span className="font-display text-lg font-bold tracking-tight md:text-xl">
-            Luxury Phone
+            LuxuryPhone24
           </span>
         </Link>
 

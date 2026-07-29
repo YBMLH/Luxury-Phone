@@ -1,11 +1,14 @@
 import { translations } from '@/lib/i18n/translations';
 import { SITE_URL as BASE_URL } from '@/lib/constants';
 import { safeJsonLd } from '@/lib/utils';
+import { getProductsServer } from '@/lib/serverData';
 import HomeClient from './HomeClient';
 
-const title = 'Luxury Phone — Smartphones, Laptops et Tablettes | Guelma';
+export const revalidate = 3600;
+
+const title = 'LuxuryPhone24 — Smartphones, Laptops et Tablettes | Guelma';
 const description =
-  'Luxury Phone : smartphones, laptops, tablettes et accessoires 100% authentiques à Guelma, Algérie. Livraison dans les 58 wilayas, paiement à la livraison.';
+  'LuxuryPhone24 : smartphones, laptops, tablettes et accessoires 100% authentiques à Guelma, Algérie. Livraison dans les 58 wilayas, paiement à la livraison.';
 
 export const metadata = {
   title: { absolute: title },
@@ -24,7 +27,7 @@ export const metadata = {
   },
 };
 
-export default function HomePage() {
+export default async function HomePage() {
   const faqJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -35,13 +38,27 @@ export default function HomePage() {
     })),
   };
 
+  // Fetched server-side (not in HomeClient's own client fetch) so the hero
+  // carousel has real images in the first render instead of waiting on a
+  // client-side round trip — better for LCP. Featured products first, then
+  // fill up to 6 with anything else that has a photo.
+  const allProducts = await getProductsServer();
+  const withImages = allProducts.filter((p) => p.images?.length);
+  const featured = withImages.filter((p) => p.featured);
+  const rest = withImages.filter((p) => !p.featured);
+  const showcaseProducts = [...featured, ...rest].slice(0, 6);
+  const heroImage = showcaseProducts[0]?.images?.[0];
+
   return (
     <>
+      {heroImage && (
+        <link rel="preload" as="image" href={heroImage} fetchPriority="high" />
+      )}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(faqJsonLd) }}
       />
-      <HomeClient />
+      <HomeClient showcaseProducts={showcaseProducts} />
     </>
   );
 }

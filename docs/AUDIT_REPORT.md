@@ -1,6 +1,6 @@
-# Luxury Phone — Production Readiness Audit
+# LuxuryPhone24 — Production Readiness Audit
 
-Prepared as a full-stack / security / SEO / QA / UX audit of the Luxury Phone
+Prepared as a full-stack / security / SEO / QA / UX audit of the LuxuryPhone24
 e-commerce site ahead of connecting a paid domain (**luxuryphone24.com**).
 Covers what exists today, what was fixed in this pass, and what's
 recommended before/after launch on the new domain.
@@ -15,7 +15,7 @@ Rules rather than a server-side API layer. This changes which parts of a
 
 ## 1. Project Summary
 
-Luxury Phone is a bilingual/trilingual (French default, English, Arabic)
+LuxuryPhone24 is a bilingual/trilingual (French default, English, Arabic)
 electronics storefront for a two-branch shop in Guelma, Algeria. Customers
 browse products, place cash-on-delivery orders to any of Algeria's 58
 wilayas, and track orders by order number + phone. The owner manages

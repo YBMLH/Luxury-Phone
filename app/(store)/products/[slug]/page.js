@@ -12,7 +12,7 @@ const CATEGORY_LABELS = translations.fr.categories;
 // Keeps titles within Google's ~60-char display limit even for long
 // product names.
 function buildTitle(name) {
-  const suffix = ' | Luxury Phone Guelma';
+  const suffix = ' | LuxuryPhone24 Guelma';
   const budget = 60 - suffix.length;
   const trimmed = name.length > budget ? `${name.slice(0, budget - 1).trimEnd()}…` : name;
   return `${trimmed}${suffix}`;
@@ -43,7 +43,7 @@ function buildDescription(product, categoryLabel) {
 export async function generateMetadata({ params }) {
   const product = await getProductServer(params.slug);
   if (!product) {
-    return { title: { absolute: 'Produit introuvable | Luxury Phone' } };
+    return { title: { absolute: 'Produit introuvable | LuxuryPhone24' } };
   }
 
   const categoryLabel = CATEGORY_LABELS[product.category]?.label;
@@ -102,7 +102,7 @@ export default async function ProductDetailPage({ params }) {
           ? 'https://schema.org/InStock'
           : 'https://schema.org/OutOfStock',
       areaServed: 'DZ',
-      seller: { '@type': 'Organization', name: 'Luxury Phone' },
+      seller: { '@type': 'Organization', name: 'LuxuryPhone24' },
     },
   };
 

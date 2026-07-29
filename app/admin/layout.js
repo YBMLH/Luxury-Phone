@@ -85,8 +85,11 @@ export default function AdminLayout({ children }) {
         }`}
       >
         <div className="flex h-16 items-center justify-between border-b border-gold/25 px-5">
-          <span className="font-display text-lg font-bold text-gold-gradient">
-            Luxury Phone
+          <span className="flex items-center gap-2">
+            <img src="/images/logo-icon.webp" alt="" className="h-8 w-auto" />
+            <span className="font-display text-lg font-bold text-gold-gradient">
+              LuxuryPhone24
+            </span>
           </span>
           <button className="text-neutral-400 lg:hidden" onClick={() => setMenuOpen(false)}>
             ✕

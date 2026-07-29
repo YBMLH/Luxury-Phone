@@ -70,10 +70,8 @@ export default function AdminLoginPage() {
       </div>
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <p className="font-display text-3xl font-bold text-gold-gradient">
-            Luxury Phone
-          </p>
-          <p className="mt-2 text-sm uppercase tracking-[0.3em] text-neutral-400">
+          <img src="/images/logo-full.webp" alt="LuxuryPhone24" className="mx-auto h-20 w-auto md:h-24" />
+          <p className="mt-3 text-sm uppercase tracking-[0.3em] text-neutral-400">
             {t('admin.login.title')}
           </p>
         </div>

@@ -1,6 +1,6 @@
-# Luxury Phone — Premium Electronics Store 🏆
+# LuxuryPhone24 — Premium Electronics Store 🏆
 
-A complete, production-ready e-commerce website for **Luxury Phone** (Guelma, Algeria),
+A complete, production-ready e-commerce website for **LuxuryPhone24** (Guelma, Algeria),
 built to be **free to host** and **simple enough for one person to maintain**.
 
 - 🛍️ Storefront: home, products with search & filters, product details with image zoom,

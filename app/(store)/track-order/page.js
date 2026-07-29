@@ -1,8 +1,8 @@
 import { SITE_URL as BASE_URL } from '@/lib/constants';
 import TrackOrderClient from './TrackOrderClient';
-const title = 'Suivre ma Commande en Ligne — Luxury Phone Guelma';
+const title = 'Suivre ma Commande en Ligne — LuxuryPhone24 Guelma';
 const description =
-  'Suivez votre commande Luxury Phone en temps réel avec votre numéro de commande et téléphone. Livraison partout en Algérie, statut mis à jour à chaque étape.';
+  'Suivez votre commande LuxuryPhone24 en temps réel avec votre numéro de commande et téléphone. Livraison partout en Algérie, statut mis à jour à chaque étape.';
 
 export const metadata = {
   title: { absolute: title },

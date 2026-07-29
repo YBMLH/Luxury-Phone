@@ -1,8 +1,8 @@
 import { SITE_URL as BASE_URL } from '@/lib/constants';
 import AboutClient from './AboutClient';
-const title = 'À propos de Luxury Phone — Boutique High-Tech Guelma';
+const title = 'À propos de LuxuryPhone24 — Boutique High-Tech Guelma';
 const description =
-  'Luxury Phone est une boutique high-tech à Guelma, Algérie, avec deux magasins. Smartphones, laptops et accessoires 100% authentiques, garantie officielle.';
+  'LuxuryPhone24 est une boutique high-tech à Guelma, Algérie, avec deux magasins. Smartphones, laptops et accessoires 100% authentiques, garantie officielle.';
 
 export const metadata = {
   title: { absolute: title },

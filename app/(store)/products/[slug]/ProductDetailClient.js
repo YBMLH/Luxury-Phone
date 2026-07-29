@@ -92,7 +92,7 @@ export default function ProductDetailClient({ product, related, breadcrumbItems 
           {images[activeImage] ? (
             <ZoomableImage
               src={images[activeImage]}
-              alt={`${product.name}${product.brand ? ` ${product.brand}` : ''} - Luxury Phone Guelma`}
+              alt={`${product.name}${product.brand ? ` ${product.brand}` : ''} - LuxuryPhone24 Guelma`}
             />
           ) : (
             <div className="flex aspect-square items-center justify-center rounded-2xl bg-neutral-100 text-6xl text-neutral-300">

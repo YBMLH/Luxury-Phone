@@ -37,10 +37,8 @@ export default function Footer() {
       <div className="border-t border-neutral-200">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-6 md:flex-row md:px-6">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-950 font-display text-xs font-bold text-gold-300">
-              L
-            </span>
-            <span className="font-display text-sm font-bold">Luxury Phone</span>
+            <img src="/images/logo-icon.webp" alt="" className="h-7 w-auto" />
+            <span className="font-display text-sm font-bold">LuxuryPhone24</span>
             <span className="text-xs text-neutral-400">
               © {new Date().getFullYear()} {t('footer.rights')} — Guelma, Algeria
             </span>
