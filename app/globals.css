@@ -35,6 +35,15 @@ body {
   border: 1px solid rgba(201, 162, 39, 0.22);
 }
 
+/* ------------------------ Glassmorphism (Apple-style) --------------------- */
+/* Backdrop-blur lightens/homogenizes whatever sits behind it, so this one
+   frosted treatment reads clearly over both the white page and the dark
+   marble sections. Used for the nav, floating hero controls, and modals. */
+.glass {
+  @apply border border-white/40 bg-white/60 backdrop-blur-xl backdrop-saturate-150
+    shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.5)];
+}
+
 /* Gold gradient text for headline accents */
 .text-gold-gradient {
   background: linear-gradient(100deg, #a88420 0%, #e2c86c 45%, #f3e29a 55%, #c9a227 100%);
@@ -82,16 +91,22 @@ body {
   background: linear-gradient(100deg, #d8b646 0%, #f0d98a 50%, #c9a227 100%);
 }
 
+/* Frosted dark glass — secondary buttons that need to stand out (nav CTA,
+   hero secondary action). Translucent + blurred, not flat black. */
 .btn-dark {
-  @apply inline-flex items-center justify-center gap-2 rounded-full bg-neutral-950 px-7 py-3
-    text-sm font-semibold text-white transition hover:bg-neutral-800
+  @apply inline-flex items-center justify-center gap-2 rounded-full border border-white/10
+    bg-neutral-950/60 px-7 py-3 text-sm font-semibold text-white backdrop-blur-xl
+    backdrop-saturate-150 transition hover:bg-neutral-950/80
     disabled:cursor-not-allowed disabled:opacity-50;
 }
 
+/* Frosted light glass — tertiary/quiet buttons (social links, "continue
+   shopping", filters). */
 .btn-outline {
-  @apply inline-flex items-center justify-center gap-2 rounded-full border border-neutral-300
-    bg-white px-7 py-3 text-sm font-semibold text-neutral-900 transition
-    hover:border-neutral-900 disabled:cursor-not-allowed disabled:opacity-50;
+  @apply inline-flex items-center justify-center gap-2 rounded-full border border-white/60
+    bg-white/55 px-7 py-3 text-sm font-semibold text-neutral-900 backdrop-blur-xl
+    backdrop-saturate-150 transition hover:bg-white/80
+    disabled:cursor-not-allowed disabled:opacity-50;
 }
 
 /* Small black action chip on product cards ("Order →") */

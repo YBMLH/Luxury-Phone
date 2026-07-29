@@ -126,7 +126,7 @@ export default function HeroShowcase({ products }) {
                     )}
                   </div>
                   {isActive && (
-                    <div className="border-t border-neutral-100 bg-white/95 px-4 py-3 text-center backdrop-blur">
+                    <div className="border-t border-white/50 bg-white/55 px-4 py-3 text-center backdrop-blur-xl backdrop-saturate-150">
                       <p className="truncate text-sm font-semibold text-neutral-900">{product.name}</p>
                       <p className="text-sm font-bold text-gold-700">{formatPrice(product.price)}</p>
                     </div>
@@ -144,7 +144,7 @@ export default function HeroShowcase({ products }) {
             type="button"
             onClick={() => go(-1)}
             aria-label={t('hero.showcase.previous')}
-            className="absolute left-0 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-neutral-300 bg-white/80 text-neutral-600 shadow-sm backdrop-blur transition hover:border-gold hover:text-gold-700 sm:flex"
+            className="glass absolute left-0 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-neutral-700 transition hover:text-gold-700 sm:flex"
           >
             ←
           </button>
@@ -152,7 +152,7 @@ export default function HeroShowcase({ products }) {
             type="button"
             onClick={() => go(1)}
             aria-label={t('hero.showcase.next')}
-            className="absolute right-0 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-neutral-300 bg-white/80 text-neutral-600 shadow-sm backdrop-blur transition hover:border-gold hover:text-gold-700 sm:flex"
+            className="glass absolute right-0 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-neutral-700 transition hover:text-gold-700 sm:flex"
           >
             →
           </button>

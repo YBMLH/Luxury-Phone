@@ -21,7 +21,7 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-neutral-200/80 bg-white/90 backdrop-blur">
+    <header className="glass sticky top-0 z-50 border-x-0 border-t-0">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
         <Link href="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
           <img src="/images/logo-icon.webp" alt="" className="h-8 w-auto md:h-9" />
@@ -80,7 +80,7 @@ export default function Navbar() {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="overflow-hidden border-t border-neutral-200 bg-white md:hidden"
+            className="glass overflow-hidden border-x-0 border-b-0 md:hidden"
             id="mobile-menu"
           >
             <div className="space-y-1 px-4 py-4">

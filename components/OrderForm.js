@@ -96,7 +96,7 @@ export default function OrderForm({ product, selection, open, onClose }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[60] flex items-end justify-center bg-black/70 p-0 sm:items-center sm:p-4"
+          className="fixed inset-0 z-[60] flex items-end justify-center bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-4"
           onClick={onClose}
           role="dialog"
           aria-modal="true"
@@ -108,7 +108,7 @@ export default function OrderForm({ product, selection, open, onClose }) {
             exit={{ y: 60, opacity: 0 }}
             transition={{ type: 'spring', damping: 26, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl"
+            className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-t-2xl border border-white/50 bg-white/80 shadow-2xl backdrop-blur-2xl backdrop-saturate-150 sm:rounded-2xl"
           >
             {orderNumber ? (
               /* ------------------------- Confirmation ------------------------- */
