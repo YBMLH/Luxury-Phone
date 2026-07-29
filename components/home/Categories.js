@@ -48,8 +48,9 @@ export default function Categories({ products = [] }) {
                         loading="lazy"
                         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-35 transition duration-500 group-hover:scale-105 group-hover:opacity-45"
                       />
-                      {/* Dark gradient keeps the text readable over any photo */}
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 to-black/35" />
+                      {/* Frosted glass over the photo — keeps text readable
+                          while still letting it show through, blurred. */}
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/20 backdrop-blur-sm" />
                     </>
                   )}
                   {/* Soft gold glow that intensifies on hover */}
