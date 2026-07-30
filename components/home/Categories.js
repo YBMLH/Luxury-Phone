@@ -36,17 +36,20 @@ export default function Categories({ products = [] }) {
           const count = countFor(cat.id);
           const bg = settings.categoryImages?.[cat.id];
           const accent = CATEGORY_ACCENTS[cat.id] || '#C9A227';
-          const glow = hexToRgba(accent, 0.35);
-          const glowStrong = hexToRgba(accent, 0.6);
+          const glow = hexToRgba(accent, 0.45);
+          const glowStrong = hexToRgba(accent, 0.7);
 
           return (
             <AnimateIn key={cat.id} delay={i * 0.05}>
               <Link href={`/products?category=${cat.id}`} className="group relative block">
+                {/* Tight, negative-spread shadow so the accent colour reads as
+                    light cast just under the card, rather than a wide smear
+                    bleeding across the page background. */}
                 <motion.div
                   whileHover={{ y: -8 }}
                   transition={{ duration: 0.25 }}
                   style={{ '--glow': glow, '--glow-strong': glowStrong }}
-                  className="relative flex h-full min-h-[210px] flex-col justify-end overflow-hidden rounded-[1.75rem] shadow-[0_18px_38px_-12px_var(--glow)] transition-shadow duration-300 group-hover:shadow-[0_28px_60px_-10px_var(--glow-strong)]"
+                  className="relative flex h-full min-h-[210px] flex-col justify-end overflow-hidden rounded-[1.75rem] shadow-[0_12px_26px_-16px_var(--glow)] transition-shadow duration-300 group-hover:shadow-[0_20px_42px_-18px_var(--glow-strong)]"
                 >
                   {/* Background: real category photo if set, otherwise a
                       tinted wash in the category's own accent color. */}
@@ -91,8 +94,10 @@ export default function Categories({ products = [] }) {
                     </span>
                   )}
 
-                  {/* Frosted glass label */}
-                  <div className="relative border-t border-white/40 bg-white/60 px-5 py-4 backdrop-blur-xl backdrop-saturate-150 transition-colors duration-300 group-hover:bg-white/75">
+                  {/* Frosted glass label. Carries its own bottom radius: iOS
+                      Safari leaks backdrop-filter past a rounded parent's
+                      corners, which showed as the panel squaring off. */}
+                  <div className="relative rounded-b-[1.75rem] border-t border-white/40 bg-white/60 px-5 py-4 backdrop-blur-xl backdrop-saturate-150 transition-colors duration-300 group-hover:bg-white/75">
                     <h3 className="font-display text-lg font-bold text-neutral-900">
                       {t(`categories.${cat.id}.label`) || cat.label}
                     </h3>

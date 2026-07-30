@@ -56,15 +56,16 @@ export default function ProductCard({ product }) {
         )}
 
         {outOfStock && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/35 backdrop-blur-md">
+          <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/35 backdrop-blur-md">
             <span className="rounded-full border border-white/40 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-white">
               {t('productDetail.outOfStock')}
             </span>
           </div>
         )}
 
-        {/* Frosted glass info strip */}
-        <div className="absolute inset-x-0 bottom-0 border-t border-white/40 bg-white/60 px-3 py-2.5 backdrop-blur-xl backdrop-saturate-150">
+        {/* Frosted glass info strip. Carries its own bottom radius: iOS Safari
+            leaks backdrop-filter past a rounded parent's corners. */}
+        <div className="absolute inset-x-0 bottom-0 rounded-b-2xl border-t border-white/40 bg-white/60 px-3 py-2.5 backdrop-blur-xl backdrop-saturate-150">
           <h3 className="line-clamp-2 text-sm font-medium text-neutral-900">
             {product.name}
           </h3>
