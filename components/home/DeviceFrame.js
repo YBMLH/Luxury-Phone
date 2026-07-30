@@ -1,30 +1,78 @@
 'use client';
 
-// An iPhone-style body with a Dynamic Island (a floating pill inset from the
-// top edge — not the older notch that hangs off it). The product photo fills
-// the screen; if a product has no photo yet, the screen falls back to a tint
-// so the fan never renders an empty slab.
-export default function DeviceFrame({ image, alt = '', tint, priority = false }) {
+// The hero fan holds whatever the owner marks as featured, which isn't always
+// a phone. Rather than force a laptop into an iPhone body, the frame adapts:
+//   phone  — iPhone-style body with a Dynamic Island (a floating pill inset
+//            from the top edge, not the older notch that hangs off it)
+//   tablet — same body, uniform bezel, a small camera dot instead of an island
+//   plain  — no device chrome at all; the photo is shown whole on a dark card
+//            so a wide product (laptop, headphones) isn't cropped to a sliver
+const PHONE_CATEGORIES = ['smartphones', 'phone-cases'];
+
+export function frameVariantFor(category) {
+  if (PHONE_CATEGORIES.includes(category)) return 'phone';
+  if (category === 'tablets') return 'tablet';
+  return 'plain';
+}
+
+const GLARE =
+  'pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_34%,rgba(255,255,255,0.16)_47%,transparent_58%)]';
+
+export default function DeviceFrame({
+  image,
+  alt = '',
+  tint,
+  priority = false,
+  variant = 'phone',
+}) {
+  const imgProps = {
+    src: image,
+    alt,
+    loading: priority ? 'eager' : 'lazy',
+    fetchPriority: priority ? 'high' : 'auto',
+  };
+
+  // Anything that isn't a handheld screen: show the product whole, centred,
+  // with no fake device body around it.
+  if (variant === 'plain') {
+    // The card keeps the category tint behind the photo. A wide product shown
+    // whole leaves a lot of empty space in a portrait slot, and a tinted
+    // ground reads as intentional where flat black just looks unfinished.
+    return (
+      <div className="relative h-full w-full overflow-hidden rounded-[1.75rem] border border-white/10 bg-neutral-950 shadow-[0_22px_45px_-12px_rgba(0,0,0,0.8)]">
+        {/* Tint sits on an opaque base — it carries alpha, so on its own the
+            cards behind would show straight through this one. */}
+        <div className="absolute inset-0" style={{ background: tint }} />
+        {image && (
+          <img {...imgProps} className="relative h-full w-full object-contain p-2.5" />
+        )}
+        <div className={GLARE} />
+      </div>
+    );
+  }
+
+  const isTablet = variant === 'tablet';
+
   return (
-    <div className="relative h-full w-full rounded-[1.75rem] bg-gradient-to-b from-neutral-600 via-neutral-800 to-neutral-950 p-[3px] shadow-[0_22px_45px_-12px_rgba(0,0,0,0.8)]">
+    <div
+      className={`relative h-full w-full rounded-[1.75rem] bg-gradient-to-b from-neutral-600 via-neutral-800 to-neutral-950 shadow-[0_22px_45px_-12px_rgba(0,0,0,0.8)] ${
+        isTablet ? 'p-[5px]' : 'p-[3px]'
+      }`}
+    >
       <div className="relative h-full w-full overflow-hidden rounded-[1.6rem] bg-neutral-950">
         {image ? (
-          <img
-            src={image}
-            alt={alt}
-            loading={priority ? 'eager' : 'lazy'}
-            fetchPriority={priority ? 'high' : 'auto'}
-            className="h-full w-full object-cover"
-          />
+          <img {...imgProps} className="h-full w-full object-cover" />
         ) : (
           <div className="h-full w-full" style={{ background: tint }} />
         )}
 
-        {/* Dynamic Island */}
-        <div className="pointer-events-none absolute left-1/2 top-[6px] h-[6.5%] w-[32%] -translate-x-1/2 rounded-full bg-black shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]" />
+        {isTablet ? (
+          <div className="pointer-events-none absolute left-1/2 top-[7px] h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-black/80" />
+        ) : (
+          <div className="pointer-events-none absolute left-1/2 top-[6px] h-[6.5%] w-[32%] -translate-x-1/2 rounded-full bg-black shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]" />
+        )}
 
-        {/* Screen glare */}
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_34%,rgba(255,255,255,0.16)_47%,transparent_58%)]" />
+        <div className={GLARE} />
       </div>
     </div>
   );

@@ -6,7 +6,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
-import DeviceFrame from './DeviceFrame';
+import DeviceFrame, { frameVariantFor } from './DeviceFrame';
 import { formatPrice, hexToRgba } from '@/lib/utils';
 import { CATEGORY_ACCENTS } from '@/lib/constants';
 import { useLanguage } from '@/context/LanguageContext';
@@ -148,6 +148,7 @@ export default function HeroShowcase({ products }) {
                     alt={isActive ? `${product.name} — LuxuryPhone24` : ''}
                     tint={`linear-gradient(155deg, #17131f, ${hexToRgba(accent, 0.75)})`}
                     priority={i === 0}
+                    variant={frameVariantFor(product.category)}
                   />
                 </Link>
               </motion.div>
