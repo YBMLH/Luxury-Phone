@@ -80,9 +80,13 @@ export default function Categories({ products = [] }) {
                     />
                   )}
 
-                  {/* Depth graduation so the glass label always reads,
-                      whatever the photo/wash looks like. */}
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/55 to-transparent" />
+                  {/* Depth graduation, confined to the photo area above the
+                      label. Spanning the whole card put dark gradient behind
+                      the translucent label, which bled through and left a dark
+                      band curving along the bottom corners. */}
+                  <div className="relative flex-1">
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/45 to-transparent" />
+                  </div>
 
                   <span className="absolute left-4 top-4 flex h-11 w-11 items-center justify-center rounded-full border border-white/40 bg-white/60 text-neutral-900 backdrop-blur-md backdrop-saturate-150 transition-transform duration-300 group-hover:scale-110">
                     <CategoryIcon id={cat.id} className="h-5 w-5" />
@@ -97,7 +101,7 @@ export default function Categories({ products = [] }) {
                   {/* Frosted glass label. Carries its own bottom radius: iOS
                       Safari leaks backdrop-filter past a rounded parent's
                       corners, which showed as the panel squaring off. */}
-                  <div className="relative rounded-b-[1.75rem] border-t border-white/40 bg-white/60 px-5 py-4 backdrop-blur-xl backdrop-saturate-150 transition-colors duration-300 group-hover:bg-white/75">
+                  <div className="relative rounded-b-[1.75rem] border-t border-white/40 bg-white/70 px-5 py-4 backdrop-blur-xl backdrop-saturate-150 transition-colors duration-300 group-hover:bg-white/85">
                     <h3 className="font-display text-lg font-bold text-neutral-900">
                       {t(`categories.${cat.id}.label`) || cat.label}
                     </h3>

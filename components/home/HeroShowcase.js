@@ -98,10 +98,12 @@ export default function HeroShowcase({ products }) {
           const isActive = offset === 0;
           const accent = CATEGORY_ACCENTS[product.category] || '#C9A227';
           const variant = frameVariantFor(product.category);
-          // The accent glow is shaped like a full slot, so it only belongs on
-          // frames that actually fill one. A laptop sits centred and smaller,
-          // and would otherwise trail a coloured rectangle around empty space.
-          const fillsSlot = variant !== 'laptop';
+          // The accent glow on the wrapper is cut to the slot's shape, so it
+          // only belongs on frames that actually fill one. Laptops and tablets
+          // sit centred at their own proportions and would otherwise trail a
+          // coloured rectangle around empty space — they take the glow on
+          // their own body instead.
+          const fillsSlot = variant === 'phone' || variant === 'plain';
 
           return (
             <motion.div
@@ -158,6 +160,7 @@ export default function HeroShowcase({ products }) {
                     tint={`linear-gradient(155deg, #17131f, ${hexToRgba(accent, 0.75)})`}
                     priority={i === 0}
                     variant={variant}
+                    glow={fillsSlot ? undefined : hexToRgba(accent, 0.7)}
                   />
                 </Link>
               </motion.div>

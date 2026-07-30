@@ -5,7 +5,8 @@
 // adapts to the category:
 //   phone  — iPhone-style body with a Dynamic Island (a floating pill inset
 //            from the top edge, not the older notch that hangs off it)
-//   tablet — same body, uniform bezel, a small camera dot instead of an island
+//   tablet — wider and squarer than a phone (3:4 rather than roughly 1:2),
+//            uniform bezel, a camera dot instead of an island
 //   laptop — an open laptop: lid with the photo as its screen, hinge and base.
 //            Landscape, so it sits centred in the portrait slot rather than
 //            filling it.
@@ -29,6 +30,7 @@ export default function DeviceFrame({
   tint,
   priority = false,
   variant = 'phone',
+  glow,
 }) {
   const imgProps = {
     src: image,
@@ -37,12 +39,39 @@ export default function DeviceFrame({
     fetchPriority: priority ? 'high' : 'auto',
   };
 
+  // Variants that don't fill the slot carry their own accent shadow, since the
+  // one on the wrapper is cut to the slot's shape.
+  const ownGlow = glow ? { boxShadow: `0 26px 50px -20px ${glow}` } : undefined;
+
+  if (variant === 'tablet') {
+    // An iPad is nothing like 1:2 — squarer and wider, so it's sized against
+    // the slot rather than filling it.
+    return (
+      <div className="flex h-full w-full items-center justify-center">
+        <div
+          className="w-[126%] rounded-[1.15rem] bg-gradient-to-b from-neutral-600 via-neutral-800 to-neutral-950 p-[5px]"
+          style={ownGlow}
+        >
+          <div className="relative aspect-[3/4] overflow-hidden rounded-[0.9rem] bg-neutral-950">
+            {image ? (
+              <img {...imgProps} className="h-full w-full object-cover" />
+            ) : (
+              <div className="h-full w-full" style={{ background: tint }} />
+            )}
+            <div className="pointer-events-none absolute left-1/2 top-[7px] h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-black/80" />
+            <div className={GLARE} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (variant === 'laptop') {
     // Slightly wider than the slot so the laptop still has presence next to
     // the taller phones; the base overhangs the lid as a real one does.
     return (
       <div className="flex h-full w-full items-center justify-center">
-        <div className="w-[122%]">
+        <div className="w-[122%]" style={ownGlow}>
           <div className="rounded-t-[10px] bg-gradient-to-b from-neutral-500 to-neutral-700 p-[3px] shadow-[0_18px_35px_-14px_rgba(0,0,0,0.85)]">
             <div className="relative aspect-[16/10] overflow-hidden rounded-[7px] bg-neutral-950">
               {image ? (
@@ -81,27 +110,16 @@ export default function DeviceFrame({
     );
   }
 
-  const isTablet = variant === 'tablet';
-
+  // phone — fills the slot exactly, so the wrapper's accent glow already fits.
   return (
-    <div
-      className={`relative h-full w-full rounded-[1.75rem] bg-gradient-to-b from-neutral-600 via-neutral-800 to-neutral-950 shadow-[0_22px_45px_-12px_rgba(0,0,0,0.8)] ${
-        isTablet ? 'p-[5px]' : 'p-[3px]'
-      }`}
-    >
+    <div className="relative h-full w-full rounded-[1.75rem] bg-gradient-to-b from-neutral-600 via-neutral-800 to-neutral-950 p-[3px] shadow-[0_22px_45px_-12px_rgba(0,0,0,0.8)]">
       <div className="relative h-full w-full overflow-hidden rounded-[1.6rem] bg-neutral-950">
         {image ? (
           <img {...imgProps} className="h-full w-full object-cover" />
         ) : (
           <div className="h-full w-full" style={{ background: tint }} />
         )}
-
-        {isTablet ? (
-          <div className="pointer-events-none absolute left-1/2 top-[7px] h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-black/80" />
-        ) : (
-          <div className="pointer-events-none absolute left-1/2 top-[6px] h-[6.5%] w-[32%] -translate-x-1/2 rounded-full bg-black shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]" />
-        )}
-
+        <div className="pointer-events-none absolute left-1/2 top-[6px] h-[6.5%] w-[32%] -translate-x-1/2 rounded-full bg-black shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]" />
         <div className={GLARE} />
       </div>
     </div>

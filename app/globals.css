@@ -68,6 +68,31 @@ body {
 .aurora-2 { animation: aurora-drift-2 19s ease-in-out infinite; }
 .aurora-3 { animation: aurora-drift-3 23s ease-in-out infinite; }
 
+/* Neon blue glow that orbits the hero title. Uses drop-shadow rather than
+   text-shadow so it follows the gradient-clipped letters correctly — the
+   accent line has transparent glyphs, which text-shadow renders through. */
+@keyframes neon-orbit {
+  0%, 100% { filter: drop-shadow(0 -5px 10px rgba(34, 211, 238, 0.95)) drop-shadow(0 0 28px rgba(59, 130, 246, 0.45)); }
+  12.5%    { filter: drop-shadow(4px -4px 10px rgba(34, 211, 238, 0.95)) drop-shadow(0 0 28px rgba(59, 130, 246, 0.45)); }
+  25%      { filter: drop-shadow(5px 0 10px rgba(34, 211, 238, 0.95)) drop-shadow(0 0 28px rgba(59, 130, 246, 0.45)); }
+  37.5%    { filter: drop-shadow(4px 4px 10px rgba(34, 211, 238, 0.95)) drop-shadow(0 0 28px rgba(59, 130, 246, 0.45)); }
+  50%      { filter: drop-shadow(0 5px 10px rgba(34, 211, 238, 0.95)) drop-shadow(0 0 28px rgba(59, 130, 246, 0.45)); }
+  62.5%    { filter: drop-shadow(-4px 4px 10px rgba(34, 211, 238, 0.95)) drop-shadow(0 0 28px rgba(59, 130, 246, 0.45)); }
+  75%      { filter: drop-shadow(-5px 0 10px rgba(34, 211, 238, 0.95)) drop-shadow(0 0 28px rgba(59, 130, 246, 0.45)); }
+  87.5%    { filter: drop-shadow(-4px -4px 10px rgba(34, 211, 238, 0.95)) drop-shadow(0 0 28px rgba(59, 130, 246, 0.45)); }
+}
+
+.neon-title {
+  animation: neon-orbit 5s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .neon-title {
+    animation: none;
+    filter: drop-shadow(0 0 14px rgba(34, 211, 238, 0.75));
+  }
+}
+
 /* Fine dot grain — stops the big soft gradients from banding on cheap panels. */
 .aurora-grain {
   background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);

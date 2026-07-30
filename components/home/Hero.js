@@ -46,7 +46,7 @@ export default function Hero({ showcaseProducts = [] }) {
             initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="mt-5 text-balance font-display text-[2.75rem] font-bold leading-[0.98] tracking-tight text-white md:text-6xl lg:text-7xl"
+            className="neon-title mt-5 text-balance font-display text-[2.75rem] font-bold leading-[0.98] tracking-tight text-white md:text-6xl lg:text-7xl"
           >
             {hero.title}
             <span className="block text-gold-gradient">{hero.titleAccent}</span>
