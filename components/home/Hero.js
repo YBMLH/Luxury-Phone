@@ -14,6 +14,11 @@ export default function Hero({ showcaseProducts = [] }) {
   const { t } = useLanguage();
   const hero = settings.heroContent;
 
+  // The plaque text and the sheen sweeping over it have to sit in exactly the
+  // same place, so both render with this one type treatment.
+  const PLATE_TYPE =
+    'font-display text-[2rem] font-bold leading-[1.05] tracking-tight sm:text-[2.5rem] md:text-5xl lg:text-[3.5rem]';
+
   const STATS = [
     { value: '100%', label: t('hero.stats.genuine') },
     { value: '58', label: t('hero.stats.wilayas') },
@@ -42,15 +47,33 @@ export default function Hero({ showcaseProducts = [] }) {
             {hero.tagline}
           </motion.p>
 
-          <motion.h1
+          {/* Engraved brass-on-graphite nameplate. Both lines are cut the same
+              depth in the same metal, so neither can outshine the other. */}
+          <motion.div
             initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="neon-title mt-5 text-balance font-display text-[2.75rem] font-bold leading-[0.98] tracking-tight text-white md:text-6xl lg:text-7xl"
+            className="plate mt-5 inline-block max-w-full px-6 py-5 sm:px-9 sm:py-7"
           >
-            {hero.title}
-            <span className="block text-gold-gradient">{hero.titleAccent}</span>
-          </motion.h1>
+            <span className="plate-screw left-2.5 top-2.5" />
+            <span className="plate-screw right-2.5 top-2.5" />
+            <span className="plate-screw bottom-2.5 left-2.5" />
+            <span className="plate-screw bottom-2.5 right-2.5" />
+
+            <div className="relative">
+              <h1 className={`plate-text text-balance ${PLATE_TYPE}`}>
+                {hero.title}
+                <span className="block">{hero.titleAccent}</span>
+              </h1>
+              <p
+                aria-hidden="true"
+                className={`plate-sheen pointer-events-none absolute inset-0 text-balance ${PLATE_TYPE}`}
+              >
+                {hero.title}
+                <span className="block">{hero.titleAccent}</span>
+              </p>
+            </div>
+          </motion.div>
         </div>
 
         {/* Device fan — sits directly under the headline on mobile so a phone

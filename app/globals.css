@@ -68,28 +68,62 @@ body {
 .aurora-2 { animation: aurora-drift-2 19s ease-in-out infinite; }
 .aurora-3 { animation: aurora-drift-3 23s ease-in-out infinite; }
 
-/* Neon blue glow that orbits the hero title. Uses drop-shadow rather than
-   text-shadow so it follows the gradient-clipped letters correctly — the
-   accent line has transparent glyphs, which text-shadow renders through. */
-@keyframes neon-orbit {
-  0%, 100% { filter: drop-shadow(0 -5px 10px rgba(34, 211, 238, 0.95)) drop-shadow(0 0 28px rgba(59, 130, 246, 0.45)); }
-  12.5%    { filter: drop-shadow(4px -4px 10px rgba(34, 211, 238, 0.95)) drop-shadow(0 0 28px rgba(59, 130, 246, 0.45)); }
-  25%      { filter: drop-shadow(5px 0 10px rgba(34, 211, 238, 0.95)) drop-shadow(0 0 28px rgba(59, 130, 246, 0.45)); }
-  37.5%    { filter: drop-shadow(4px 4px 10px rgba(34, 211, 238, 0.95)) drop-shadow(0 0 28px rgba(59, 130, 246, 0.45)); }
-  50%      { filter: drop-shadow(0 5px 10px rgba(34, 211, 238, 0.95)) drop-shadow(0 0 28px rgba(59, 130, 246, 0.45)); }
-  62.5%    { filter: drop-shadow(-4px 4px 10px rgba(34, 211, 238, 0.95)) drop-shadow(0 0 28px rgba(59, 130, 246, 0.45)); }
-  75%      { filter: drop-shadow(-5px 0 10px rgba(34, 211, 238, 0.95)) drop-shadow(0 0 28px rgba(59, 130, 246, 0.45)); }
-  87.5%    { filter: drop-shadow(-4px -4px 10px rgba(34, 211, 238, 0.95)) drop-shadow(0 0 28px rgba(59, 130, 246, 0.45)); }
+/* ------------------------- Engraved nameplate ----------------------------- */
+/* The hero title is a milled graphite plaque bolted to the wall: the words are
+   cut into the metal and packed with brass. All the depth comes from a dark
+   shadow on the upper lip of each cut and a pale highlight on the lower —
+   there is no glow anywhere, which is what keeps the words readable.       */
+.plate {
+  position: relative;
+  border-radius: 6px;
+  border: 1px solid rgba(226, 200, 108, 0.34);
+  background-color: #14131a;
+  background-image:
+    /* fine brushed-metal grain */
+    repeating-linear-gradient(92deg, rgba(255, 255, 255, 0.028) 0 1px, transparent 1px 3px),
+    linear-gradient(160deg, #1c1b23 0%, #0e0d13 55%, #17161d 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    0 20px 34px -18px rgba(0, 0, 0, 0.9);
 }
 
-.neon-title {
-  animation: neon-orbit 5s linear infinite;
+.plate-text {
+  color: #c9a227;
+  text-shadow:
+    0 -1.5px 1px rgba(0, 0, 0, 0.95),
+    0 1.5px 0 rgba(255, 240, 205, 0.35),
+    0 4px 5px rgba(0, 0, 0, 0.55);
+}
+
+/* A copy of the heading masked down to one narrow diagonal band, travelling
+   across the letters — the highlight you get sweeping a light over brass. */
+.plate-sheen {
+  color: transparent;
+  background-image: linear-gradient(104deg, transparent 42%, rgba(243, 226, 154, 0.85) 50%, transparent 58%);
+  background-size: 320% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: plate-sweep 6s linear infinite;
+}
+
+@keyframes plate-sweep {
+  from { background-position: 150% 0; }
+  to   { background-position: -150% 0; }
+}
+
+.plate-screw {
+  position: absolute;
+  height: 7px;
+  width: 7px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 35% 30%, #6b6472, #221f28);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .neon-title {
+  .plate-sheen {
     animation: none;
-    filter: drop-shadow(0 0 14px rgba(34, 211, 238, 0.75));
+    opacity: 0.25;
   }
 }
 
