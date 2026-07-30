@@ -13,7 +13,7 @@ import { getProducts } from '@/lib/db';
 import { pickShowcase } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
 
-export default function HomeClient({ showcaseProducts = [] }) {
+export default function HomeClient({ showcaseProducts = [], heroContent = null }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const { t } = useLanguage();
@@ -45,7 +45,7 @@ export default function HomeClient({ showcaseProducts = [] }) {
 
   return (
     <>
-      <Hero showcaseProducts={heroProducts} />
+      <Hero showcaseProducts={heroProducts} initialHero={heroContent} />
 
       <Categories products={products} />
 

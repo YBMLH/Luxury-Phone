@@ -1,7 +1,7 @@
 import { translations } from '@/lib/i18n/translations';
 import { SITE_URL as BASE_URL } from '@/lib/constants';
 import { safeJsonLd, pickShowcase } from '@/lib/utils';
-import { getProductsServer } from '@/lib/serverData';
+import { getProductsServer, getSettingsServer } from '@/lib/serverData';
 import HomeClient from './HomeClient';
 
 // Short window so the cached HTML never shows a badly outdated photo. The
@@ -44,8 +44,11 @@ export default async function HomePage() {
   // Fetched server-side (not in HomeClient's own client fetch) so the hero
   // fan has real images in the first render instead of waiting on a
   // client-side round trip — better for LCP. HomeClient swaps in fresh data
-  // as soon as its own fetch lands.
-  const showcaseProducts = pickShowcase(await getProductsServer());
+  // as soon as its own fetch lands. Settings ride along for the same reason:
+  // without them the board spells out the placeholder headline and then
+  // re-spells the real title once the client fetch resolves.
+  const [products, settings] = await Promise.all([getProductsServer(), getSettingsServer()]);
+  const showcaseProducts = pickShowcase(products);
   const heroImage = showcaseProducts[0]?.images?.[0];
 
   return (
@@ -57,7 +60,7 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(faqJsonLd) }}
       />
-      <HomeClient showcaseProducts={showcaseProducts} />
+      <HomeClient showcaseProducts={showcaseProducts} heroContent={settings.heroContent} />
     </>
   );
 }

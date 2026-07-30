@@ -10,11 +10,16 @@ import { DEFAULT_SETTINGS, mergeSettings } from '@/lib/defaults';
 const SettingsContext = createContext({
   settings: DEFAULT_SETTINGS,
   loading: true,
+  loaded: false,
 });
 
 export function SettingsProvider({ children }) {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [loading, setLoading] = useState(true);
+  // True only after a read that actually reached Firestore. A failed read
+  // leaves us on the defaults, which are indistinguishable from real saved
+  // content — so anything server-rendered needs to know the difference.
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     Promise.all([getSettings(), getCategoryImages().catch(() => ({}))])
@@ -27,13 +32,14 @@ export function SettingsProvider({ children }) {
           ...merged,
           categoryImages: { ...merged.categoryImages, ...categoryImages },
         });
+        setLoaded(true);
       })
       .catch(() => setSettings(DEFAULT_SETTINGS))
       .finally(() => setLoading(false));
   }, []);
 
   return (
-    <SettingsContext.Provider value={{ settings, loading }}>
+    <SettingsContext.Provider value={{ settings, loading, loaded }}>
       {children}
     </SettingsContext.Provider>
   );

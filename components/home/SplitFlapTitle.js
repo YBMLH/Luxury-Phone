@@ -18,8 +18,10 @@ export default function SplitFlapTitle({ lines = [], className = '' }) {
       <span className="sr-only">{rows.join(' ')}</span>
 
       <span aria-hidden="true" className="flap-board">
-        {rows.map((line, row) => (
-          <span key={row} className="flap-row">
+        {rows.map((line) => (
+          // Keyed by the text, so a title that actually changes remounts and
+          // flips again rather than silently swapping characters in place.
+          <span key={line} className="flap-row">
             {[...line].map((char, i) => {
               const delay = charIndex++ * FLIP_STEP_MS;
               return char === ' ' ? (

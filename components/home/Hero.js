@@ -10,10 +10,16 @@ import SplitFlapTitle from './SplitFlapTitle';
 // `showcaseProducts` is fetched server-side (see app/(store)/page.js) and
 // passed down so the fan has real images in the first render — no client-side
 // fetch waterfall delaying the largest thing on the screen.
-export default function Hero({ showcaseProducts = [] }) {
-  const { settings } = useSettings();
+export default function Hero({ showcaseProducts = [], initialHero = null }) {
+  const { settings, loaded } = useSettings();
   const { t } = useLanguage();
-  const hero = settings.heroContent;
+
+  // `initialHero` is the same content read on the server, so the headline is
+  // already correct in the first paint. A *successful* client read takes over
+  // from there, which is what makes a dashboard edit show up right away; a
+  // failed one leaves the server's text alone instead of dropping the board
+  // back to the placeholder.
+  const hero = loaded || !initialHero ? settings.heroContent : initialHero;
 
   const STATS = [
     { value: '100%', label: t('hero.stats.genuine') },
