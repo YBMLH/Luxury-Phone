@@ -97,6 +97,11 @@ export default function HeroShowcase({ products }) {
           const pose = FAN[String(offset)];
           const isActive = offset === 0;
           const accent = CATEGORY_ACCENTS[product.category] || '#C9A227';
+          const variant = frameVariantFor(product.category);
+          // The accent glow is shaped like a full slot, so it only belongs on
+          // frames that actually fill one. A laptop sits centred and smaller,
+          // and would otherwise trail a coloured rectangle around empty space.
+          const fillsSlot = variant !== 'laptop';
 
           return (
             <motion.div
@@ -141,14 +146,18 @@ export default function HeroShowcase({ products }) {
                     }
                   }}
                   className="block h-full w-full rounded-[1.75rem]"
-                  style={{ boxShadow: `0 30px 60px -22px ${hexToRgba(accent, 0.75)}` }}
+                  style={
+                    fillsSlot
+                      ? { boxShadow: `0 30px 60px -22px ${hexToRgba(accent, 0.75)}` }
+                      : undefined
+                  }
                 >
                   <DeviceFrame
                     image={product.images?.[0]}
                     alt={isActive ? `${product.name} — LuxuryPhone24` : ''}
                     tint={`linear-gradient(155deg, #17131f, ${hexToRgba(accent, 0.75)})`}
                     priority={i === 0}
-                    variant={frameVariantFor(product.category)}
+                    variant={variant}
                   />
                 </Link>
               </motion.div>
