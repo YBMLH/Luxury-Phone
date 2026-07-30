@@ -11,6 +11,7 @@ import ContactSection from '@/components/home/ContactSection';
 import FAQ from '@/components/home/FAQ';
 import { ProductGridSkeleton } from '@/components/Skeletons';
 import { getProducts } from '@/lib/db';
+import { pickShowcase } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function HomeClient({ showcaseProducts = [] }) {
@@ -32,9 +33,21 @@ export default function HomeClient({ showcaseProducts = [] }) {
   // latest ones until the owner marks some as featured.
   const essentials = featured.length ? featured : products;
 
+  // The server-rendered list paints instantly (good for LCP), then the live
+  // fetch takes over — otherwise the hero would keep showing whatever photos
+  // were cached when the page was last rebuilt, even after an edit.
+  //
+  // Only swap when the live fetch actually yields something: offline, the
+  // Firestore SDK resolves from an empty local cache instead of throwing, and
+  // an empty result there would blank the hero. The server list came from a
+  // real read, so it's the safer thing to keep. A genuinely emptied shop
+  // corrects itself on the next revalidate.
+  const liveShowcase = pickShowcase(products);
+  const heroProducts = liveShowcase.length ? liveShowcase : showcaseProducts;
+
   return (
     <>
-      <Hero showcaseProducts={showcaseProducts} />
+      <Hero showcaseProducts={heroProducts} />
 
       {loading ? (
         <div className="mx-auto max-w-7xl px-4 py-14 md:px-6">

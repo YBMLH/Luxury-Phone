@@ -1,10 +1,13 @@
 import { translations } from '@/lib/i18n/translations';
 import { SITE_URL as BASE_URL } from '@/lib/constants';
-import { safeJsonLd } from '@/lib/utils';
+import { safeJsonLd, pickShowcase } from '@/lib/utils';
 import { getProductsServer } from '@/lib/serverData';
 import HomeClient from './HomeClient';
 
-export const revalidate = 3600;
+// Short window so the cached HTML never shows a badly outdated photo. The
+// hero also refreshes itself client-side (see HomeClient), so an edit in the
+// dashboard shows up immediately regardless of where this cache is at.
+export const revalidate = 300;
 
 const title = 'LuxuryPhone24 — Smartphones, Laptops et Tablettes | Guelma';
 const description =
@@ -39,14 +42,10 @@ export default async function HomePage() {
   };
 
   // Fetched server-side (not in HomeClient's own client fetch) so the hero
-  // carousel has real images in the first render instead of waiting on a
-  // client-side round trip — better for LCP. Featured products first, then
-  // fill up to 6 with anything else that has a photo.
-  const allProducts = await getProductsServer();
-  const withImages = allProducts.filter((p) => p.images?.length);
-  const featured = withImages.filter((p) => p.featured);
-  const rest = withImages.filter((p) => !p.featured);
-  const showcaseProducts = [...featured, ...rest].slice(0, 6);
+  // fan has real images in the first render instead of waiting on a
+  // client-side round trip — better for LCP. HomeClient swaps in fresh data
+  // as soon as its own fetch lands.
+  const showcaseProducts = pickShowcase(await getProductsServer());
   const heroImage = showcaseProducts[0]?.images?.[0];
 
   return (

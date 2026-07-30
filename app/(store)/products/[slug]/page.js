@@ -5,7 +5,9 @@ import { translations } from '@/lib/i18n/translations';
 import { SITE_URL as BASE_URL } from '@/lib/constants';
 import ProductDetailClient from './ProductDetailClient';
 
-export const revalidate = 3600;
+// This page is fully server-rendered, so this window is how long an edited
+// photo or price can take to appear here. Kept short deliberately.
+export const revalidate = 300;
 
 const CATEGORY_LABELS = translations.fr.categories;
 
