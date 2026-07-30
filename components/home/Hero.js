@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { useSettings } from '@/context/SettingsContext';
 import { useLanguage } from '@/context/LanguageContext';
 import HeroShowcase from './HeroShowcase';
+import SplitFlapTitle from './SplitFlapTitle';
 
 // `showcaseProducts` is fetched server-side (see app/(store)/page.js) and
 // passed down so the fan has real images in the first render — no client-side
@@ -13,11 +14,6 @@ export default function Hero({ showcaseProducts = [] }) {
   const { settings } = useSettings();
   const { t } = useLanguage();
   const hero = settings.heroContent;
-
-  // The plaque text and the sheen sweeping over it have to sit in exactly the
-  // same place, so both render with this one type treatment.
-  const PLATE_TYPE =
-    'font-display text-[2rem] font-bold leading-[1.05] tracking-tight sm:text-[2.5rem] md:text-5xl lg:text-[3.5rem]';
 
   const STATS = [
     { value: '100%', label: t('hero.stats.genuine') },
@@ -47,33 +43,12 @@ export default function Hero({ showcaseProducts = [] }) {
             {hero.tagline}
           </motion.p>
 
-          {/* Engraved brass-on-graphite nameplate. Both lines are cut the same
-              depth in the same metal, so neither can outshine the other. */}
-          <motion.div
-            initial={{ opacity: 0, y: 22 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="plate mt-5 inline-block max-w-full px-6 py-5 sm:px-9 sm:py-7"
-          >
-            <span className="plate-screw left-2.5 top-2.5" />
-            <span className="plate-screw right-2.5 top-2.5" />
-            <span className="plate-screw bottom-2.5 left-2.5" />
-            <span className="plate-screw bottom-2.5 right-2.5" />
-
-            <div className="relative">
-              <h1 className={`plate-text text-balance ${PLATE_TYPE}`}>
-                {hero.title}
-                <span className="block">{hero.titleAccent}</span>
-              </h1>
-              <p
-                aria-hidden="true"
-                className={`plate-sheen pointer-events-none absolute inset-0 text-balance ${PLATE_TYPE}`}
-              >
-                {hero.title}
-                <span className="block">{hero.titleAccent}</span>
-              </p>
-            </div>
-          </motion.div>
+          {/* The board's own flip is the entrance animation, so there's no
+              fade wrapper here competing with it. */}
+          <SplitFlapTitle
+            lines={[hero.title, hero.titleAccent]}
+            className="mt-5 block font-display text-[clamp(1.35rem,5.2vw,2.6rem)] font-bold leading-none tracking-tight text-[#FFF6E6]"
+          />
         </div>
 
         {/* Device fan — sits directly under the headline on mobile so a phone

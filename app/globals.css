@@ -68,62 +68,75 @@ body {
 .aurora-2 { animation: aurora-drift-2 19s ease-in-out infinite; }
 .aurora-3 { animation: aurora-drift-3 23s ease-in-out infinite; }
 
-/* ------------------------- Engraved nameplate ----------------------------- */
-/* The hero title is a milled graphite plaque bolted to the wall: the words are
-   cut into the metal and packed with brass. All the depth comes from a dark
-   shadow on the upper lip of each cut and a pale highlight on the lower —
-   there is no glow anywhere, which is what keeps the words readable.       */
-.plate {
+/* -------------------------- Split-flap headline ---------------------------- */
+/* The hero title is an airport departure board: each letter is a hinged tile
+   with a seam across its middle, hanging from its top edge. Tiles are laid
+   out with flex and wrap as a safety net, so a long title set from the
+   dashboard drops to a new line instead of running off the screen.        */
+.flap-board {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  perspective: 600px;
+}
+
+.flap-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: center;
+}
+
+@media (min-width: 768px) {
+  .flap-row {
+    justify-content: flex-start;
+  }
+}
+
+.flap-tile {
   position: relative;
-  border-radius: 6px;
-  border: 1px solid rgba(226, 200, 108, 0.34);
-  background-color: #14131a;
-  background-image:
-    /* fine brushed-metal grain */
-    repeating-linear-gradient(92deg, rgba(255, 255, 255, 0.028) 0 1px, transparent 1px 3px),
-    linear-gradient(160deg, #1c1b23 0%, #0e0d13 55%, #17161d 100%);
+  display: grid;
+  place-items: center;
+  width: 0.78em;
+  height: 1.24em;
+  /* Each glyph is centred in its own cell, so the headline's negative
+     tracking would push wide letters like w and m off the tile. */
+  letter-spacing: normal;
+  border-radius: 4px;
+  /* Two-tone fill: the upper half is the flap that has just come down. */
+  background: linear-gradient(#22202a 0 49.5%, #15141b 50.5% 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.09),
-    0 20px 34px -18px rgba(0, 0, 0, 0.9);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.07),
+    0 6px 12px -6px rgba(0, 0, 0, 0.9);
+  transform-origin: 50% 0;
+  animation: flap-in 0.5s cubic-bezier(0.2, 0.75, 0.3, 1) backwards;
 }
 
-.plate-text {
-  color: #c9a227;
-  text-shadow:
-    0 -1.5px 1px rgba(0, 0, 0, 0.95),
-    0 1.5px 0 rgba(255, 240, 205, 0.35),
-    0 4px 5px rgba(0, 0, 0, 0.55);
-}
-
-/* A copy of the heading masked down to one narrow diagonal band, travelling
-   across the letters — the highlight you get sweeping a light over brass. */
-.plate-sheen {
-  color: transparent;
-  background-image: linear-gradient(104deg, transparent 42%, rgba(243, 226, 154, 0.85) 50%, transparent 58%);
-  background-size: 320% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  animation: plate-sweep 6s linear infinite;
-}
-
-@keyframes plate-sweep {
-  from { background-position: 150% 0; }
-  to   { background-position: -150% 0; }
-}
-
-.plate-screw {
+/* The hinge line, with a hairline of light on its lower edge. */
+.flap-tile::after {
+  content: '';
   position: absolute;
-  height: 7px;
-  width: 7px;
-  border-radius: 9999px;
-  background: radial-gradient(circle at 35% 30%, #6b6472, #221f28);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6);
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.75);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.flap-gap {
+  width: 0.3em;
+}
+
+@keyframes flap-in {
+  from { transform: rotateX(-92deg); opacity: 0; }
+  60%  { opacity: 1; }
+  to   { transform: none; opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .plate-sheen {
+  .flap-tile {
     animation: none;
-    opacity: 0.25;
   }
 }
 
