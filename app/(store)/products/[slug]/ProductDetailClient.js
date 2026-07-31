@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import ProductCard from '@/components/ProductCard';
 import OrderForm from '@/components/OrderForm';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import ProductReviews from '@/components/ProductReviews';
 import { formatPrice, discountPercent } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -207,6 +208,8 @@ export default function ProductDetailClient({ product, related, breadcrumbItems 
           )}
         </motion.div>
       </div>
+
+      <ProductReviews product={product} />
 
       {/* Related products */}
       {related.length > 0 && (

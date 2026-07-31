@@ -7,7 +7,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { createOrder } from '@/lib/db';
+import { createOrder, isPhoneBlocked } from '@/lib/db';
 import { WILAYAS, wilayaLabel } from '@/lib/constants';
 import { useSettings } from '@/context/SettingsContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -42,6 +42,16 @@ export default function OrderForm({ product, selection, open, onClose }) {
     : null;
   const total = subtotal + (deliveryFee || 0);
 
+  // Confirmation the customer can act on: opens WhatsApp to the shop with the
+  // order number already typed, so they keep a record and you get a thread.
+  const shopWhatsApp = String(settings.contactInfo?.whatsapp || '').replace(/[^0-9]/g, '');
+  const whatsappConfirmLink =
+    shopWhatsApp && orderNumber
+      ? `https://wa.me/${shopWhatsApp.replace(/^0/, '213')}?text=${encodeURIComponent(
+          t('orderForm.whatsappMessage', { orderNumber, product: product.name })
+        )}`
+      : null;
+
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -66,6 +76,15 @@ export default function OrderForm({ product, selection, open, onClose }) {
 
     setSubmitting(true);
     try {
+      // Cash on delivery means a fake order costs a real parcel. Numbers the
+      // owner has blocked are turned away here rather than after the courier
+      // has already driven out.
+      if (await isPhoneBlocked(form.phone)) {
+        toast.error(t('orderForm.errors.blocked'));
+        setSubmitting(false);
+        return;
+      }
+
       const number = await createOrder({
         ...form,
         productId: product.id,
@@ -81,6 +100,15 @@ export default function OrderForm({ product, selection, open, onClose }) {
       });
       setOrderNumber(number);
       toast.success(t('orderForm.success'));
+
+      // Ring the owner's phone through Telegram. Deliberately not awaited and
+      // deliberately swallowed: the order is already saved, and a failed
+      // notification must never look to the customer like a failed order.
+      fetch('/api/notify-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderNumber: number, phone: form.phone }),
+      }).catch(() => {});
     } catch (err) {
       console.error(err);
       toast.error(t('orderForm.errors.generic'));
@@ -132,7 +160,20 @@ export default function OrderForm({ product, selection, open, onClose }) {
                   {t('orderForm.saveNumber')}
                 </p>
                 <div className="mt-6 flex flex-col gap-3">
-                  <Link href="/track-order" className="btn-gold w-full">
+                  {whatsappConfirmLink && (
+                    <a
+                      href={whatsappConfirmLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-gold w-full"
+                    >
+                      {t('orderForm.sendWhatsApp')}
+                    </a>
+                  )}
+                  <Link
+                    href="/track-order"
+                    className={whatsappConfirmLink ? 'btn-outline w-full' : 'btn-gold w-full'}
+                  >
                     {t('orderForm.trackMyOrder')}
                   </Link>
                   <button onClick={onClose} className="btn-outline w-full">

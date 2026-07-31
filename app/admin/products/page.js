@@ -234,6 +234,15 @@ export default function AdminProductsPage() {
                         ? t('admin.products.lowStock', { count: product.stock })
                         : t('admin.products.inStock', { count: product.stock })}
                     </span>
+                    {product.branchStock &&
+                      Object.entries(product.branchStock).filter(([, n]) => Number(n) > 0).length > 0 && (
+                        <p className="mt-1 text-[11px] text-neutral-400">
+                          {Object.entries(product.branchStock)
+                            .filter(([, n]) => Number(n) > 0)
+                            .map(([branch, n]) => `${branch}: ${n}`)
+                            .join(' · ')}
+                        </p>
+                      )}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1">

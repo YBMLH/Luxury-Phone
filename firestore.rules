@@ -68,6 +68,9 @@ service cloud.firestore {
         && request.resource.data.total is number
         && request.resource.data.total >= 0
         && request.resource.data.status == 'Pending';
+      // courier, parcelNumber and stockApplied are set by the dashboard
+      // after the order exists; they are absent from the create list above
+      // on purpose, so a customer cannot pre-set them.
       allow read, update, delete: if isAdmin();
     }
 
@@ -89,6 +92,9 @@ service cloud.firestore {
     // Customers: created/updated automatically when an order is placed.
     // Only admins can view the list.
     match /customers/{phone} {
+      // Placing an order writes only these five fields. deliveredCount,
+      // cancelledCount and blocked are deliberately absent: a customer must
+      // never be able to reset their own record or unblock themselves.
       allow create, update: if
         request.resource.data.keys().hasOnly([
           'fullName', 'phone', 'wilaya', 'ordersCount', 'lastOrderAt'
@@ -96,7 +102,41 @@ service cloud.firestore {
         && validString(request.resource.data.fullName, 100)
         && validString(request.resource.data.phone, 15)
         && validString(request.resource.data.wilaya, 50);
-      allow read, delete: if isAdmin();
+      // Admins keep the delivery tally and the blocked flag.
+      allow create, update, read, delete: if isAdmin();
+    }
+
+    // Blocklist: one document per blocked phone number, the number being the
+    // document id. A customer's browser checks its own number before placing
+    // an order, which needs `get`. `list` stays closed, so nobody can read
+    // out who has been blocked — you can only ask about a number you already
+    // know. Only admins write.
+    match /blocklist/{phone} {
+      allow get: if true;
+      allow list: if false;
+      allow write: if isAdmin();
+    }
+
+    // Reviews: anyone may submit one, but only as approved:false, and only
+    // admins can flip that flag. Nothing a customer writes is ever visible
+    // on the storefront until the owner has read it.
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if
+        request.resource.data.keys().hasOnly([
+          'productId', 'productName', 'name', 'rating', 'comment',
+          'approved', 'createdAt'
+        ])
+        && request.resource.data.approved == false
+        && validString(request.resource.data.productId, 60)
+        && validString(request.resource.data.productName, 150)
+        && validString(request.resource.data.name, 60)
+        && request.resource.data.name.size() >= 2
+        && validString(request.resource.data.comment, 600)
+        && request.resource.data.rating is int
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5;
+      allow update, delete: if isAdmin();
     }
 
     // Admins: each admin can read their own record (used by the app to

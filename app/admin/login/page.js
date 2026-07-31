@@ -9,17 +9,33 @@ import { useLanguage } from '@/context/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export default function AdminLoginPage() {
-  const { user, admin, loading, login } = useAuth();
+  const { user, admin, loading, login, resetPassword } = useAuth();
   const { t } = useLanguage();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [resetting, setResetting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   // Already signed in as an admin? Go straight to the dashboard.
   useEffect(() => {
     if (!loading && user && admin) router.replace('/admin');
   }, [loading, user, admin, router]);
+
+  async function handleReset() {
+    if (!email.trim()) {
+      return toast.error(t('admin.login.resetNeedsEmail'));
+    }
+    setResetting(true);
+    try {
+      await resetPassword(email.trim());
+    } catch {
+      // Swallowed on purpose: see the note by the button.
+    } finally {
+      setResetting(false);
+      toast.success(t('admin.login.resetSent'));
+    }
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -108,6 +124,18 @@ export default function AdminLoginPage() {
           </div>
           <button type="submit" disabled={submitting} className="btn-gold w-full">
             {submitting ? t('admin.login.signingIn') : t('admin.login.signIn')}
+          </button>
+          {/* Firebase sends the reset link itself — the app never handles the
+              password, and the message is deliberately identical whether or
+              not the address exists, so this can't be used to discover
+              which email owns the dashboard. */}
+          <button
+            type="button"
+            onClick={handleReset}
+            disabled={resetting}
+            className="w-full text-center text-xs font-semibold text-gold-300 underline-offset-4 hover:underline disabled:opacity-50"
+          >
+            {resetting ? t('admin.login.sendingReset') : t('admin.login.forgotPassword')}
           </button>
           <p className="text-center text-xs text-neutral-500">
             {t('admin.login.restricted')}

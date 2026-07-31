@@ -226,3 +226,41 @@ export const IconArrowRight = (p) => (
     <path d="M5 12h14M13 6l6 6-6 6" />
   </Svg>
 );
+
+export const IconPrinter = (p) => (
+  <Svg {...p}>
+    <path d="M7 9V3.5h10V9" />
+    <rect x="3.5" y="9" width="17" height="7" rx="2" />
+    <path d="M7 14h10v6.5H7V14Z" />
+  </Svg>
+);
+
+export const IconTruck = (p) => (
+  <Svg {...p}>
+    <path d="M2.5 6.5h10v9h-10v-9Z" />
+    <path d="M12.5 10h4l3 3v2.5h-7V10Z" />
+    <circle cx="6.5" cy="18" r="1.8" />
+    <circle cx="16.5" cy="18" r="1.8" />
+  </Svg>
+);
+
+export const IconStar = (p) => (
+  <Svg {...p}>
+    <path d="m12 3.8 2.5 5.1 5.6.8-4 3.9 1 5.6-5.1-2.7-5.1 2.7 1-5.6-4-3.9 5.6-.8L12 3.8Z" />
+  </Svg>
+);
+
+export const IconUpload = (p) => (
+  <Svg {...p}>
+    <path d="M12 16V4" />
+    <path d="m7.5 8.5 4.5-4.5 4.5 4.5" />
+    <path d="M4 20h16" />
+  </Svg>
+);
+
+export const IconBan = (p) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="m6 6 12 12" />
+  </Svg>
+);

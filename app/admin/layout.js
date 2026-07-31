@@ -29,9 +29,10 @@ import {
   IconMenu,
   IconClose,
   IconPlus,
+  IconStar,
 } from '@/components/admin/Icons';
 
-function useNav(t, pendingCount) {
+function useNav(t, pendingCount, isOwner) {
   return useMemo(
     () => [
       {
@@ -54,24 +55,32 @@ function useNav(t, pendingCount) {
       {
         heading: t('admin.layout.groupManage'),
         items: [
-          { href: '/admin/settings', label: t('admin.layout.settings'), icon: IconSettings },
-          { href: '/admin/activity', label: t('admin.layout.activity'), icon: IconHistory },
+          { href: '/admin/reviews', label: t('admin.layout.reviews'), icon: IconStar },
+          // Site content and the audit trail belong to the owner. A staff
+          // account can run the shop without being able to rewrite the
+          // storefront or read who did what.
+          ...(isOwner
+            ? [
+                { href: '/admin/settings', label: t('admin.layout.settings'), icon: IconSettings },
+                { href: '/admin/activity', label: t('admin.layout.activity'), icon: IconHistory },
+              ]
+            : []),
         ],
       },
     ],
-    [t, pendingCount]
+    [t, pendingCount, isOwner]
   );
 }
 
 // Split out so it can read the order feed — the provider sits above it.
-function AdminShell({ children, user, onLogout }) {
+function AdminShell({ children, user, isOwner, onLogout }) {
   const { t } = useLanguage();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const { orders } = useOrderAlerts();
 
   const pendingCount = orders.filter((o) => o.status === 'Pending').length;
-  const groups = useNav(t, pendingCount);
+  const groups = useNav(t, pendingCount, isOwner);
 
   // Close the drawer whenever the route changes, so a tap on a nav item on a
   // phone doesn't leave the menu covering the page you just opened.
@@ -210,7 +219,7 @@ function AdminShell({ children, user, onLogout }) {
 }
 
 export default function AdminLayout({ children }) {
-  const { user, admin, loading, logout } = useAuth();
+  const { user, admin, isOwner, loading, logout } = useAuth();
   const { t } = useLanguage();
   const pathname = usePathname();
   const router = useRouter();
@@ -267,7 +276,7 @@ export default function AdminLayout({ children }) {
   // The live order listener only starts once we know an admin is signed in.
   return (
     <OrderAlertProvider>
-      <AdminShell user={user} onLogout={handleLogout}>
+      <AdminShell user={user} isOwner={isOwner} onLogout={handleLogout}>
         {children}
       </AdminShell>
     </OrderAlertProvider>

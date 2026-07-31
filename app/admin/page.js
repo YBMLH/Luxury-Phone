@@ -10,6 +10,8 @@ import { getOrders, getProducts, getCustomers, getSettings, updateOrderStatus } 
 import { TableSkeleton } from '@/components/Skeletons';
 import { useLanguage } from '@/context/LanguageContext';
 import { useOrderAlerts } from '@/context/OrderAlertContext';
+import { useAuth } from '@/context/AuthContext';
+import RestoreBackup from '@/components/admin/RestoreBackup';
 import { ORDER_STATUSES, STATUS_COLORS, wilayaLabel } from '@/lib/constants';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { PageHeader, Card, StatCard, TabBar } from '@/components/admin/ui';
@@ -25,6 +27,7 @@ import {
   IconUsers,
   IconSettings,
   IconArrowRight,
+  IconTrendUp,
 } from '@/components/admin/Icons';
 
 const RANGES = [
@@ -99,6 +102,7 @@ function ActivityChart({ months, metric, t }) {
 export default function AdminDashboard() {
   const { t, locale } = useLanguage();
   const { orders: liveOrders } = useOrderAlerts();
+  const { isOwner } = useAuth();
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -129,6 +133,16 @@ export default function AdminDashboard() {
     });
   }, [liveOrders]);
 
+  // productId -> cost price, so an order can be costed without another read.
+  const costById = useMemo(() => {
+    const map = new Map();
+    for (const product of products) {
+      const cost = Number(product.costPrice) || 0;
+      if (cost > 0) map.set(product.id, cost);
+    }
+    return map;
+  }, [products]);
+
   const stats = useMemo(() => {
     const now = Date.now();
     const windowMs = rangeDays * 24 * 60 * 60 * 1000;
@@ -154,6 +168,19 @@ export default function AdminDashboard() {
     const revenue = inRange.filter(isEarning).reduce((sum, o) => sum + orderValue(o), 0);
     const prevRevenue = previous.filter(isEarning).reduce((sum, o) => sum + orderValue(o), 0);
     const earning = inRange.filter(isEarning);
+
+    // Profit is only meaningful for orders whose product has a cost price on
+    // it, so the covered share is reported alongside the figure rather than
+    // quietly pretending the uncosted ones were free.
+    let profit = 0;
+    let costedOrders = 0;
+    for (const order of earning) {
+      const cost = costById.get(order.productId);
+      if (!cost) continue;
+      costedOrders += 1;
+      const quantity = Math.max(1, Number(order.quantity) || 1);
+      profit += (Number(order.price) || 0) * quantity - cost * quantity;
+    }
 
     const byWilaya = {};
     const byProduct = {};
@@ -189,13 +216,16 @@ export default function AdminDashboard() {
       revenueDelta: percentChange(revenue, prevRevenue),
       countDelta: percentChange(inRange.length, previous.length),
       avgOrder: earning.length ? Math.round(revenue / earning.length) : 0,
+      profit,
+      costedOrders,
+      earningCount: earning.length,
       pending: orders.filter((o) => o.status === 'Pending').length,
       delivered: inRange.filter((o) => o.status === 'Delivered').length,
       topWilayas: Object.entries(byWilaya).sort((a, b) => b[1] - a[1]).slice(0, 6),
       topProducts: Object.entries(byProduct).sort((a, b) => b[1] - a[1]).slice(0, 6),
       months,
     };
-  }, [orders, rangeDays, locale]);
+  }, [orders, rangeDays, locale, costById]);
 
   const outOfStock = products.filter((p) => Number(p.stock) <= 0);
   const lowStock = products.filter((p) => Number(p.stock) > 0 && Number(p.stock) <= 3);
@@ -300,13 +330,15 @@ export default function AdminDashboard() {
         title={t('admin.dashboard.title')}
         subtitle={t('admin.dashboard.subtitle')}
         actions={
-          <button
-            onClick={downloadBackup}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3.5 py-2 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-100"
-          >
-            <IconDownload className="h-4 w-4" />
-            {t('admin.dashboard.downloadBackup')}
-          </button>
+          isOwner && (
+            <button
+              onClick={downloadBackup}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3.5 py-2 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-100"
+            >
+              <IconDownload className="h-4 w-4" />
+              {t('admin.dashboard.downloadBackup')}
+            </button>
+          )
         }
       />
 
@@ -332,7 +364,7 @@ export default function AdminDashboard() {
         onChange={setRangeDays}
       />
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 xl:grid-cols-5">
         <StatCard
           icon={IconCash}
           tone="gold"
@@ -365,6 +397,34 @@ export default function AdminDashboard() {
           value={formatPrice(stats.avgOrder)}
           hint={t('admin.dashboard.perOrder')}
         />
+        {costById.size > 0 ? (
+          <StatCard
+            icon={IconTrendUp}
+            tone="green"
+            label={t('admin.dashboard.profit')}
+            value={formatPrice(stats.profit)}
+            hint={
+              stats.costedOrders < stats.earningCount
+                ? t('admin.dashboard.profitPartial', {
+                    covered: stats.costedOrders,
+                    total: stats.earningCount,
+                  })
+                : t('admin.dashboard.profitAll')
+            }
+          />
+        ) : (
+          <Link
+            href="/admin/products"
+            className="flex flex-col justify-center rounded-2xl border border-dashed border-neutral-300 bg-white/60 p-4 text-center transition hover:border-gold/50 hover:bg-white"
+          >
+            <span className="text-[13px] font-semibold text-neutral-700">
+              {t('admin.dashboard.profitSetupTitle')}
+            </span>
+            <span className="mt-1 text-xs text-neutral-500">
+              {t('admin.dashboard.profitSetupBody')}
+            </span>
+          </Link>
+        )}
       </div>
 
       <div className="grid gap-4 xl:grid-cols-3">
@@ -535,6 +595,12 @@ export default function AdminDashboard() {
           )}
         </Card>
       </div>
+
+      {isOwner && (
+        <Card title={t('admin.restore.title')} subtitle={t('admin.restore.subtitle')}>
+          <RestoreBackup onRestored={() => window.location.reload()} />
+        </Card>
+      )}
     </div>
   );
 }

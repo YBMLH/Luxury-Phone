@@ -251,3 +251,106 @@ body {
   background: #c9a227aa;
   border-radius: 6px;
 }
+
+/* ------------------------- Printable delivery slips ----------------------- */
+/* The slips sit in the normal admin page and are only revealed when printing.
+   Doing it this way rather than opening a new window keeps popup blockers
+   out of the workflow entirely.                                            */
+.print-slips {
+  display: none;
+}
+
+@media print {
+  /* Everything that isn't a slip disappears — nav, tables, buttons. */
+  body * {
+    visibility: hidden;
+  }
+
+  .print-slips,
+  .print-slips * {
+    visibility: visible;
+  }
+
+  .print-slips {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    color: #000;
+    font-size: 12pt;
+  }
+
+  .slip {
+    page-break-after: always;
+    break-after: page;
+    border: 1.5px solid #000;
+    border-radius: 6px;
+    padding: 14mm 12mm;
+    margin: 0 0 6mm;
+  }
+
+  .slip:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  .slip-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid #000;
+    padding-bottom: 4mm;
+    margin-bottom: 5mm;
+  }
+
+  .slip-shop { font-size: 15pt; font-weight: 700; margin: 0; }
+  .slip-right { text-align: right; }
+  .slip-number { font-size: 15pt; font-weight: 700; font-family: monospace; margin: 0; }
+  .slip-muted { font-size: 10pt; color: #444; margin: 0; }
+
+  .slip-label {
+    font-size: 9pt;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #444;
+    margin: 0 0 1.5mm;
+  }
+
+  .slip-name { font-size: 14pt; font-weight: 700; margin: 0 0 1mm; }
+  .slip-line { margin: 0; }
+  .slip-phone { font-size: 13pt; font-weight: 600; margin: 2mm 0 0; }
+
+  .slip-table {
+    width: 100%;
+    margin: 6mm 0 0;
+    border-collapse: collapse;
+  }
+
+  .slip-table th {
+    text-align: left;
+    width: 32mm;
+    padding: 1.5mm 0;
+    font-size: 10pt;
+    color: #444;
+    font-weight: 500;
+    vertical-align: top;
+  }
+
+  .slip-table td { padding: 1.5mm 0; vertical-align: top; }
+
+  .slip-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 6mm;
+    padding-top: 4mm;
+    border-top: 1.5px solid #000;
+    font-size: 14pt;
+  }
+
+  .slip-total strong { font-size: 18pt; }
+
+  @page {
+    margin: 10mm;
+  }
+}

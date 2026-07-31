@@ -16,8 +16,10 @@ const EMPTY = {
   category: 'smartphones',
   description: '',
   price: '',
+  costPrice: '',
   oldPrice: '',
   stock: '',
+  branchStock: {},
   featured: false,
   bestseller: false,
   newArrival: false,
@@ -81,6 +83,9 @@ function TagListInput({ label, placeholder, values, onChange, addLabel }) {
 export default function ProductForm({ product = null }) {
   const router = useRouter();
   const { settings } = useSettings();
+  const branches = (settings.locations || [])
+    .map((location) => location.name)
+    .filter(Boolean);
   const { t } = useLanguage();
   const editing = Boolean(product);
 
@@ -92,8 +97,10 @@ export default function ProductForm({ product = null }) {
           category: product.category || 'smartphones',
           description: product.description || '',
           price: product.price ?? '',
+          costPrice: product.costPrice ?? '',
           oldPrice: product.oldPrice ?? '',
           stock: product.stock ?? '',
+          branchStock: product.branchStock || {},
           featured: Boolean(product.featured),
           bestseller: Boolean(product.bestseller),
           newArrival: Boolean(product.newArrival),
@@ -164,6 +171,8 @@ export default function ProductForm({ product = null }) {
       price,
       oldPrice: form.oldPrice ? Number(form.oldPrice) : null,
       stock: Number(form.stock) || 0,
+      costPrice: Number(form.costPrice) || 0,
+      branchStock: form.branchStock || {},
       featured: form.featured,
       bestseller: form.bestseller,
       newArrival: form.newArrival,
@@ -232,6 +241,45 @@ export default function ProductForm({ product = null }) {
               <label className="label">{t('admin.productForm.stock')} *</label>
               <input className="input" type="number" min="0" value={form.stock}
                 onChange={set('stock')} placeholder="10" />
+            </div>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div>
+              <label className="label">{t('admin.productForm.costPrice')}</label>
+              <input className="input" type="number" min="0" value={form.costPrice}
+                onChange={set('costPrice')} placeholder={t('admin.productForm.costPriceHint')} />
+              <p className="mt-1 text-xs text-neutral-500">
+                {t('admin.productForm.costPriceHelp')}
+              </p>
+            </div>
+            {/* Where the units physically are. The number above stays the one
+                that sells; this is the shelf breakdown so you know which shop
+                to send someone to. */}
+            <div className="sm:col-span-2">
+              <label className="label">{t('admin.productForm.branchStock')}</label>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {branches.map((branch) => (
+                  <div key={branch} className="flex items-center gap-2">
+                    <span className="min-w-0 flex-1 truncate text-sm text-neutral-600">{branch}</span>
+                    <input
+                      className="input !w-24 !px-2 !py-1.5"
+                      type="number"
+                      min="0"
+                      value={form.branchStock?.[branch] ?? ''}
+                      onChange={(e) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          branchStock: { ...prev.branchStock, [branch]: Number(e.target.value) || 0 },
+                        }))
+                      }
+                      aria-label={branch}
+                    />
+                  </div>
+                ))}
+              </div>
+              <p className="mt-1 text-xs text-neutral-500">
+                {t('admin.productForm.branchStockHelp')}
+              </p>
             </div>
           </div>
           <div>

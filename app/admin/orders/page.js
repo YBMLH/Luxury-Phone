@@ -3,15 +3,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { getOrders, updateOrderStatus, deleteOrder } from '@/lib/db';
+import { getOrders, updateOrderStatus, deleteOrder, setOrderDelivery } from '@/lib/db';
 import { ORDER_STATUSES, STATUS_COLORS, wilayaLabel } from '@/lib/constants';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { TableSkeleton } from '@/components/Skeletons';
 import EmptyState from '@/components/EmptyState';
 import Pagination from '@/components/admin/Pagination';
 import { useLanguage } from '@/context/LanguageContext';
+import { useSettings } from '@/context/SettingsContext';
 import { useOrderAlerts } from '@/context/OrderAlertContext';
 import { PageHeader, TabBar, IconButton } from '@/components/admin/ui';
+import DeliverySlips from '@/components/admin/DeliverySlips';
 import {
   IconDownload,
   IconEye,
@@ -19,12 +21,26 @@ import {
   IconPhone,
   IconWhatsApp,
   IconSearch,
+  IconPrinter,
 } from '@/components/admin/Icons';
 
 const PAGE_SIZE = 25;
 
-function OrderDetailModal({ order, onClose, t, locale }) {
+function OrderDetailModal({ order, onClose, onSaveDelivery, onPrint, t, locale }) {
+  const [courier, setCourier] = useState(order?.courier || '');
+  const [parcelNumber, setParcelNumber] = useState(order?.parcelNumber || '');
+  const [savingDelivery, setSavingDelivery] = useState(false);
+
   if (!order) return null;
+
+  const deliveryDirty =
+    courier !== (order.courier || '') || parcelNumber !== (order.parcelNumber || '');
+
+  async function saveDelivery() {
+    setSavingDelivery(true);
+    await onSaveDelivery(order, { courier, parcelNumber });
+    setSavingDelivery(false);
+  }
   const rows = [
     [t('admin.orders.fields.orderNumber'), order.orderNumber],
     [t('admin.orders.fields.customer'), order.customerName],
@@ -42,6 +58,8 @@ function OrderDetailModal({ order, onClose, t, locale }) {
     [t('admin.orders.fields.storage'), order.storage || '—'],
     [t('admin.orders.fields.ram'), order.ram || '—'],
     [t('admin.orders.fields.notes'), order.notes || '—'],
+    [t('admin.orders.courier'), order.courier || '—'],
+    [t('admin.orders.parcelNumber'), order.parcelNumber || '—'],
     [t('admin.orders.fields.date'), formatDate(order.createdAt)],
   ];
 
@@ -84,6 +102,48 @@ function OrderDetailModal({ order, onClose, t, locale }) {
               <IconWhatsApp className="h-4 w-4" /> WhatsApp
             </a>
           </div>
+          {/* Courier and parcel number — filled in when the parcel is handed
+              over, so there is somewhere to look when it needs chasing. */}
+          <div className="mb-4 rounded-xl border border-neutral-200 bg-white/70 p-4">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-500">
+              {t('admin.orders.deliverySection')}
+            </p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <input
+                className="input"
+                placeholder={t('admin.orders.courierPlaceholder')}
+                value={courier}
+                onChange={(e) => setCourier(e.target.value)}
+                aria-label={t('admin.orders.courier')}
+              />
+              <input
+                className="input"
+                placeholder={t('admin.orders.parcelPlaceholder')}
+                value={parcelNumber}
+                onChange={(e) => setParcelNumber(e.target.value)}
+                aria-label={t('admin.orders.parcelNumber')}
+              />
+            </div>
+            <div className="mt-2 flex gap-2">
+              <button
+                type="button"
+                onClick={saveDelivery}
+                disabled={!deliveryDirty || savingDelivery}
+                className="rounded-lg bg-neutral-900 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-neutral-800 disabled:opacity-40"
+              >
+                {savingDelivery ? '…' : t('admin.orders.saveDelivery')}
+              </button>
+              <button
+                type="button"
+                onClick={() => onPrint(order)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3.5 py-2 text-xs font-semibold text-neutral-700 transition hover:bg-neutral-100"
+              >
+                <IconPrinter className="h-4 w-4" />
+                {t('admin.orders.printSlip')}
+              </button>
+            </div>
+          </div>
+
           <dl className="divide-y divide-neutral-100">
             {rows.map(([label, value]) => (
               <div key={label} className="grid grid-cols-3 gap-3 py-2.5 text-sm">
@@ -100,6 +160,7 @@ function OrderDetailModal({ order, onClose, t, locale }) {
 
 export default function AdminOrdersPage() {
   const { t, locale } = useLanguage();
+  const { settings } = useSettings();
   const { orders: liveOrders } = useOrderAlerts();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -109,6 +170,7 @@ export default function AdminOrdersPage() {
   const [sort, setSort] = useState('newest');
   const [selected, setSelected] = useState(null);
   const [checked, setChecked] = useState(() => new Set());
+  const [printing, setPrinting] = useState([]);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -227,6 +289,19 @@ export default function AdminOrdersPage() {
         t('admin.orders.bulkSuccess', { count: targets.length, status: t(`statuses.${status}`) })
       );
       setChecked(new Set());
+    }
+  }
+
+  async function handleSaveDelivery(order, delivery) {
+    try {
+      await setOrderDelivery(order, delivery);
+      setOrders((prev) =>
+        prev.map((o) => (o.id === order.id ? { ...o, ...delivery } : o))
+      );
+      setSelected((cur) => (cur && cur.id === order.id ? { ...cur, ...delivery } : cur));
+      toast.success(t('admin.orders.deliverySaved'));
+    } catch {
+      toast.error(t('admin.orders.deliveryError'));
     }
   }
 
@@ -368,6 +443,13 @@ export default function AdminOrdersPage() {
             {t('admin.orders.selected', { count: checked.size })}
           </span>
           <span className="flex-1" />
+          <button
+            onClick={() => setPrinting(filtered.filter((o) => checked.has(o.id)))}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-semibold transition hover:bg-white/20"
+          >
+            <IconPrinter className="h-3.5 w-3.5" />
+            {t('admin.orders.printSlips')}
+          </button>
           {['Confirmed', 'Shipped', 'Delivered'].map((s) => (
             <button
               key={s}
@@ -503,8 +585,26 @@ export default function AdminOrdersPage() {
       )}
 
       <AnimatePresence>
-        {selected && <OrderDetailModal order={selected} onClose={() => setSelected(null)} t={t} locale={locale} />}
+        {selected && (
+          <OrderDetailModal
+            order={selected}
+            onClose={() => setSelected(null)}
+            onSaveDelivery={handleSaveDelivery}
+            onPrint={(order) => setPrinting([order])}
+            t={t}
+            locale={locale}
+          />
+        )}
       </AnimatePresence>
+
+      <DeliverySlips
+        orders={printing}
+        shopName={settings.contactInfo?.shopName || 'LuxuryPhone24'}
+        shopPhone={settings.contactInfo?.phone || ''}
+        locale={locale}
+        t={t}
+        onDone={() => setPrinting([])}
+      />
     </div>
   );
 }
