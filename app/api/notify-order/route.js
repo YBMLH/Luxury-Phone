@@ -31,11 +31,20 @@ function clean(value, max = 40) {
 
 export async function POST(request) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
-  const chatId = process.env.TELEGRAM_CHAT_ID;
+
+  // One or several recipients, comma-separated, so the shop owner and whoever
+  // else answers the phone can both be pinged without any code change:
+  //   TELEGRAM_CHAT_ID=728019731,987654321
+  // A group chat id (a negative number) works here too, and is the easier
+  // option once more than two people need the alerts.
+  const chatIds = String(process.env.TELEGRAM_CHAT_ID || '')
+    .split(',')
+    .map((id) => id.trim())
+    .filter(Boolean);
 
   // Not configured yet is a normal state, not an error — the store works
   // perfectly well without it, so don't make the order form look broken.
-  if (!token || !chatId) {
+  if (!token || chatIds.length === 0) {
     return Response.json({ ok: true, sent: false, reason: 'not-configured' });
   }
 
@@ -74,23 +83,30 @@ export async function POST(request) {
     `[Open the dashboard](${SITE_URL}/admin/orders)`,
   ].join('\n');
 
-  try {
-    const response = await fetch(`${TELEGRAM_API}/bot${token}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text,
-        parse_mode: 'Markdown',
-        disable_web_page_preview: true,
-      }),
-    });
-    if (!response.ok) {
-      return Response.json({ ok: false, error: 'telegram-failed' }, { status: 502 });
-    }
-  } catch {
-    return Response.json({ ok: false, error: 'telegram-unreachable' }, { status: 502 });
+  // Every recipient is attempted; one blocked or mistyped id must not stop
+  // the others from being told about the order.
+  const results = await Promise.allSettled(
+    chatIds.map((chatId) =>
+      fetch(`${TELEGRAM_API}/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text,
+          parse_mode: 'Markdown',
+          disable_web_page_preview: true,
+        }),
+      }).then((response) => {
+        if (!response.ok) throw new Error('telegram-rejected');
+        return true;
+      })
+    )
+  );
+
+  const delivered = results.filter((r) => r.status === 'fulfilled').length;
+  if (delivered === 0) {
+    return Response.json({ ok: false, error: 'telegram-failed' }, { status: 502 });
   }
 
-  return Response.json({ ok: true, sent: true });
+  return Response.json({ ok: true, sent: true, delivered, of: chatIds.length });
 }
