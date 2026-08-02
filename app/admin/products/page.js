@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { getProducts, deleteProduct, addProduct } from '@/lib/db';
+import { getProducts, deleteProduct, addProduct, backfillProductSlugs } from '@/lib/db';
 import { CATEGORIES } from '@/lib/constants';
 import { formatPrice } from '@/lib/utils';
 import { TableSkeleton } from '@/components/Skeletons';
@@ -17,6 +17,7 @@ import {
   IconEdit,
   IconCopy,
   IconTrash,
+  IconAlert,
 } from '@/components/admin/Icons';
 
 export default function AdminProductsPage() {
@@ -28,6 +29,7 @@ export default function AdminProductsPage() {
   const [stockView, setStockView] = useState('all');
   const [sort, setSort] = useState('newest');
   const [deleting, setDeleting] = useState(null);
+  const [fixingSlugs, setFixingSlugs] = useState(false);
 
   useEffect(() => {
     getProducts()
@@ -76,6 +78,23 @@ export default function AdminProductsPage() {
     [products]
   );
 
+  // Products added before slugs existed still fall back to their database id
+  // in the URL. One button repairs all of them at once.
+  const missingSlugs = products.filter((p) => !p.slug);
+
+  async function fixSlugs() {
+    setFixingSlugs(true);
+    try {
+      const { fixed } = await backfillProductSlugs();
+      setProducts(await getProducts());
+      toast.success(t('admin.products.slugsFixed', { count: fixed }));
+    } catch {
+      toast.error(t('admin.products.slugsFixError'));
+    } finally {
+      setFixingSlugs(false);
+    }
+  }
+
   async function handleDuplicate(product) {
     try {
       const { id, createdAt, updatedAt, ...data } = product;
@@ -123,6 +142,22 @@ export default function AdminProductsPage() {
           </Link>
         }
       />
+
+      {missingSlugs.length > 0 && (
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <IconAlert className="h-[18px] w-[18px] shrink-0" />
+          <span className="flex-1">
+            {t('admin.products.slugsWarning', { count: missingSlugs.length })}
+          </span>
+          <button
+            onClick={fixSlugs}
+            disabled={fixingSlugs}
+            className="rounded-lg bg-amber-600 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-amber-700 disabled:opacity-50"
+          >
+            {fixingSlugs ? t('admin.products.slugsFixing') : t('admin.products.slugsFix')}
+          </button>
+        </div>
+      )}
 
       <TabBar
         tabs={[
