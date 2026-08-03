@@ -354,3 +354,92 @@ body {
     margin: 10mm;
   }
 }
+
+/* --------------------------- Social platform cards ------------------------ */
+/* Instagram and Facebook cards wear their own brand colours — the recognition
+   is the point. The gradient pans slowly rather than sitting still, which
+   reads as alive without pulling attention off the products.              */
+.social-card {
+  background-size: 220% 220%;
+  animation: social-pan 14s ease infinite;
+  box-shadow: 0 16px 34px -20px rgba(0, 0, 0, 0.55);
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.3, 1),
+    box-shadow 0.35s ease;
+}
+
+.social-card:hover {
+  transform: translateY(-4px);
+}
+
+.social-card--instagram {
+  background-image: linear-gradient(
+    135deg,
+    #feda75 0%,
+    #fa7e1e 22%,
+    #d62976 52%,
+    #962fbf 76%,
+    #4f5bd5 100%
+  );
+}
+
+.social-card--instagram:hover {
+  box-shadow: 0 22px 46px -20px rgba(214, 41, 118, 0.75);
+}
+
+.social-card--facebook {
+  background-image: linear-gradient(135deg, #4293ff 0%, #1877f2 45%, #0b4bb8 100%);
+}
+
+.social-card--facebook:hover {
+  box-shadow: 0 22px 46px -20px rgba(24, 119, 242, 0.75);
+}
+
+@keyframes social-pan {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+/* Frosted tile behind the platform glyph. */
+.social-badge {
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(6px);
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.3, 1),
+    background-color 0.35s ease;
+}
+
+.social-card:hover .social-badge {
+  transform: scale(1.06) rotate(-4deg);
+  background: rgba(255, 255, 255, 0.28);
+}
+
+/* A single diagonal highlight that crosses the card on hover. */
+.social-sheen {
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.32) 50%,
+    transparent 62%
+  );
+  background-size: 260% 100%;
+  background-position: 160% 0;
+  opacity: 0;
+  transition: background-position 0.75s ease, opacity 0.2s ease;
+}
+
+.social-card:hover .social-sheen {
+  opacity: 1;
+  background-position: -60% 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .social-card,
+  .social-badge,
+  .social-sheen {
+    animation: none;
+    transition: none;
+  }
+  .social-card:hover {
+    transform: none;
+  }
+}
