@@ -5,7 +5,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { SettingsProvider } from '@/context/SettingsContext';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { getSettingsServer } from '@/lib/serverData';
-import { SITE_URL as BASE_URL } from '@/lib/constants';
+import { SITE_URL as BASE_URL, OPENING_HOURS } from '@/lib/constants';
 import { safeJsonLd } from '@/lib/utils';
 import './globals.css';
 
@@ -64,7 +64,7 @@ export default async function RootLayout({ children }) {
       addressLocality: loc.city || 'Guelma',
       addressCountry: 'DZ',
     },
-    openingHours: loc.workingHours || undefined,
+    openingHoursSpecification: OPENING_HOURS,
     areaServed: 'DZ',
     priceRange: '$$',
   }));
