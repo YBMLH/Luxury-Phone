@@ -461,3 +461,67 @@ body {
 .social-card--whatsapp:hover {
   box-shadow: 0 22px 46px -20px rgba(37, 211, 102, 0.7);
 }
+
+/* ----------------------------- Branch cards ------------------------------- */
+/* The shopfront photo is the hook, so the card leans into it: the image pushes
+   in slightly on hover while the card itself lifts and picks up a gold rim. */
+.branch-card {
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.3, 1),
+    box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+.branch-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(201, 162, 39, 0.55);
+  box-shadow: 0 26px 50px -28px rgba(23, 20, 12, 0.55);
+}
+
+.branch-photo {
+  transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.3, 1), filter 0.5s ease;
+}
+
+.branch-card:hover .branch-photo {
+  transform: scale(1.07);
+  filter: saturate(1.08);
+}
+
+/* Dark wash under the branch name so it stays legible on any photo. */
+.branch-scrim {
+  background: linear-gradient(
+    to top,
+    rgba(12, 11, 9, 0.82) 0%,
+    rgba(12, 11, 9, 0.35) 38%,
+    rgba(12, 11, 9, 0) 68%
+  );
+}
+
+/* Cross-fade between the photo and the embedded map. The white backing
+   matters: an embed that is slow to paint would otherwise show the photo
+   bleeding through, which reads as a rendering fault. */
+.branch-map {
+  background: #fff;
+  transition: opacity 0.45s ease;
+}
+
+.branch-arrow {
+  transition: transform 0.3s ease;
+}
+
+.branch-card:hover .branch-arrow {
+  transform: translateX(3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .branch-card,
+  .branch-photo,
+  .branch-map,
+  .branch-arrow {
+    transition: none;
+  }
+  .branch-card:hover {
+    transform: none;
+  }
+  .branch-card:hover .branch-photo {
+    transform: none;
+  }
+}

@@ -15,6 +15,7 @@ import { useLanguage } from '@/context/LanguageContext';
 
 const EMPTY_LOCATION = {
   name: '', city: '', address: '', phone: '', workingHours: '', mapEmbedUrl: '',
+  photo: '', mapLink: '',
 };
 const EMPTY_REVIEW = { name: '', city: '', rating: 5, text: '' };
 
@@ -364,6 +365,17 @@ export default function AdminSettingsPage() {
                 <Field label={f('mapEmbedUrl')} value={loc.mapEmbedUrl}
                   hint={f('mapEmbedHint')}
                   onChange={(e) => updateItem('locations', i, 'mapEmbedUrl', e.target.value)} />
+                <Field label={f('mapLink')} value={loc.mapLink}
+                  hint={f('mapLinkHint')}
+                  onChange={(e) => updateItem('locations', i, 'mapLink', e.target.value)} />
+                <div>
+                  <ImageInput
+                    label={f('branchPhoto')}
+                    value={loc.photo}
+                    onChange={(url) => updateItem('locations', i, 'photo', url)}
+                  />
+                  <p className="mt-1 text-xs text-neutral-400">{f('branchPhotoHint')}</p>
+                </div>
               </div>
             ))}
             <button onClick={() => addItem('locations', EMPTY_LOCATION)} className="btn-outline">
@@ -413,9 +425,15 @@ export default function AdminSettingsPage() {
             <Field label={f('aboutTitle')}
               value={settings.aboutContent.title}
               onChange={(e) => update('aboutContent', 'title', e.target.value)} />
-            <Field label={f('aboutText')} rows={8}
+            <Field label={f('aboutText')} rows={6}
               value={settings.aboutContent.text}
               onChange={(e) => update('aboutContent', 'text', e.target.value)} />
+            <Field label={f('aboutFounded')} hint={f('aboutFoundedHint')}
+              value={settings.aboutContent.founded}
+              onChange={(e) => update('aboutContent', 'founded', e.target.value)} />
+            <Field label={f('aboutStory')} rows={8} hint={f('aboutStoryHint')}
+              value={settings.aboutContent.story}
+              onChange={(e) => update('aboutContent', 'story', e.target.value)} />
           </div>
         )}
       </div>
