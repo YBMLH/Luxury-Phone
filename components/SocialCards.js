@@ -88,7 +88,7 @@ export default function SocialCards() {
 
   const instagram = social.instagram || SOCIAL_FALLBACK.instagram;
   const facebook = social.facebook || SOCIAL_FALLBACK.facebook;
-  const tiktok = social.tiktok || '';
+  const tiktok = social.tiktok || SOCIAL_FALLBACK.tiktok;
 
   const cards = [
     instagram && {
@@ -111,7 +111,7 @@ export default function SocialCards() {
       key: 'tiktok',
       href: tiktok,
       glyph: TikTokGlyph,
-      handle: '@luxuryphone24',
+      handle: '@luxury_phone4',
       label: 'TikTok',
       cta: t('contactSection.followCta'),
     },
