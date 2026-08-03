@@ -1,12 +1,14 @@
 'use client';
 
-// Instagram and Facebook cards for the contact section.
+// Instagram, Facebook, TikTok and WhatsApp cards for the contact section.
 //
 // Each card wears its platform's own colours, because that recognition is the
 // whole point — someone scanning the page should spot Instagram before they
 // read a single word. The URLs come from Settings → Social links so the owner
 // can change them without touching code; the constants are only a fallback so
-// the cards are never blank.
+// the cards are never blank. WhatsApp is the exception: it is built from the
+// shop's phone number in Settings → Contact info, the same number the floating
+// chat button uses, so there is only ever one place to change it.
 import AnimateIn from '@/components/AnimateIn';
 import { useSettings } from '@/context/SettingsContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -27,6 +29,14 @@ function TikTokGlyph({ className = 'h-7 w-7' }) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
       <path d="M16.5 2h-3v13.1a2.6 2.6 0 1 1-2.2-2.57V9.4a5.75 5.75 0 1 0 5.2 5.72V8.9a6.6 6.6 0 0 0 3.9 1.27V7.1A3.72 3.72 0 0 1 16.5 2Z" />
+    </svg>
+  );
+}
+
+function WhatsAppGlyph({ className = 'h-7 w-7' }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M12.04 2A9.9 9.9 0 0 0 2.1 11.9c0 1.75.46 3.46 1.34 4.97L2 22l5.28-1.38a9.9 9.9 0 0 0 4.76 1.21h.01A9.9 9.9 0 0 0 22 11.93 9.9 9.9 0 0 0 12.04 2Zm0 18.13h-.01a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.13.82.84-3.05-.2-.31a8.2 8.2 0 0 1-1.26-4.36 8.24 8.24 0 1 1 8.24 8.23Zm4.52-6.16c-.25-.13-1.47-.72-1.69-.81-.23-.08-.39-.12-.55.13-.17.24-.64.8-.78.97-.14.16-.29.18-.53.06-.25-.13-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.38-1.72-.15-.25-.02-.38.1-.5.11-.11.25-.29.37-.44.13-.15.17-.25.25-.41.09-.17.05-.31-.02-.44-.06-.12-.55-1.34-.76-1.83-.2-.48-.4-.42-.55-.43h-.47c-.16 0-.42.06-.64.31-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.7 2.6 4.11 3.64.58.25 1.02.4 1.37.51.58.18 1.1.16 1.52.1.46-.07 1.47-.6 1.68-1.18.2-.58.2-1.07.15-1.18-.06-.1-.22-.16-.47-.29Z" />
     </svg>
   );
 }
@@ -90,6 +100,10 @@ export default function SocialCards() {
   const facebook = social.facebook || SOCIAL_FALLBACK.facebook;
   const tiktok = social.tiktok || SOCIAL_FALLBACK.tiktok;
 
+  // wa.me wants digits only — no spaces, no plus sign, no leading zero.
+  const whatsappRaw = (settings.contactInfo?.whatsapp || '').trim();
+  const whatsappDigits = whatsappRaw.replace(/\D/g, '');
+
   const cards = [
     instagram && {
       key: 'instagram',
@@ -115,13 +129,25 @@ export default function SocialCards() {
       label: 'TikTok',
       cta: t('contactSection.followCta'),
     },
+    whatsappDigits && {
+      key: 'whatsapp',
+      href: `https://wa.me/${whatsappDigits}`,
+      glyph: WhatsAppGlyph,
+      handle: whatsappRaw,
+      label: 'WhatsApp',
+      cta: t('contactSection.chatCta'),
+    },
   ].filter(Boolean);
 
   if (cards.length === 0) return null;
 
+  // Four across would squeeze the handles into an ellipsis at this container
+  // width, so four cards go two-by-two instead — the account names stay whole.
+  const columns = cards.length === 3 ? 'sm:grid-cols-3' : 'sm:grid-cols-2';
+
   return (
     <AnimateIn>
-      <div className={`grid gap-4 ${cards.length > 2 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
+      <div className={`grid gap-4 ${columns}`}>
         {cards.map((card) => (
           <SocialCard
             key={card.key}

@@ -10,7 +10,7 @@ import SocialCards from '@/components/SocialCards';
 export default function ContactClient() {
   const { settings } = useSettings();
   const { t } = useLanguage();
-  const { contactInfo, socialLinks } = settings;
+  const { contactInfo } = settings;
 
   const cards = [
     contactInfo.phone && {
@@ -19,12 +19,8 @@ export default function ContactClient() {
       value: contactInfo.phone,
       href: `tel:${contactInfo.phone}`,
     },
-    contactInfo.whatsapp && {
-      icon: '💬',
-      title: t('contactPage.whatsapp'),
-      value: contactInfo.whatsapp,
-      href: `https://wa.me/${contactInfo.whatsapp.replace(/\D/g, '')}`,
-    },
+    // WhatsApp deliberately isn't here — it gets its own branded card in the
+    // row below, alongside Instagram, Facebook and TikTok.
     contactInfo.email && {
       icon: '✉️',
       title: t('contactPage.email'),

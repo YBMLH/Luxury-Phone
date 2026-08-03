@@ -452,3 +452,12 @@ body {
 .social-card--tiktok:hover {
   box-shadow: 0 22px 46px -20px rgba(254, 44, 85, 0.65);
 }
+
+/* WhatsApp's two greens, light into dark. */
+.social-card--whatsapp {
+  background-image: linear-gradient(135deg, #5ff08a 0%, #25d366 40%, #128c7e 78%, #075e54 100%);
+}
+
+.social-card--whatsapp:hover {
+  box-shadow: 0 22px 46px -20px rgba(37, 211, 102, 0.7);
+}
