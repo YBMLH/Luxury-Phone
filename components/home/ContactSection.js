@@ -4,7 +4,6 @@ import Link from 'next/link';
 import AnimateIn from '@/components/AnimateIn';
 import { useSettings } from '@/context/SettingsContext';
 import { useLanguage } from '@/context/LanguageContext';
-import SocialCards from './SocialCards';
 
 export default function ContactSection() {
   const { settings } = useSettings();
@@ -42,8 +41,6 @@ export default function ContactSection() {
           </Link>
         </div>
       </AnimateIn>
-
-      <SocialCards />
     </section>
   );
 }

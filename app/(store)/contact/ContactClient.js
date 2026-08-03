@@ -5,6 +5,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import Locations from '@/components/home/Locations';
 import AnimateIn from '@/components/AnimateIn';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import SocialCards from '@/components/SocialCards';
 
 export default function ContactClient() {
   const { settings } = useSettings();
@@ -93,30 +94,12 @@ export default function ContactClient() {
           </div>
         )}
 
-        {(socialLinks.facebook || socialLinks.instagram || socialLinks.tiktok) && (
-          <div className="mt-10 text-center">
-            <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-neutral-500">
-              {t('contactPage.followUs')}
-            </p>
-            <div className="flex justify-center gap-3">
-              {socialLinks.facebook && (
-                <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="btn-outline !px-5 !py-2">
-                  Facebook
-                </a>
-              )}
-              {socialLinks.instagram && (
-                <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="btn-outline !px-5 !py-2">
-                  Instagram
-                </a>
-              )}
-              {socialLinks.tiktok && (
-                <a href={socialLinks.tiktok} target="_blank" rel="noopener noreferrer" className="btn-outline !px-5 !py-2">
-                  TikTok
-                </a>
-              )}
-            </div>
-          </div>
-        )}
+        <div className="mt-12">
+          <p className="mb-4 text-center text-sm font-semibold uppercase tracking-widest text-neutral-500">
+            {t('contactPage.followUs')}
+          </p>
+          <SocialCards />
+        </div>
       </section>
 
       <Locations />

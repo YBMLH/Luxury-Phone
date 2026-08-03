@@ -23,6 +23,14 @@ function InstagramGlyph({ className = 'h-7 w-7' }) {
   );
 }
 
+function TikTokGlyph({ className = 'h-7 w-7' }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M16.5 2h-3v13.1a2.6 2.6 0 1 1-2.2-2.57V9.4a5.75 5.75 0 1 0 5.2 5.72V8.9a6.6 6.6 0 0 0 3.9 1.27V7.1A3.72 3.72 0 0 1 16.5 2Z" />
+    </svg>
+  );
+}
+
 function FacebookGlyph({ className = 'h-7 w-7' }) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
@@ -80,37 +88,51 @@ export default function SocialCards() {
 
   const instagram = social.instagram || SOCIAL_FALLBACK.instagram;
   const facebook = social.facebook || SOCIAL_FALLBACK.facebook;
+  const tiktok = social.tiktok || '';
 
-  if (!instagram && !facebook) return null;
+  const cards = [
+    instagram && {
+      key: 'instagram',
+      href: instagram,
+      glyph: InstagramGlyph,
+      handle: '@luxury.phone24',
+      label: 'Instagram',
+      cta: t('contactSection.followCta'),
+    },
+    facebook && {
+      key: 'facebook',
+      href: facebook,
+      glyph: FacebookGlyph,
+      handle: 'Luxury Phone 24',
+      label: 'Facebook',
+      cta: t('contactSection.pageCta'),
+    },
+    tiktok && {
+      key: 'tiktok',
+      href: tiktok,
+      glyph: TikTokGlyph,
+      handle: '@luxuryphone24',
+      label: 'TikTok',
+      cta: t('contactSection.followCta'),
+    },
+  ].filter(Boolean);
+
+  if (cards.length === 0) return null;
 
   return (
     <AnimateIn>
-      <div className="mt-12">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
-          {t('contactSection.followUs')}
-        </p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          {instagram && (
-            <SocialCard
-              href={instagram}
-              platform="instagram"
-              glyph={InstagramGlyph}
-              handle="@luxury.phone24"
-              label="Instagram"
-              cta={t('contactSection.followCta')}
-            />
-          )}
-          {facebook && (
-            <SocialCard
-              href={facebook}
-              platform="facebook"
-              glyph={FacebookGlyph}
-              handle="Luxury Phone 24"
-              label="Facebook"
-              cta={t('contactSection.pageCta')}
-            />
-          )}
-        </div>
+      <div className={`grid gap-4 ${cards.length > 2 ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
+        {cards.map((card) => (
+          <SocialCard
+            key={card.key}
+            href={card.href}
+            platform={card.key}
+            glyph={card.glyph}
+            handle={card.handle}
+            label={card.label}
+            cta={card.cta}
+          />
+        ))}
       </div>
     </AnimateIn>
   );
