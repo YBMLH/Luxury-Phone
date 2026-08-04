@@ -95,7 +95,12 @@ function AdminShell({ children, user, isOwner, onLogout }) {
   return (
     <div className="admin-canvas flex min-h-screen">
       <aside
-        className={`glass-sidebar fixed inset-y-0 left-0 z-50 flex w-64 flex-col transition-transform lg:static lg:translate-x-0 ${
+        // On desktop the menu sticks to the top of its own column and owns a
+        // full screen of height, so scrolling the dashboard never drags the
+        // navigation off the top of the window. lg:self-start is what makes
+        // that work: without it the flex row stretches the aside to the full
+        // page height and sticky has nowhere to stick.
+        className={`glass-sidebar fixed inset-y-0 left-0 z-50 flex w-64 flex-col transition-transform lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:self-start ${
           menuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -113,10 +118,10 @@ function AdminShell({ children, user, isOwner, onLogout }) {
           </button>
         </div>
 
-        <nav className="flex-1 space-y-5 overflow-y-auto p-4">
+        <nav className="flex-1 space-y-3.5 overflow-y-auto p-3">
           {groups.map((group) => (
             <div key={group.heading}>
-              <p className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-500">
+              <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-500">
                 {group.heading}
               </p>
               <div className="space-y-0.5">
@@ -129,7 +134,7 @@ function AdminShell({ children, user, isOwner, onLogout }) {
                       key={item.href}
                       href={item.href}
                       aria-current={active ? 'page' : undefined}
-                      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
+                      className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition ${
                         active
                           ? 'bg-gold/20 text-gold-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]'
                           : 'text-neutral-300 hover:bg-white/5 hover:text-white'
@@ -150,21 +155,21 @@ function AdminShell({ children, user, isOwner, onLogout }) {
           ))}
         </nav>
 
-        <div className="shrink-0 space-y-1 border-t border-white/10 p-4">
-          <div className="px-1 pb-2">
+        <div className="shrink-0 space-y-0.5 border-t border-white/10 p-3">
+          <div className="px-1 pb-1.5">
             <LanguageSwitcher dark />
           </div>
           <Link
             href="/"
             target="_blank"
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-neutral-300 transition hover:bg-white/5 hover:text-white"
+            className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-neutral-300 transition hover:bg-white/5 hover:text-white"
           >
             <IconStore className="h-[18px] w-[18px]" />
             {t('admin.layout.viewStore')}
           </Link>
           <button
             onClick={onLogout}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-300 transition hover:bg-red-500/10"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm text-red-300 transition hover:bg-red-500/10"
           >
             <IconLogout className="h-[18px] w-[18px]" />
             {t('admin.layout.logout')}

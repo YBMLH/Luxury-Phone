@@ -34,7 +34,7 @@ export function Card({ title, subtitle, action, children, className = '', bodyCl
   return (
     <section className={`glass-card rounded-[20px] ${className}`}>
       {(title || action) && (
-        <header className="flex items-center justify-between gap-3 border-b border-neutral-900/5 px-5 py-3.5">
+        <header className="flex items-center justify-between gap-3 border-b border-neutral-900/5 px-5 py-3">
           <div className="min-w-0">
             {title && (
               <h2 className="font-display text-[15px] font-semibold text-neutral-900">{title}</h2>
@@ -70,22 +70,22 @@ export function StatCard({ icon: Icon, label, value, hint, delta = null, tone = 
   return (
     <Wrapper
       {...wrapperProps}
-      className={`glass-card block rounded-[20px] p-4 ${
+      className={`glass-card block rounded-[20px] px-4 py-3 ${
         href ? 'glass-card--interactive' : ''
       }`}
     >
       <div className="flex items-center justify-between gap-2">
-        <p className="text-[13px] font-medium leading-snug text-neutral-500">{label}</p>
+        <p className="truncate text-[13px] font-medium leading-snug text-neutral-500">{label}</p>
         {Icon && (
-          <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg ${TONES[tone]}`}>
-            <Icon className="h-[18px] w-[18px]" />
+          <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg ${TONES[tone]}`}>
+            <Icon className="h-4 w-4" />
           </span>
         )}
       </div>
-      <p className="mt-2 font-display text-[26px] font-bold leading-tight text-neutral-900">
+      <p className="mt-1.5 font-display text-[22px] font-bold leading-tight text-neutral-900">
         {value}
       </p>
-      <div className="mt-1 flex items-center gap-2 text-xs">
+      <div className="mt-0.5 flex items-center gap-2 text-[11px]">
         {delta != null && (
           <span
             className={`inline-flex items-center gap-1 font-semibold ${

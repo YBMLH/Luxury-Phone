@@ -75,9 +75,15 @@ function ActivityChart({ months, metric, t }) {
   const values = months.map((m) => (metric === 'revenue' ? m.revenue : m.count));
   const max = Math.max(1, ...values);
 
+  // Six empty columns say nothing a sentence cannot, and cost a third of a
+  // screen on a shop that has not sold anything yet.
+  if (!values.some((v) => v > 0)) {
+    return <p className="py-6 text-center text-sm text-neutral-500">{t('admin.dashboard.noOrders')}</p>;
+  }
+
   return (
     <div>
-      <div className="flex h-32 items-end gap-2 sm:gap-3">
+      <div className="flex h-28 items-end gap-2 sm:gap-3">
         {months.map((m, i) => (
           <div key={m.key} className="group flex flex-1 flex-col items-center justify-end gap-1.5">
             <span className="text-[11px] font-semibold tabular-nums text-neutral-700">
@@ -89,7 +95,7 @@ function ActivityChart({ months, metric, t }) {
             </span>
             <div
               className="w-full max-w-[52px] rounded-t-md bg-gold-500 transition group-hover:bg-gold-400"
-              style={{ height: `${Math.max(3, (values[i] / max) * 96)}px` }}
+              style={{ height: `${Math.max(3, (values[i] / max) * 84)}px` }}
               title={`${m.label}: ${
                 metric === 'revenue' ? formatPrice(m.revenue) : `${m.count} ${t('admin.dashboard.orders')}`
               }`}
@@ -352,10 +358,9 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <PageHeader
         title={t('admin.dashboard.title')}
-        subtitle={t('admin.dashboard.subtitle')}
         actions={
           isOwner && (
             <button
@@ -482,7 +487,7 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      <div className="grid items-start gap-4 xl:grid-cols-4">
+      <div className="grid items-start gap-3 xl:grid-cols-4">
         <Card
           className="min-w-0 xl:col-span-2"
           title={t('admin.dashboard.activity')}
@@ -582,7 +587,7 @@ export default function AdminDashboard() {
 
       {/* Recent orders next to the two breakdowns rather than above them:
           stacking every panel full-width is what made this page a scroll. */}
-      <div className="grid items-start gap-4 xl:grid-cols-4">
+      <div className="grid items-start gap-3 xl:grid-cols-4">
       <Card
         className="min-w-0 xl:col-span-3"
         title={t('admin.dashboard.recentOrders')}
@@ -598,7 +603,7 @@ export default function AdminDashboard() {
         bodyClassName="p-0"
       >
         {recent.length === 0 ? (
-          <p className="px-5 py-10 text-center text-sm text-neutral-500">
+          <p className="px-5 py-7 text-center text-sm text-neutral-500">
             {t('admin.dashboard.noOrders')}
           </p>
         ) : (
@@ -618,20 +623,20 @@ export default function AdminDashboard() {
               <tbody className="divide-y divide-neutral-50">
                 {recent.map((order) => (
                   <tr key={order.id} className="hover:bg-neutral-50">
-                    <td className="px-4 py-3 font-mono text-xs font-semibold">{order.orderNumber}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-2.5 font-mono text-xs font-semibold">{order.orderNumber}</td>
+                    <td className="px-4 py-2.5">
                       <p className="font-medium">{order.customerName}</p>
                       <p className="text-xs text-neutral-500">
                         {wilayaLabel(order.wilaya, locale)}
                       </p>
                     </td>
-                    <td className="max-w-[160px] px-4 py-3">
+                    <td className="max-w-[160px] px-4 py-2.5">
                       <p className="truncate text-neutral-700">{order.productName}</p>
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-right font-semibold tabular-nums">
+                    <td className="whitespace-nowrap px-4 py-2.5 text-right font-semibold tabular-nums">
                       {formatPrice(orderValue(order))}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-2.5">
                       <select
                         value={order.status}
                         onChange={(e) => handleStatusChange(order, e.target.value)}
