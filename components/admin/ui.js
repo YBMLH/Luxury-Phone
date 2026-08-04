@@ -32,11 +32,9 @@ export function PageHeader({ title, subtitle, count, actions }) {
 
 export function Card({ title, subtitle, action, children, className = '', bodyClassName = 'p-5' }) {
   return (
-    <section
-      className={`rounded-2xl border border-neutral-200 bg-white shadow-[0_1px_2px_rgba(16,15,14,0.05)] ${className}`}
-    >
+    <section className={`glass-card rounded-[20px] ${className}`}>
       {(title || action) && (
-        <header className="flex items-center justify-between gap-3 border-b border-neutral-100 px-5 py-3.5">
+        <header className="flex items-center justify-between gap-3 border-b border-neutral-900/5 px-5 py-3.5">
           <div className="min-w-0">
             {title && (
               <h2 className="font-display text-[15px] font-semibold text-neutral-900">{title}</h2>
@@ -72,8 +70,8 @@ export function StatCard({ icon: Icon, label, value, hint, delta = null, tone = 
   return (
     <Wrapper
       {...wrapperProps}
-      className={`block rounded-2xl border border-neutral-200 bg-white p-4 shadow-[0_1px_2px_rgba(16,15,14,0.05)] transition ${
-        href ? 'hover:border-neutral-300 hover:shadow-card' : ''
+      className={`glass-card block rounded-[20px] p-4 ${
+        href ? 'glass-card--interactive' : ''
       }`}
     >
       <div className="flex items-center justify-between gap-2">
@@ -121,34 +119,34 @@ export function Badge({ tone = 'neutral', children, className = '' }) {
 // each one before clicking it.
 export function TabBar({ tabs, value, onChange }) {
   return (
-    <div className="-mx-1 flex gap-1 overflow-x-auto pb-1">
-      {tabs.map((tab) => {
-        const active = tab.value === value;
-        return (
-          <button
-            key={tab.value}
-            type="button"
-            onClick={() => onChange(tab.value)}
-            aria-pressed={active}
-            className={`flex shrink-0 items-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium transition ${
-              active
-                ? 'bg-neutral-900 text-white'
-                : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900'
-            }`}
-          >
-            {tab.label}
-            {tab.count != null && (
-              <span
-                className={`rounded px-1.5 py-0.5 text-[11px] font-semibold tabular-nums ${
-                  active ? 'bg-white/20 text-white' : 'bg-neutral-100 text-neutral-500'
-                }`}
-              >
-                {tab.count}
-              </span>
-            )}
-          </button>
-        );
-      })}
+    <div className="overflow-x-auto pb-1">
+      <div className="segmented">
+        {tabs.map((tab) => {
+          const active = tab.value === value;
+          return (
+            <button
+              key={tab.value}
+              type="button"
+              onClick={() => onChange(tab.value)}
+              aria-pressed={active}
+              className={`segmented-item flex shrink-0 items-center gap-2 px-3.5 py-1.5 text-sm font-medium ${
+                active ? '' : 'text-neutral-600 hover:text-neutral-900'
+              }`}
+            >
+              {tab.label}
+              {tab.count != null && (
+                <span
+                  className={`rounded px-1.5 py-0.5 text-[11px] font-semibold tabular-nums ${
+                    active ? 'bg-neutral-900/8 text-neutral-600' : 'bg-neutral-900/6 text-neutral-500'
+                  }`}
+                >
+                  {tab.count}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

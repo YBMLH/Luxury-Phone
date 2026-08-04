@@ -93,9 +93,9 @@ function AdminShell({ children, user, isOwner, onLogout }) {
       ?.label || t('admin.layout.adminDashboard');
 
   return (
-    <div className="flex min-h-screen bg-[#F7F7F5]">
+    <div className="admin-canvas flex min-h-screen">
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-[#0C0C0E] bg-gradient-to-b from-[#141319] to-[#0A0A0C] transition-transform lg:static lg:translate-x-0 ${
+        className={`glass-sidebar fixed inset-y-0 left-0 z-50 flex w-64 flex-col transition-transform lg:static lg:translate-x-0 ${
           menuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -129,9 +129,9 @@ function AdminShell({ children, user, isOwner, onLogout }) {
                       key={item.href}
                       href={item.href}
                       aria-current={active ? 'page' : undefined}
-                      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
+                      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
                         active
-                          ? 'bg-gold/15 text-gold-300'
+                          ? 'bg-gold/20 text-gold-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]'
                           : 'text-neutral-300 hover:bg-white/5 hover:text-white'
                       }`}
                     >
@@ -180,9 +180,9 @@ function AdminShell({ children, user, isOwner, onLogout }) {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-neutral-200 bg-white/85 px-4 backdrop-blur-xl lg:px-8">
+        <header className="glass-bar sticky top-0 z-30 flex h-16 items-center gap-3 px-4 lg:px-8">
           <button
-            className="grid h-9 w-9 place-items-center rounded-lg border border-neutral-200 text-neutral-600 lg:hidden"
+            className="grid h-9 w-9 place-items-center rounded-xl border border-neutral-900/10 bg-white/60 text-neutral-600 lg:hidden"
             onClick={() => setMenuOpen(true)}
             aria-label={t('admin.layout.menu')}
           >
@@ -198,7 +198,7 @@ function AdminShell({ children, user, isOwner, onLogout }) {
           {!pathname.startsWith('/admin/products') && (
             <Link
               href="/admin/products/new"
-              className="hidden items-center gap-1.5 rounded-lg bg-neutral-900 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-neutral-800 sm:inline-flex"
+              className="hidden items-center gap-1.5 rounded-xl bg-neutral-900 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-neutral-800 active:scale-[0.97] sm:inline-flex"
             >
               <IconPlus className="h-4 w-4" />
               {t('admin.layout.newProduct')}

@@ -525,3 +525,96 @@ body {
     transform: none;
   }
 }
+
+/* ------------------------ Admin: glass surfaces --------------------------- */
+/* Translucent panels only read as glass when there is something behind them
+   to pick up, so the admin canvas carries a soft colour wash rather than a
+   flat grey. The wash is fixed, so panels shift against it as you scroll. */
+.admin-canvas {
+  background-color: #F3F3F1;
+  background-image:
+    radial-gradient(58rem 30rem at 6% -12%, rgba(201, 162, 39, 0.18), transparent 62%),
+    radial-gradient(46rem 26rem at 102% -4%, rgba(96, 122, 184, 0.16), transparent 64%),
+    radial-gradient(50rem 28rem at 44% 112%, rgba(201, 162, 39, 0.12), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* One frosted surface, used by every admin panel. The inset highlight along
+   the top edge is what sells the material — without it a translucent box
+   just looks washed out. */
+.glass-card {
+  background: rgba(255, 255, 255, 0.72);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(16, 15, 14, 0.07);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 1px 2px rgba(16, 15, 14, 0.04),
+    0 12px 30px -18px rgba(16, 15, 14, 0.3);
+}
+
+/* Panels you can click get a small lift, the way a control does. */
+.glass-card--interactive {
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.3, 1), box-shadow 0.28s ease;
+}
+
+.glass-card--interactive:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 2px 4px rgba(16, 15, 14, 0.05),
+    0 18px 40px -20px rgba(16, 15, 14, 0.42);
+}
+
+/* Sticky top bar: heavier blur, lighter fill, so content dissolves under it. */
+.glass-bar {
+  background: rgba(250, 250, 249, 0.68);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid rgba(16, 15, 14, 0.07);
+}
+
+/* The sidebar sits in the flow on desktop, so there is nothing behind it to
+   blur — it gets depth from a vertical gradient and edge highlights instead. */
+.glass-sidebar {
+  background:
+    linear-gradient(180deg, rgba(26, 25, 31, 0.96) 0%, rgba(10, 10, 12, 0.98) 100%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  backdrop-filter: blur(24px) saturate(160%);
+  box-shadow:
+    inset -1px 0 0 rgba(255, 255, 255, 0.07),
+    inset 1px 0 0 rgba(255, 255, 255, 0.05);
+}
+
+/* iOS-style segmented control: a recessed track with a raised knob on the
+   selected item, instead of a row of loose buttons. */
+.segmented {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 11px;
+  background: rgba(118, 118, 128, 0.12);
+  box-shadow: inset 0 1px 2px rgba(16, 15, 14, 0.06);
+}
+
+.segmented-item {
+  border-radius: 9px;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.segmented-item[aria-pressed='true'] {
+  background: #fff;
+  color: #0c0c0e;
+  box-shadow:
+    0 0 0 0.5px rgba(16, 15, 14, 0.06),
+    0 1px 3px rgba(16, 15, 14, 0.14);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-card--interactive {
+    transition: none;
+  }
+  .glass-card--interactive:hover {
+    transform: none;
+  }
+}

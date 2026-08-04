@@ -13,7 +13,7 @@ import { useOrderAlerts } from '@/context/OrderAlertContext';
 import { useAuth } from '@/context/AuthContext';
 import RestoreBackup from '@/components/admin/RestoreBackup';
 import { ORDER_STATUSES, STATUS_COLORS, wilayaLabel } from '@/lib/constants';
-import { formatPrice, formatDate } from '@/lib/utils';
+import { formatPrice } from '@/lib/utils';
 import { PageHeader, Card, StatCard, TabBar } from '@/components/admin/ui';
 import {
   IconCash,
@@ -29,6 +29,17 @@ import {
   IconArrowRight,
   IconTrendUp,
 } from '@/components/admin/Icons';
+
+// Solid fills for the pipeline bar. STATUS_COLORS is a pill treatment (pale
+// background + dark text) and reads as washed-out stripes at this size.
+const PIPELINE_COLORS = {
+  Pending: 'bg-amber-400',
+  Confirmed: 'bg-blue-500',
+  Processing: 'bg-purple-500',
+  Shipped: 'bg-indigo-500',
+  Delivered: 'bg-green-500',
+  Cancelled: 'bg-red-400',
+};
 
 const RANGES = [
   { value: 7, key: 'range7' },
@@ -66,7 +77,7 @@ function ActivityChart({ months, metric, t }) {
 
   return (
     <div>
-      <div className="flex h-44 items-end gap-2 sm:gap-3">
+      <div className="flex h-32 items-end gap-2 sm:gap-3">
         {months.map((m, i) => (
           <div key={m.key} className="group flex flex-1 flex-col items-center justify-end gap-1.5">
             <span className="text-[11px] font-semibold tabular-nums text-neutral-700">
@@ -78,7 +89,7 @@ function ActivityChart({ months, metric, t }) {
             </span>
             <div
               className="w-full max-w-[52px] rounded-t-md bg-gold-500 transition group-hover:bg-gold-400"
-              style={{ height: `${Math.max(3, (values[i] / max) * 140)}px` }}
+              style={{ height: `${Math.max(3, (values[i] / max) * 96)}px` }}
               title={`${m.label}: ${
                 metric === 'revenue' ? formatPrice(m.revenue) : `${m.count} ${t('admin.dashboard.orders')}`
               }`}
@@ -184,10 +195,23 @@ export default function AdminDashboard() {
 
     const byWilaya = {};
     const byProduct = {};
+    const byStatus = {};
     for (const order of inRange) {
       byWilaya[order.wilaya] = (byWilaya[order.wilaya] || 0) + 1;
       byProduct[order.productName] = (byProduct[order.productName] || 0) + 1;
+      byStatus[order.status] = (byStatus[order.status] || 0) + 1;
     }
+
+    // For cash on delivery the number that matters is not how many orders
+    // came in, but how many of the settled ones actually got paid for.
+    const deliveredCount = byStatus.Delivered || 0;
+    const cancelledCount = byStatus.Cancelled || 0;
+    const settled = deliveredCount + cancelledCount;
+
+    // Money already promised but not yet in hand: everything still moving.
+    const toCollect = inRange
+      .filter((o) => o.status !== 'Delivered' && o.status !== 'Cancelled')
+      .reduce((sum, o) => sum + orderValue(o), 0);
 
     // Six calendar months, always — the trend is more useful than the window.
     const months = [];
@@ -220,9 +244,12 @@ export default function AdminDashboard() {
       costedOrders,
       earningCount: earning.length,
       pending: orders.filter((o) => o.status === 'Pending').length,
-      delivered: inRange.filter((o) => o.status === 'Delivered').length,
-      topWilayas: Object.entries(byWilaya).sort((a, b) => b[1] - a[1]).slice(0, 6),
-      topProducts: Object.entries(byProduct).sort((a, b) => b[1] - a[1]).slice(0, 6),
+      delivered: deliveredCount,
+      byStatus,
+      successRate: settled ? Math.round((deliveredCount / settled) * 100) : null,
+      toCollect,
+      topWilayas: Object.entries(byWilaya).sort((a, b) => b[1] - a[1]).slice(0, 5),
+      topProducts: Object.entries(byProduct).sort((a, b) => b[1] - a[1]).slice(0, 5),
       months,
     };
   }, [orders, rangeDays, locale, costById]);
@@ -240,7 +267,7 @@ export default function AdminDashboard() {
     });
   }, [orders]);
 
-  const recent = orders.slice(0, 6);
+  const recent = orders.slice(0, 5);
 
   async function handleStatusChange(order, status) {
     const previous = order.status;
@@ -320,12 +347,12 @@ export default function AdminDashboard() {
   ].filter(Boolean);
 
   const alertTones = {
-    red: 'border-red-200 bg-red-50 text-red-900 hover:bg-red-100',
-    amber: 'border-amber-200 bg-amber-50 text-amber-900 hover:bg-amber-100',
+    red: 'border-red-300/50 bg-red-50/70 text-red-900 hover:bg-red-100/80',
+    amber: 'border-amber-300/50 bg-amber-50/70 text-amber-900 hover:bg-amber-100/80',
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <PageHeader
         title={t('admin.dashboard.title')}
         subtitle={t('admin.dashboard.subtitle')}
@@ -342,29 +369,57 @@ export default function AdminDashboard() {
         }
       />
 
+      {/* Alerts sit on one wrapping line rather than one banner each — three
+          stacked banners pushed the actual dashboard below the fold. */}
       {alerts.length > 0 && (
-        <div className="grid gap-2">
+        <div className="flex flex-wrap gap-2">
           {alerts.map((alert) => (
             <Link
               key={alert.text}
               href={alert.href}
-              className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-sm transition ${alertTones[alert.tone]}`}
+              className={`inline-flex max-w-full items-center gap-2 rounded-full border px-3.5 py-2 text-[13px] backdrop-blur-xl transition ${alertTones[alert.tone]}`}
             >
-              <IconAlert className="h-[18px] w-[18px] shrink-0" />
-              <span className="flex-1">{alert.text}</span>
-              <IconArrowRight className="h-4 w-4 shrink-0 opacity-60" />
+              <IconAlert className="h-4 w-4 shrink-0" />
+              <span className="truncate">{alert.text}</span>
+              <IconArrowRight className="h-3.5 w-3.5 shrink-0 opacity-60" />
             </Link>
           ))}
         </div>
       )}
 
-      <TabBar
-        tabs={RANGES.map((r) => ({ value: r.value, label: t(`admin.dashboard.${r.key}`) }))}
-        value={rangeDays}
-        onChange={setRangeDays}
-      />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <TabBar
+          tabs={RANGES.map((r) => ({ value: r.value, label: t(`admin.dashboard.${r.key}`) }))}
+          value={rangeDays}
+          onChange={setRangeDays}
+        />
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 xl:grid-cols-5">
+        {/* Quick actions as a toolbar next to the range picker: the same five
+            destinations, without spending a whole panel of height on them. */}
+        <div className="flex flex-wrap gap-1.5">
+          {[
+            { href: '/admin/products/new', icon: IconPlus, label: t('admin.dashboard.qaAddProduct') },
+            { href: '/admin/orders', icon: IconReceipt, label: t('admin.dashboard.qaOrders') },
+            { href: '/admin/customers', icon: IconUsers, label: t('admin.dashboard.qaCustomers') },
+            { href: '/admin/settings', icon: IconSettings, label: t('admin.dashboard.qaSettings') },
+            { href: '/', icon: IconStore, label: t('admin.dashboard.qaViewStore'), external: true },
+          ].map((action) => (
+            <Link
+              key={action.label}
+              href={action.href}
+              {...(action.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+              className="inline-flex items-center gap-1.5 rounded-full border border-neutral-900/8 bg-white/70 px-3 py-1.5 text-[13px] font-medium text-neutral-700 backdrop-blur-xl transition hover:bg-white hover:text-neutral-900"
+            >
+              <action.icon className="h-4 w-4 text-neutral-500" />
+              {action.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Five across from the laptop breakpoint up, so the headline numbers
+          never cost two rows of height on the screen most used here. */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         <StatCard
           icon={IconCash}
           tone="gold"
@@ -427,9 +482,9 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-3">
+      <div className="grid items-start gap-4 xl:grid-cols-4">
         <Card
-          className="xl:col-span-2"
+          className="min-w-0 xl:col-span-2"
           title={t('admin.dashboard.activity')}
           subtitle={t('admin.dashboard.lastSixMonths')}
           action={
@@ -452,33 +507,84 @@ export default function AdminDashboard() {
           <ActivityChart months={stats.months} metric={metric} t={t} />
         </Card>
 
-        <Card title={t('admin.dashboard.quickActions')} bodyClassName="p-3">
-          <div className="grid gap-1.5">
-            {[
-              { href: '/admin/products/new', icon: IconPlus, label: t('admin.dashboard.qaAddProduct') },
-              { href: '/admin/orders', icon: IconReceipt, label: t('admin.dashboard.qaOrders') },
-              { href: '/admin/customers', icon: IconUsers, label: t('admin.dashboard.qaCustomers') },
-              { href: '/admin/settings', icon: IconSettings, label: t('admin.dashboard.qaSettings') },
-              { href: '/', icon: IconStore, label: t('admin.dashboard.qaViewStore'), external: true },
-            ].map((action) => (
-              <Link
-                key={action.label}
-                href={action.href}
-                {...(action.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-neutral-700 transition hover:bg-neutral-100"
-              >
-                <span className="grid h-8 w-8 place-items-center rounded-lg bg-neutral-100 text-neutral-600">
-                  <action.icon className="h-4 w-4" />
-                </span>
-                <span className="flex-1">{action.label}</span>
-                <IconArrowRight className="h-4 w-4 text-neutral-300" />
-              </Link>
-            ))}
-          </div>
+        <Card title={t('admin.dashboard.pipeline')} bodyClassName="p-4">
+          {stats.inRange.length === 0 ? (
+            <p className="text-sm text-neutral-500">{t('admin.dashboard.noOrders')}</p>
+          ) : (
+            <>
+              {/* One bar, split by status — how the whole period is sitting,
+                  readable at a glance without counting six numbers. */}
+              <div className="flex h-2.5 overflow-hidden rounded-full bg-neutral-900/6">
+                {ORDER_STATUSES.map((status) => {
+                  const count = stats.byStatus[status] || 0;
+                  if (!count) return null;
+                  return (
+                    <div
+                      key={status}
+                      className={PIPELINE_COLORS[status]}
+                      style={{ width: `${(count / stats.inRange.length) * 100}%` }}
+                      title={`${t(`statuses.${status}`)}: ${count}`}
+                    />
+                  );
+                })}
+              </div>
+              <ul className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1.5">
+                {ORDER_STATUSES.filter((s) => stats.byStatus[s]).map((status) => (
+                  <li key={status} className="flex items-center gap-2 text-xs">
+                    <span className={`h-2 w-2 shrink-0 rounded-full ${PIPELINE_COLORS[status]}`} />
+                    <span className="flex-1 truncate text-neutral-600">{t(`statuses.${status}`)}</span>
+                    <span className="font-semibold tabular-nums">{stats.byStatus[status]}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-4 grid grid-cols-2 gap-3 border-t border-neutral-900/5 pt-3">
+                <div>
+                  <p className="text-[10px] uppercase leading-tight tracking-wider text-neutral-400">
+                    {t('admin.dashboard.successRate')}
+                  </p>
+                  <p className="font-display text-base font-bold tabular-nums">
+                    {stats.successRate == null ? '—' : `${stats.successRate}%`}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase leading-tight tracking-wider text-neutral-400">
+                    {t('admin.dashboard.toCollect')}
+                  </p>
+                  <p className="font-display text-base font-bold tabular-nums">
+                    {formatPrice(stats.toCollect)}
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
+        </Card>
+
+        <Card title={t('admin.dashboard.topProducts')} bodyClassName="p-4">
+          {stats.topProducts.length === 0 ? (
+            <p className="text-sm text-neutral-500">{t('admin.dashboard.noOrders')}</p>
+          ) : (
+            <ul className="space-y-2">
+              {stats.topProducts.map(([name, count], i) => (
+                <li key={name} className="flex items-center gap-3 text-sm">
+                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-neutral-100 text-xs font-bold text-neutral-500">
+                    {i + 1}
+                  </span>
+                  <span className="flex-1 truncate">{name}</span>
+                  <span className="rounded-full bg-gold/15 px-2.5 py-0.5 text-xs font-semibold text-gold-700">
+                    {count}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </Card>
       </div>
 
+      {/* Recent orders next to the two breakdowns rather than above them:
+          stacking every panel full-width is what made this page a scroll. */}
+      <div className="grid items-start gap-4 xl:grid-cols-4">
       <Card
+        className="min-w-0 xl:col-span-3"
         title={t('admin.dashboard.recentOrders')}
         action={
           <Link
@@ -492,44 +598,40 @@ export default function AdminDashboard() {
         bodyClassName="p-0"
       >
         {recent.length === 0 ? (
-          <p className="px-5 py-8 text-center text-sm text-neutral-500">
+          <p className="px-5 py-10 text-center text-sm text-neutral-500">
             {t('admin.dashboard.noOrders')}
           </p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-left text-sm">
+            <table className="w-full min-w-[520px] text-left text-sm">
               <thead className="border-b border-neutral-100 text-xs uppercase tracking-wider text-neutral-400">
                 <tr>
-                  <th className="px-5 py-2.5 font-semibold">{t('admin.orders.orderNumber')}</th>
-                  <th className="px-5 py-2.5 font-semibold">{t('admin.orders.customer')}</th>
-                  <th className="px-5 py-2.5 font-semibold">{t('admin.orders.product')}</th>
-                  <th className="px-5 py-2.5 font-semibold">{t('admin.orders.date')}</th>
-                  <th className="px-5 py-2.5 text-right font-semibold">
+                  <th className="px-4 py-2.5 font-semibold">{t('admin.orders.orderNumber')}</th>
+                  <th className="px-4 py-2.5 font-semibold">{t('admin.orders.customer')}</th>
+                  <th className="px-4 py-2.5 font-semibold">{t('admin.orders.product')}</th>
+                  <th className="px-4 py-2.5 text-right font-semibold">
                     {t('admin.orders.fields.total')}
                   </th>
-                  <th className="px-5 py-2.5 font-semibold">{t('admin.orders.status')}</th>
+                  <th className="px-4 py-2.5 font-semibold">{t('admin.orders.status')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-50">
                 {recent.map((order) => (
                   <tr key={order.id} className="hover:bg-neutral-50">
-                    <td className="px-5 py-3 font-mono text-xs font-semibold">{order.orderNumber}</td>
-                    <td className="px-5 py-3">
+                    <td className="px-4 py-3 font-mono text-xs font-semibold">{order.orderNumber}</td>
+                    <td className="px-4 py-3">
                       <p className="font-medium">{order.customerName}</p>
                       <p className="text-xs text-neutral-500">
                         {wilayaLabel(order.wilaya, locale)}
                       </p>
                     </td>
-                    <td className="max-w-[200px] px-5 py-3">
+                    <td className="max-w-[160px] px-4 py-3">
                       <p className="truncate text-neutral-700">{order.productName}</p>
                     </td>
-                    <td className="whitespace-nowrap px-5 py-3 text-xs text-neutral-500">
-                      {formatDate(order.createdAt)}
-                    </td>
-                    <td className="whitespace-nowrap px-5 py-3 text-right font-semibold tabular-nums">
+                    <td className="whitespace-nowrap px-4 py-3 text-right font-semibold tabular-nums">
                       {formatPrice(orderValue(order))}
                     </td>
-                    <td className="px-5 py-3">
+                    <td className="px-4 py-3">
                       <select
                         value={order.status}
                         onChange={(e) => handleStatusChange(order, e.target.value)}
@@ -551,12 +653,11 @@ export default function AdminDashboard() {
         )}
       </Card>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card title={t('admin.dashboard.ordersByWilaya')}>
+        <Card title={t('admin.dashboard.ordersByWilaya')} bodyClassName="p-4">
           {stats.topWilayas.length === 0 ? (
             <p className="text-sm text-neutral-500">{t('admin.dashboard.noOrders')}</p>
           ) : (
-            <ul className="space-y-3">
+            <ul className="space-y-2">
               {stats.topWilayas.map(([wilaya, count]) => (
                 <li key={wilaya} className="flex items-center gap-3 text-sm">
                   <span className="w-28 shrink-0 truncate font-medium">
@@ -575,31 +676,30 @@ export default function AdminDashboard() {
           )}
         </Card>
 
-        <Card title={t('admin.dashboard.topProducts')}>
-          {stats.topProducts.length === 0 ? (
-            <p className="text-sm text-neutral-500">{t('admin.dashboard.noOrders')}</p>
-          ) : (
-            <ul className="space-y-2.5">
-              {stats.topProducts.map(([name, count], i) => (
-                <li key={name} className="flex items-center gap-3 text-sm">
-                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md bg-neutral-100 text-xs font-bold text-neutral-500">
-                    {i + 1}
-                  </span>
-                  <span className="flex-1 truncate">{name}</span>
-                  <span className="rounded-full bg-gold/15 px-2.5 py-0.5 text-xs font-semibold text-gold-700">
-                    {count}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Card>
       </div>
 
+      {/* Restoring a backup is a once-a-year action, so it folds away instead
+          of holding a full panel of height on every visit. */}
       {isOwner && (
-        <Card title={t('admin.restore.title')} subtitle={t('admin.restore.subtitle')}>
-          <RestoreBackup onRestored={() => window.location.reload()} />
-        </Card>
+        <details className="glass-card group rounded-2xl">
+          <summary className="flex cursor-pointer list-none items-center gap-3 px-5 py-3.5">
+            <span className="grid h-8 w-8 place-items-center rounded-lg bg-neutral-100 text-neutral-600">
+              <IconDownload className="h-4 w-4 rotate-180" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-[15px] font-semibold text-neutral-900">
+                {t('admin.restore.title')}
+              </span>
+              <span className="block truncate text-xs text-neutral-500">
+                {t('admin.restore.subtitle')}
+              </span>
+            </span>
+            <IconArrowRight className="h-4 w-4 shrink-0 text-neutral-400 transition group-open:rotate-90" />
+          </summary>
+          <div className="border-t border-neutral-100 p-5">
+            <RestoreBackup onRestored={() => window.location.reload()} />
+          </div>
+        </details>
       )}
     </div>
   );
