@@ -7,7 +7,7 @@
 // Google Maps. The directions link never depends on the owner filling in a
 // field: when no explicit link is saved, one is built from the branch name and
 // address, which is what a customer would have typed into Maps anyway.
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import AnimateIn from '@/components/AnimateIn';
 import { useSettings } from '@/context/SettingsContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -55,7 +55,34 @@ function BranchCard({ loc }) {
   // Start on whichever view exists; the map iframe is only created once it is
   // asked for, so two embedded maps never load on a page nobody scrolled to.
   const [view, setView] = useState(hasPhoto ? 'photo' : 'map');
-  const [mapMounted, setMapMounted] = useState(!hasPhoto && hasMap);
+  const [mapMounted, setMapMounted] = useState(false);
+  const cardRef = useRef(null);
+
+  // A branch with a map but no photo shows the map straight away — but only
+  // once the card is actually near the screen. On the homepage this section
+  // sits below several others, and mounting a Google Maps frame during the
+  // initial page load stalls everything above it for no benefit.
+  const wantsMapOnSight = hasMap && !hasPhoto;
+  useEffect(() => {
+    if (!wantsMapOnSight || mapMounted) return;
+    const node = cardRef.current;
+    if (!node) return;
+    if (typeof IntersectionObserver === 'undefined') {
+      setMapMounted(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setMapMounted(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [wantsMapOnSight, mapMounted]);
 
   const href = directionsUrl(loc);
   const showToggle = hasPhoto && hasMap;
@@ -66,7 +93,10 @@ function BranchCard({ loc }) {
   }
 
   return (
-    <article className="branch-card group relative overflow-hidden rounded-[1.75rem] border border-neutral-200/80 bg-white shadow-sm">
+    <article
+      ref={cardRef}
+      className="branch-card group relative overflow-hidden rounded-[1.75rem] border border-neutral-200/80 bg-white shadow-sm"
+    >
       <div className="relative h-56 overflow-hidden sm:h-64">
         <a
           href={href}

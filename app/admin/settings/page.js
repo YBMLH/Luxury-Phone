@@ -5,7 +5,10 @@
 // here and saved to the settings/site document in Firestore.
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { getSettings, saveSettings, getCategoryImages, setCategoryImage } from '@/lib/db';
+import {
+  getSettings, saveSettings, getCategoryImages, setCategoryImage,
+  getBranchPhotos, setBranchPhoto,
+} from '@/lib/db';
 import { mergeSettings } from '@/lib/defaults';
 import { WILAYAS, CATEGORIES, wilayaLabel } from '@/lib/constants';
 import { TableSkeleton } from '@/components/Skeletons';
@@ -48,12 +51,20 @@ export default function AdminSettingsPage() {
   const f = (key) => t(`admin.settings.fields.${key}`);
 
   useEffect(() => {
-    Promise.all([getSettings(), getCategoryImages().catch(() => ({}))])
-      .then(([saved, categoryImages]) => {
+    Promise.all([
+      getSettings(),
+      getCategoryImages().catch(() => ({})),
+      getBranchPhotos().catch(() => ({})),
+    ])
+      .then(([saved, categoryImages, branchPhotos]) => {
         const merged = mergeSettings(saved);
         setSettings({
           ...merged,
           categoryImages: { ...merged.categoryImages, ...categoryImages },
+          locations: merged.locations.map((loc, i) => ({
+            ...loc,
+            photo: branchPhotos[String(i)] || loc.photo || '',
+          })),
         });
       })
       .catch(() => toast.error(t('admin.settings.loadError')));
@@ -85,7 +96,11 @@ export default function AdminSettingsPage() {
       // categoryImages now lives in its own Firestore collection (each
       // ImageInput above saves itself immediately) — excluded here so it's
       // never duplicated back into the settings document.
-      const { categoryImages, ...toSave } = settings;
+      const { categoryImages, ...rest } = settings;
+      const toSave = {
+        ...rest,
+        locations: rest.locations.map(({ photo, ...loc }) => loc),
+      };
       // Light sanitization of every text field before saving. Image
       // sources (data: URLs or https:// links) must never be truncated —
       // cutting a data: URL at 2000 chars corrupts the image entirely, so
@@ -372,7 +387,12 @@ export default function AdminSettingsPage() {
                   <ImageInput
                     label={f('branchPhoto')}
                     value={loc.photo}
-                    onChange={(url) => updateItem('locations', i, 'photo', url)}
+                    onChange={(url) => {
+                      updateItem('locations', i, 'photo', url);
+                      setBranchPhoto(i, url).catch(() =>
+                        toast.error(t('admin.settings.saveError'))
+                      );
+                    }}
                   />
                   <p className="mt-1 text-xs text-neutral-400">{f('branchPhotoHint')}</p>
                 </div>

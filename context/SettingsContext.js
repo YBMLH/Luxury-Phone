@@ -4,7 +4,7 @@
 // once per visit and shares it with every component. Falls back to the
 // defaults in lib/defaults.js until the owner saves their own content.
 import { createContext, useContext, useEffect, useState } from 'react';
-import { getSettings, getCategoryImages } from '@/lib/db';
+import { getSettings, getCategoryImages, getBranchPhotos } from '@/lib/db';
 import { DEFAULT_SETTINGS, mergeSettings } from '@/lib/defaults';
 
 const SettingsContext = createContext({
@@ -22,15 +22,24 @@ export function SettingsProvider({ children }) {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    Promise.all([getSettings(), getCategoryImages().catch(() => ({}))])
-      .then(([saved, categoryImages]) => {
+    Promise.all([
+      getSettings(),
+      getCategoryImages().catch(() => ({})),
+      getBranchPhotos().catch(() => ({})),
+    ])
+      .then(([saved, categoryImages, branchPhotos]) => {
         const merged = mergeSettings(saved);
         // The dedicated categoryImages collection is the source of truth;
         // any legacy value still embedded in the settings document (from
-        // before it moved out) is only a fallback.
+        // before it moved out) is only a fallback. Branch photos work the
+        // same way, keyed by the branch's position in the list.
         setSettings({
           ...merged,
           categoryImages: { ...merged.categoryImages, ...categoryImages },
+          locations: merged.locations.map((loc, i) => ({
+            ...loc,
+            photo: branchPhotos[String(i)] || loc.photo || '',
+          })),
         });
         setLoaded(true);
       })

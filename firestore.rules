@@ -37,6 +37,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Shopfront photos, one document per branch, kept out of settings/site
+    // for exactly the same reason.
+    match /branchPhotos/{branchId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // Orders: anyone can place one (with strict validation), but only
     // admins can read, change or delete them. Customer data stays private.
     // hasOnly() blocks any extra/unknown fields from being injected.
