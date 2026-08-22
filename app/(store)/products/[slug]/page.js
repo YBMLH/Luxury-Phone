@@ -6,8 +6,17 @@ import { SITE_URL as BASE_URL } from '@/lib/constants';
 import ProductDetailClient from './ProductDetailClient';
 
 // This page is fully server-rendered, so this window is how long an edited
-// photo or price can take to appear here. Kept short deliberately.
-export const revalidate = 300;
+// photo or price can take to appear here.
+//
+// It was five minutes, which is what pushed the project to 75% of Vercel's
+// free ISR write allowance in its first weeks. Every distinct product URL is
+// its own cache entry with its own clock, so the cost is (products + 1) × the
+// number of windows in a day — and a single crawler request per window is
+// enough to trigger a rewrite. At five minutes that is 288 rewrites per page
+// per day; at an hour it is 24. An hour is still well inside how quickly a
+// price change needs to reach a customer, and the owner can force it sooner
+// by redeploying, which clears the cache outright.
+export const revalidate = 3600;
 
 const CATEGORY_LABELS = translations.fr.categories;
 

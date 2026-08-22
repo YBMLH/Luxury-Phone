@@ -4,10 +4,16 @@ import { safeJsonLd, pickShowcase } from '@/lib/utils';
 import { getProductsServer, getSettingsServer } from '@/lib/serverData';
 import HomeClient from './HomeClient';
 
-// Short window so the cached HTML never shows a badly outdated photo. The
-// hero also refreshes itself client-side (see HomeClient), so an edit in the
-// dashboard shows up immediately regardless of where this cache is at.
-export const revalidate = 300;
+// How stale the cached HTML may get. This costs one ISR write per window in
+// which the page is requested, and a crawler is enough to trigger it — five
+// minutes here meant 288 rewrites a day from this page alone, which is what
+// took the project to 75% of Vercel's free write allowance.
+//
+// An hour costs the visitor nothing: HomeClient re-fetches the products in
+// the browser on every visit, so a dashboard edit is on screen immediately no
+// matter how old this cache entry is. The window only affects the very first
+// paint and what a crawler sees.
+export const revalidate = 3600;
 
 const title = 'LuxuryPhone24 — Smartphones, Laptops et Tablettes | Guelma';
 const description =
